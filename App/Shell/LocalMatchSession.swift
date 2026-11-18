@@ -59,7 +59,7 @@ final class LocalMatchSession: ObservableObject {
         paused = false
         model.matchSnapshot = snap
         if !notices.isEmpty {
-            model.setContentLoadNotices(notices)
+            model.appendContentLoadNotices(notices)
         }
         return notices
     }
