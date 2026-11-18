@@ -12,7 +12,7 @@ public struct MoveMetadataTable: Sendable, Equatable {
         var kindsFlat: [String: MoveInputKind] = [:]
         for def in fighterDefs {
             for move in def.moves {
-                let key = MoveMetadataKey.compose(fighterID: def.id, moveID: move.id)
+                let key = FightCore.MoveMetadataKey.compose(fighterID: def.id, moveID: move.id)
                 kindsComposite[key] = move.inputKind
                 if kindsFlat[move.id] == nil {
                     kindsFlat[move.id] = move.inputKind
@@ -30,7 +30,7 @@ public struct MoveMetadataTable: Sendable, Equatable {
     }
 
     public func moveInputKind(fighterID: String, moveID: String) -> MoveInputKind? {
-        inputKindByFighterMove[MoveMetadataKey.compose(fighterID: fighterID, moveID: moveID)]
+        inputKindByFighterMove[FightCore.MoveMetadataKey.compose(fighterID: fighterID, moveID: moveID)]
             ?? inputKindByMoveID[moveID]
     }
 
@@ -44,10 +44,31 @@ public struct MoveMetadataTable: Sendable, Equatable {
 }
 
 public enum FighterDefinitionMap {
-    public static func keyedByFighterID(p1: FighterDef, p2: FighterDef) -> [String: FighterDef] {
+    /// Keys definitions by roster pick ids used in `GameSnapshot.fighterIDs` (not raw bundle ids).
+    public static func keyedByRosterPick(
+        p1PickID: String,
+        p1: FighterDef,
+        p2PickID: String,
+        p2: FighterDef
+    ) -> [String: FighterDef] {
         var map: [String: FighterDef] = [:]
-        map[p1.id] = p1
-        map[p2.id] = p2
+        map[p1PickID] = relabeled(p1, pickID: p1PickID)
+        map[p2PickID] = relabeled(p2, pickID: p2PickID)
         return map
+    }
+
+    public static func rosterOrdered(
+        p1PickID: String,
+        p1: FighterDef,
+        p2PickID: String,
+        p2: FighterDef
+    ) -> [FighterDef] {
+        [relabeled(p1, pickID: p1PickID), relabeled(p2, pickID: p2PickID)]
+    }
+
+    private static func relabeled(_ def: FighterDef, pickID: String) -> FighterDef {
+        var copy = def
+        copy.id = pickID
+        return copy
     }
 }

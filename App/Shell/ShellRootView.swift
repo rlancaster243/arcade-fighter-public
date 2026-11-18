@@ -22,7 +22,7 @@ public struct ShellRootView: View {
 
     private var showsMatchView: Bool {
         switch model.state.screen {
-        case .inMatch, .matchPaused:
+        case .inMatch, .matchPaused, .result:
             return model.matchSnapshot != nil
         default:
             return false
@@ -40,10 +40,10 @@ public struct ShellRootView: View {
 
     public var body: some View {
         ZStack {
-            menuLayer
             if let snapshot = model.matchSnapshot, showsMatchView {
                 matchLayer(snapshot: snapshot)
             }
+            menuLayer
             if case .matchPaused(let setup) = model.state.screen {
                 MatchPausedView(setup: setup, input: input)
             }
@@ -64,7 +64,10 @@ public struct ShellRootView: View {
             contentNoticeBanner
         }
         .onAppear {
-            sfx.preloadIfNeeded()
+            let audioNotices = sfx.preloadIfNeeded()
+            if !audioNotices.isEmpty {
+                model.appendContentLoadNotices(audioNotices)
+            }
             syncMatchSessionIfNeeded()
         }
         .onChange(of: model.state.screen) { _, _ in

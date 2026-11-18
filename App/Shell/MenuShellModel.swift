@@ -31,12 +31,10 @@ final class MenuShellModel: ObservableObject {
             if shouldBootstrapMatch(from: old.screen, to: new.screen) {
                 matchSnapshot = MatchBootstrap.snapshot(for: setup)
             }
-        case .matchPaused:
+        case .matchPaused, .result:
             break
-        case .title, .mainMenu, .arcadeLadder, .versusSetup, .characterSelect, .result, .settings, .rematchPrompt:
-            if isLiveMatchScreen(old.screen) {
-                matchSnapshot = nil
-            }
+        case .title, .mainMenu, .arcadeLadder, .versusSetup, .characterSelect, .settings, .rematchPrompt:
+            matchSnapshot = nil
         }
     }
 
@@ -50,17 +48,13 @@ final class MenuShellModel: ObservableObject {
         }
     }
 
-    private func isLiveMatchScreen(_ screen: MenuScreen) -> Bool {
-        switch screen {
-        case .inMatch, .matchPaused:
-            return true
-        default:
-            return false
-        }
-    }
-
     func setContentLoadNotices(_ notices: [String]) {
         contentLoadNotices = notices
+    }
+
+    func appendContentLoadNotices(_ notices: [String]) {
+        guard !notices.isEmpty else { return }
+        contentLoadNotices.append(contentsOf: notices)
     }
 
     func clearContentLoadNotices() {

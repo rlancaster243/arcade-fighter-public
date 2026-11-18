@@ -23,6 +23,7 @@ final class GreyboxScene: SKScene {
     private var shakeAmp: Int32 = 0
     private var renderTick: Int32 = 0
     private var contentOffset = CGPoint.zero
+    var onAtlasLoadNotice: ((String) -> Void)?
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -77,8 +78,11 @@ final class GreyboxScene: SKScene {
             let dir = ContentPaths.fighterDirectory(id, repoRoot: root)
             let png = dir.appendingPathComponent("\(id).png")
             let json = dir.appendingPathComponent("sheet.json")
-            if let atlas = try? SpriteAtlas(sheetPNG: png, sheetJSON: json) {
+            do {
+                let atlas = try SpriteAtlas(sheetPNG: png, sheetJSON: json)
                 atlases[id] = atlas
+            } catch {
+                onAtlasLoadNotice?("Sprite sheet for “\(id)” failed: \(error.localizedDescription)")
             }
         }
         loadedAtlasIDs = ids

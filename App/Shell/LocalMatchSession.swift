@@ -25,8 +25,18 @@ final class LocalMatchSession: ObservableObject {
         var notices: [String] = []
         let p1Result = loadFighter(id: setup.p1.id, label: "P1", notices: &notices)
         let p2Result = loadFighter(id: setup.p2.id, label: "P2", notices: &notices)
-        let defs = [p1Result, p2Result]
-        let defMap = FighterDefinitionMap.keyedByFighterID(p1: p1Result, p2: p2Result)
+        let defs = FighterDefinitionMap.rosterOrdered(
+            p1PickID: setup.p1.id,
+            p1: p1Result,
+            p2PickID: setup.p2.id,
+            p2: p2Result
+        )
+        let defMap = FighterDefinitionMap.keyedByRosterPick(
+            p1PickID: setup.p1.id,
+            p1: p1Result,
+            p2PickID: setup.p2.id,
+            p2: p2Result
+        )
         metadataTable = MoveMetadataTable(fighterDefs: defs)
         let context = CollisionMatchContext(fighterDefs: defs)
 
@@ -126,11 +136,13 @@ final class LocalMatchSession: ObservableObject {
         } catch {
             let greybox = ContentPaths.greyboxDirectory(fromFile: #filePath)
             if let fallback = try? FighterLoader.loadFighter(from: greybox) {
-                notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using greybox.")
-                return fallback
+                notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using greybox as “\(id)”.")
+                var relabeled = fallback
+                relabeled.id = id
+                return relabeled
             }
             notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using built-in fallback.")
-            return FighterDef(id: "greybox", displayName: "Greybox", gamePlan: "fallback")
+            return FighterDef(id: id, displayName: "Fallback", gamePlan: "fallback")
         }
     }
 

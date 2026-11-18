@@ -13,12 +13,19 @@ final class SFXEventPlayer: ObservableObject {
         self.player = player ?? SFXPlayer(audioDirectory: SFXContent.audioDirectory())
     }
 
-    func preloadIfNeeded() {
-        guard !loaded else { return }
+    @discardableResult
+    func preloadIfNeeded() -> [String] {
+        guard !loaded else { return [] }
         loaded = true
+        var notices: [String] = []
         let root = ContentPaths.repoRoot(fromFile: #filePath)
-        guard let manifest = try? SFXContent.loadManifest(repoRoot: root) else { return }
-        try? player.preload(manifest: manifest)
+        do {
+            let manifest = try SFXContent.loadManifest(repoRoot: root)
+            try player.preload(manifest: manifest)
+        } catch {
+            notices.append("Audio preload failed: \(error.localizedDescription)")
+        }
+        return notices
     }
 
     func handle(events: [GameEvent], snapshot: GameSnapshot, metadata: MoveMetadataTable) {
