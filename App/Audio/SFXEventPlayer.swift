@@ -1,14 +1,15 @@
 import FightCore
 import Foundation
+import Combine
 
 /// Maps `GameEvent`s to manifest clip ids for `SFXPlayer`.
 @MainActor
-final class SFXEventPlayer {
+final class SFXEventPlayer: ObservableObject {
     private let player: SFXPlayer
     private var loaded = false
 
-    init(player: SFXPlayer = SFXPlayer()) {
-        self.player = player
+    init(player: SFXPlayer? = nil) {
+        self.player = player ?? SFXPlayer(audioDirectory: SFXContent.audioDirectory())
     }
 
     func preloadIfNeeded() {
