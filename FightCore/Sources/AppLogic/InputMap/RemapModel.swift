@@ -36,13 +36,13 @@ public struct InputRemapSettings: Sendable, Equatable, Codable {
     ) {
         switch player {
         case .p1:
-            applyRemap(slot: slot, to: keyCode, bindings: &playerOneBindings)
+            Self.patch(bindings: &playerOneBindings, slot: slot, keyCode: keyCode)
         case .p2:
-            applyRemap(slot: slot, to: keyCode, bindings: &playerTwoBindings)
+            Self.patch(bindings: &playerTwoBindings, slot: slot, keyCode: keyCode)
         }
     }
 
-    private mutating func applyRemap(slot: KeyRemapSlot, to keyCode: UInt16, bindings: inout PlayerKeyBindings) {
+    private static func patch(bindings: inout PlayerKeyBindings, slot: KeyRemapSlot, keyCode: UInt16) {
         switch slot {
         case .up: bindings.up = keyCode
         case .down: bindings.down = keyCode
