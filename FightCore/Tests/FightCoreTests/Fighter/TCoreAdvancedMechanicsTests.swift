@@ -11,11 +11,11 @@ final class TCoreAdvancedMechanicsTests: XCTestCase {
         snap.fighterIDs = [def.id, def.id]
         snap.fighters[0].kind = .attackActive
         snap.fighters[0].activeMoveID = "sp_invuln"
-        snap.fighters[0].stateTick = 1
+        snap.fighters[0].stateTick = 3
 
         XCTAssertTrue(stepper.isInvulnerable(fighter: snap.fighters[0], defID: def.id))
 
-        snap.fighters[0].stateTick = 0
+        snap.fighters[0].stateTick = 2
         XCTAssertFalse(stepper.isInvulnerable(fighter: snap.fighters[0], defID: def.id))
     }
 

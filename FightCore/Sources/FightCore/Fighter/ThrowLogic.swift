@@ -33,6 +33,5 @@ enum ThrowLogic {
         defender.activeMoveID = ""
         attacker.kind = .attackRecovery
         attacker.timer = 0
-        attacker.stateTick = attacker.stateTick
     }
 }

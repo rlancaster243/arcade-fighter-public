@@ -57,7 +57,7 @@ public enum MovePhaseMath {
             hit: pick(move.frames.hit, index),
             hurt: pick(move.frames.hurt, index),
             push: pick(move.frames.push, index),
-            throwBoxes: pick(move.frames.throw, index)
+            throwBoxes: pick(move.frames.throwBoxes, index)
         )
     }
 
