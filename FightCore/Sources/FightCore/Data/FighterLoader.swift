@@ -39,13 +39,40 @@ public enum FighterLoader {
 }
 
 public enum ContentPaths {
+    /// Walks upward from `file` until `Content/Fighters/greybox` exists under the candidate root.
     public static func repoRoot(fromFile file: String = #filePath) -> URL {
-        var url = URL(fileURLWithPath: file)
-        for _ in 0..<5 {
-            url.deleteLastPathComponent()
+        var url = URL(fileURLWithPath: file).deletingLastPathComponent()
+        let fm = FileManager.default
+        for _ in 0..<10 {
+            let greybox = url.appendingPathComponent("Content/Fighters/greybox", isDirectory: true)
+            if fm.fileExists(atPath: greybox.appendingPathComponent("fighter.json").path) {
+                return url
+            }
+            let parent = url.deletingLastPathComponent()
+            if parent.path == url.path { break }
+            url = parent
         }
-        return url
+        return fallbackRepoRoot(fromFile: file)
     }
+
+  private static func fallbackRepoRoot(fromFile file: String) -> URL {
+    var url = URL(fileURLWithPath: file).deletingLastPathComponent()
+    for _ in 0..<10 {
+      if fmContainsPackageSwift(at: url) {
+        return url.deletingLastPathComponent()
+      }
+      let parent = url.deletingLastPathComponent()
+      if parent.path == url.path { break }
+      url = parent
+    }
+    var direct = URL(fileURLWithPath: file)
+    for _ in 0..<5 { direct.deleteLastPathComponent() }
+    return direct
+  }
+
+  private static func fmContainsPackageSwift(at url: URL) -> Bool {
+    FileManager.default.fileExists(atPath: url.appendingPathComponent("Package.swift").path)
+  }
 
     public static func greyboxDirectory(fromFile file: String = #filePath) -> URL {
         repoRoot(fromFile: file).appendingPathComponent("Content/Fighters/greybox", isDirectory: true)
@@ -53,5 +80,12 @@ public enum ContentPaths {
 
     public static func replaysDirectory(fromFile file: String = #filePath) -> URL {
         repoRoot(fromFile: file).appendingPathComponent("Fixtures/Replays", isDirectory: true)
+    }
+
+    public static func badFighterCaseDirectory(_ name: String, fromFile file: String = #filePath) -> URL {
+        let testsRoot = URL(fileURLWithPath: file)
+            .deletingLastPathComponent() // Contracts
+            .deletingLastPathComponent() // FightCoreTests
+        return testsRoot.appendingPathComponent("Resources/bad_fighters/\(name)", isDirectory: true)
     }
 }

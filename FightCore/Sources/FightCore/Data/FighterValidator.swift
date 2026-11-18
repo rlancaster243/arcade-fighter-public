@@ -37,7 +37,14 @@ enum FighterValidator {
             try validateBoxCount(move.frames.hit ?? [], expected: move.active, moveID: move.id, phase: "hit")
             try validateBoxCount(move.frames.hurt ?? [], expected: move.active, moveID: move.id, phase: "hurt")
             try validateBoxCount(move.frames.push ?? [], expected: move.active, moveID: move.id, phase: "push")
-            try validateBoxCount(move.frames.throw ?? [], expected: move.active, moveID: move.id, phase: "throw")
+            if guardLevel == .throwAttack {
+                try validateBoxCount(
+                    move.frames.throw ?? [],
+                    expected: move.active,
+                    moveID: move.id,
+                    phase: "throw"
+                )
+            }
 
             let frames = MoveFrameBoxes(
                 hit: (move.frames.hit ?? []).map(mapBox),

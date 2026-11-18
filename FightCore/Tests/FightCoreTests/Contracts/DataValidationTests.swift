@@ -70,9 +70,7 @@ final class DataValidationTests: XCTestCase {
     }
 
     private func badCaseDirectory(_ name: String) -> URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .appendingPathComponent("Resources/bad_fighters/\(name)", isDirectory: true)
+        ContentPaths.badFighterCaseDirectory(name)
     }
 
     private func loadFixture(at dir: URL) throws -> FighterDef {
