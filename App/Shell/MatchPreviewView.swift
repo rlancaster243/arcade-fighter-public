@@ -33,12 +33,16 @@ struct MatchPreviewView: View {
             .position(x: posX, y: posY)
             .onAppear {
                 scene.scaleMode = .resizeFill
-                scene.onAtlasLoadNotice = onAtlasLoadNotice
-                scene.snapshot = snapshot
+                wireAtlasNoticesAndSnapshot(snapshot)
             }
             .onChange(of: snapshot) { _, newValue in
-                scene.onAtlasLoadNotice = onAtlasLoadNotice
-                scene.snapshot = newValue
+                wireAtlasNoticesAndSnapshot(newValue)
             }
+    }
+
+    private func wireAtlasNoticesAndSnapshot(_ snapshot: GameSnapshot) {
+        scene.onAtlasLoadNotice = onAtlasLoadNotice
+        scene.snapshot = snapshot
+        scene.revalidateAtlases()
     }
 }

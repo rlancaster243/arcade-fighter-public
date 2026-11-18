@@ -161,7 +161,12 @@ public struct ShellRootView: View {
                 viewWidth: Int(geo.size.width.rounded(.down)),
                 viewHeight: Int(geo.size.height.rounded(.down)),
                 wantsFullscreen: display.wantsFullscreen,
-                windowIntegerScale: display.windowIntegerScale
+                windowIntegerScale: display.windowIntegerScale,
+                onAtlasLoadNotice: { line in
+                    Task { @MainActor in
+                        model.appendContentLoadNotices([line])
+                    }
+                }
             )
         }
         .allowsHitTesting(false)

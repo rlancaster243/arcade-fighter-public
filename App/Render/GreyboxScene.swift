@@ -70,6 +70,12 @@ final class GreyboxScene: SKScene {
         view.layer?.magnificationFilter = .nearest
     }
 
+    /// Re-run atlas loads after `onAtlasLoadNotice` is attached (e.g. post-`didMove`).
+    func revalidateAtlases() {
+        loadedAtlasIDs = []
+        syncAtlasesIfNeeded()
+    }
+
     private func syncAtlasesIfNeeded() {
         let ids = Set(snapshot.fighterIDs)
         guard ids != loadedAtlasIDs else { return }
