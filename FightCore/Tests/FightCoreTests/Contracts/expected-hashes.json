@@ -1,25 +1,52 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
+  "catalogFighters": ["greybox", "kestrel", "bruno", "ilse", "rook"],
   "scenarios": [
     {
       "id": "replay-greybox-idle",
-      "finalHash": 8782780902704125185
+      "kind": "replay",
+      "stageId": "stage1",
+      "fighters": ["greybox", "greybox"],
+      "replayFile": "greybox-idle.json",
+      "tickHashes": [0]
     },
     {
       "id": "replay-greybox-short",
-      "finalHash": 11029084304615100007
+      "kind": "replay",
+      "stageId": "stage2",
+      "fighters": ["greybox", "greybox"],
+      "replayFile": "greybox-short.json",
+      "tickHashes": [0]
     },
     {
-      "id": "script-kestrel-bruno-5t",
-      "finalHash": 8530034009201952160
+      "id": "script-kestrel-bruno",
+      "kind": "script",
+      "stageId": "stage1",
+      "fighters": ["kestrel", "bruno"],
+      "scriptSeed": 541382372222365758,
+      "tickHashes": [0]
     },
     {
-      "id": "cpu-greybox-normal-hard-180t",
-      "finalHash": 3586471278278273826
+      "id": "cpu-greybox-stage1",
+      "kind": "cpu",
+      "stageId": "stage1",
+      "fighters": ["greybox", "greybox"],
+      "matchSeed": 2711846913,
+      "tickLimit": 180,
+      "p1Difficulty": "normal",
+      "p2Difficulty": "hard",
+      "tickHashes": [0]
     },
     {
-      "id": "cpu-ilse-rook-easy-normal-240t",
-      "finalHash": 13613689456164374622
+      "id": "cpu-ilse-rook-stage2",
+      "kind": "cpu",
+      "stageId": "stage2",
+      "fighters": ["ilse", "rook"],
+      "matchSeed": 286596864,
+      "tickLimit": 240,
+      "p1Difficulty": "easy",
+      "p2Difficulty": "normal",
+      "tickHashes": [0]
     }
   ]
 }
