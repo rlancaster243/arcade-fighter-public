@@ -9,8 +9,16 @@ import AppKit
 /// Root shell: menus, match preview, window/fullscreen preferences. Wire from `AppMain` when Phase 0 entry is unfrozen.
 public struct ShellRootView: View {
     @StateObject private var model = MenuShellModel()
+    @StateObject private var input = InputCoordinator()
+    @StateObject private var matchSession = LocalMatchSession()
+    @StateObject private var sfx = SFXEventPlayer()
 
     public init() {}
+
+  private var inMatch: Bool {
+    if case .inMatch = model.state.screen { return true }
+    return false
+  }
 
     public var body: some View {
         ZStack {
@@ -18,15 +26,39 @@ public struct ShellRootView: View {
             if let snapshot = model.matchSnapshot {
                 matchLayer(snapshot: snapshot)
             }
+            MatchTickView(isActive: inMatch) { date in
+                guard inMatch else { return }
+                matchSession.advance(to: date, input: input, model: model, sfx: sfx)
+            }
         }
         .frame(minWidth: 384, minHeight: 216)
         .windowPreferences(model.state.preferences)
+        .onAppear {
+            sfx.preloadIfNeeded()
+            syncMatchSessionIfNeeded()
+        }
+        .onChange(of: model.state.screen) { _, _ in
+            syncMatchSessionIfNeeded()
+        }
+        .sheet(isPresented: $input.showKeyTest) {
+            KeyTestScreen(input: input)
+        }
         #if os(macOS)
         .background(MenuKeyboardBridge { model.send($0) })
         .onChange(of: model.state.requestedQuit) { _, quit in
             if quit { NSApplication.shared.terminate(nil) }
         }
         #endif
+    }
+
+    private func syncMatchSessionIfNeeded() {
+        if case .inMatch(let setup) = model.state.screen {
+            guard !matchSession.isRunning else { return }
+            let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
+            matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+        } else {
+            matchSession.stop()
+        }
     }
 
     @ViewBuilder
