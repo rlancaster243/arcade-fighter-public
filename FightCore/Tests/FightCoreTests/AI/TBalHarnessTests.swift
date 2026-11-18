@@ -9,7 +9,7 @@ import Foundation
 final class TBalHarnessTests: XCTestCase {
     func testT_BAL_HARNESS_batchIsDeterministic() {
         let config = FightSimBatchConfig(
-            batchSeed: 0xBAL1,
+            batchSeed: 0xBA11,
             matchCount: 4,
             ticksPerMatch: 180,
             p1Difficulty: .normal,
