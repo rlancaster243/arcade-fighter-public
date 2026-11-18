@@ -33,7 +33,7 @@ public struct FighterStepper: FighterStepping, Sendable {
             snapshot.fighters[idx] = fighter
         }
 
-        handleThrowResolution(snapshot: &snapshot)
+        handleThrowResolution(snapshot: &snapshot, runtime: &runtime)
     }
 
     public func isInvulnerable(fighter: FighterState, defID: String) -> Bool {
@@ -195,7 +195,7 @@ public struct FighterStepper: FighterStepping, Sendable {
         snapshot.projectiles.append(projectile)
     }
 
-    private func handleThrowResolution(snapshot: inout GameSnapshot) {
+    private func handleThrowResolution(snapshot: inout GameSnapshot, runtime: inout [FighterRuntimeSlot]) {
         guard snapshot.fighters.count >= 2 else { return }
         for attackerSlot in PlayerSlot.allCases {
             let aIdx = Int(attackerSlot.rawValue)
@@ -209,8 +209,12 @@ public struct FighterStepper: FighterStepping, Sendable {
 
             let defenderIdx = aIdx == 0 ? 1 : 0
             var defender = snapshot.fighters[defenderIdx]
+            let defenderQueued = defenderIdx < runtime.count ? runtime[defenderIdx].queuedMoveID : ""
 
-            if defender.activeMoveID == move.id {
+            if defender.activeMoveID == move.id || defenderQueued == move.id {
+                if defenderIdx < runtime.count {
+                    runtime[defenderIdx].queuedMoveID = ""
+                }
                 ThrowLogic.techThrow(defender: &defender, attacker: &attacker)
                 snapshot.fighters[aIdx] = attacker
                 snapshot.fighters[defenderIdx] = defender

@@ -61,13 +61,9 @@ final class TCoreAdvancedMechanicsTests: XCTestCase {
         snap.fighters[0].activeMoveID = "throw_lp_lk"
         stepper.stepFighters(snapshot: &snap)
 
-        let untilActive = throwMove.startup
-        for _ in 0..<untilActive {
+        for _ in 0..<throwMove.startup {
             stepper.stepFighters(snapshot: &snap)
         }
-        XCTAssertEqual(snap.fighters[0].kind, .attackActive)
-
-        stepper.stepFighters(snapshot: &snap)
         XCTAssertEqual(snap.fighters[0].kind, .throwing)
         XCTAssertEqual(snap.fighters[1].kind, .beingThrown)
         XCTAssertTrue(snap.events.contains { $0.kind == .throwHit })

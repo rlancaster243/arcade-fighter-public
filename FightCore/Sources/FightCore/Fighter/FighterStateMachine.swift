@@ -3,11 +3,13 @@ enum FighterStateMachine {
         switch kind {
         case .idle, .walkForward, .walkBack, .crouch:
             return true
-        case .attackRecovery:
-            return true
         default:
             return false
         }
+    }
+
+    static func canCancelFromRecovery(kind: FighterStateKind) -> Bool {
+        kind == .attackRecovery
     }
 
     static func isGrounded(_ kind: FighterStateKind) -> Bool {
