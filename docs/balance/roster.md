@@ -187,8 +187,8 @@ No fighter defines a cheaper or more expensive super in content; balance differe
 3. **Rushdown tax is subtle:** Kestrel trades LP damage for speed and extra LP meter; supers are not stronger than Ilse’s—mobility is the main perk.
 4. **Ilse zoner hints:** Strong QCF (110) and high DP; lows are not in this JSON slice—QCB is standard mid 80.
 5. **Rook anomalies:** Slowest HP (15f), strongest single special (Castle Slam 130), low super chip, nonstandard special buttons, only low-guard QCB in the roster.
-6. **Greybox flat 80:** Useful baseline; every production fighter diverges on at least one axis (health, walks, or move damage).
-7. **Stun parity:** Identical 12/8 hit and block stun on almost all moves—balance is damage, chip, frames, and walks—not stun shapes.
+6. **Greybox flat 80:** Useful baseline for strike damage (normals, specials, super all 80); **throw is 120** like the rest of the roster. Every production fighter diverges on at least one axis (health, walks, or move damage).
+7. **Stun parity:** All **39** roster moves use **12** hitstun and **8** blockstun—balance is damage, chip, frames, and walks—not stun shapes.
 8. **Content gaps vs full buttons:** Kestrel/Bruno lack LK/HK move entries; comparing full button coverage to Ilse/Rook is asymmetric until L9 kits are extended.
 
 ---
