@@ -11,6 +11,8 @@
     { "id": "throw", "file": "throw.wav", "gainQ8": 220 },
     { "id": "ko", "file": "ko.wav", "gainQ8": 256 },
     { "id": "round_start", "file": "round_start.wav", "gainQ8": 230 },
+    { "id": "whiff", "file": "whiff.wav", "gainQ8": 190 },
+    { "id": "time_over", "file": "time_over.wav", "gainQ8": 240 },
     { "id": "ambient_bells", "file": "ambient_bells.wav", "gainQ8": 128, "loop": true }
   ]
 }

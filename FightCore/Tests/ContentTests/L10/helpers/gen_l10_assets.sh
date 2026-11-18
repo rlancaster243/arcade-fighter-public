@@ -52,4 +52,16 @@ synth_wav Content/Audio/ko.wav 196 0.4
 synth_wav Content/Audio/round_start.wav 784 0.2
 synth_wav Content/Audio/ambient_bells.wav 392 2.0
 
+# Whiff is a short filtered noise whoosh so it is not another sine hit.
+ffmpeg -y -loglevel error -f lavfi \
+  -i "anoisesrc=color=white:duration=0.07:sample_rate=44100,highpass=f=1800,lowpass=f=7000,volume=0.14,afade=t=in:st=0:d=0.008,afade=t=out:st=0.02:d=0.05" \
+  -ar 44100 -ac 1 -c:a pcm_s16le Content/Audio/whiff.wav
+
+# Time-over is a two-note descending tone, distinct from round_start and ko.
+ffmpeg -y -loglevel error \
+  -f lavfi -i "sine=frequency=311:duration=0.16:sample_rate=44100" \
+  -f lavfi -i "sine=frequency=155:duration=0.28:sample_rate=44100" \
+  -filter_complex "[0][1]concat=n=2:v=0:a=1" \
+  -ar 44100 -ac 1 -c:a pcm_s16le Content/Audio/time_over.wav
+
 echo "L10 assets generated under Content/"
