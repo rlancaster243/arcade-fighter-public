@@ -3,10 +3,14 @@ public typealias MatchDirectingStub = MatchDirector
 
 /// Match directing: rounds, timer, KO, meter, hitstop / super freeze.
 public struct MatchDirector: MatchDirecting {
-    public var moveMetadata: [String: MatchMoveMetadata]
+    public var metadata: MatchMoveMetadataResolver
 
     public init(moveMetadata: [String: MatchMoveMetadata] = [:]) {
-        self.moveMetadata = moveMetadata
+        metadata = MatchMoveMetadataResolver(flat: moveMetadata)
+    }
+
+    public init(metadata: MatchMoveMetadataResolver) {
+        self.metadata = metadata
     }
 
     public mutating func applyRules(snapshot: inout GameSnapshot) {
@@ -18,9 +22,9 @@ public struct MatchDirector: MatchDirecting {
         }
 
         if !snapshot.rules.matchOver {
-            MeterRules.spendSuperOnStartup(snapshot: &snapshot, moveMetadata: moveMetadata)
-            MeterRules.applyEvents(snapshot: &snapshot, moveMetadata: moveMetadata)
-            HitstopRules.applyEvents(snapshot: &snapshot, moveMetadata: moveMetadata)
+            MeterRules.spendSuperOnStartup(snapshot: &snapshot, metadata: metadata)
+            MeterRules.applyEvents(snapshot: &snapshot, metadata: metadata)
+            HitstopRules.applyEvents(snapshot: &snapshot, metadata: metadata)
             RoundRules.markKOStates(snapshot: &snapshot)
         }
 

@@ -23,12 +23,12 @@ enum MeterRules {
     /// Apply meter changes from combat events using move metadata.
     static func applyEvents(
         snapshot: inout GameSnapshot,
-        moveMetadata: [String: MatchMoveMetadata]
+        metadata: MatchMoveMetadataResolver
     ) {
         guard snapshot.fighters.count >= 2 else { return }
 
         for event in snapshot.events {
-            let meta = moveMetadata[event.moveID] ?? MatchMoveMetadata()
+            let meta = metadata.metadata(for: event.attacker, moveID: event.moveID, in: snapshot)
             let attackerIdx = Int(event.attacker.rawValue)
             let defenderIdx = Int(event.defender.rawValue)
             guard attackerIdx < snapshot.fighters.count, defenderIdx < snapshot.fighters.count else {
@@ -65,12 +65,14 @@ enum MeterRules {
     /// Deduct super cost on the first tick of a super's startup.
     static func spendSuperOnStartup(
         snapshot: inout GameSnapshot,
-        moveMetadata: [String: MatchMoveMetadata]
+        metadata: MatchMoveMetadataResolver
     ) {
         for i in snapshot.fighters.indices {
             let fighter = snapshot.fighters[i]
             guard fighter.kind == .attackStartup, fighter.stateTick == 0 else { continue }
-            guard let meta = moveMetadata[fighter.activeMoveID], meta.isSuper else { continue }
+            let slot: PlayerSlot = i == 0 ? .p1 : .p2
+            let meta = metadata.metadata(for: slot, moveID: fighter.activeMoveID, in: snapshot)
+            guard meta.isSuper else { continue }
             _ = spend(MatchRules.superMeterCost, from: &snapshot.fighters[i].meter)
         }
     }

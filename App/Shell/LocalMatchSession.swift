@@ -20,11 +20,13 @@ final class LocalMatchSession: ObservableObject {
     var isRunning: Bool { setup != nil && snapshot != nil }
     var isPaused: Bool { paused && isRunning }
 
-    func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) {
-        let p1 = loadFighter(id: setup.p1.id)
-        let p2 = loadFighter(id: setup.p2.id)
-        let defs = [p1, p2]
-        let defMap = FighterDefinitionMap.keyedByFighterID(p1: p1, p2: p2)
+    @discardableResult
+    func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) -> [String] {
+        var notices: [String] = []
+        let p1Result = loadFighter(id: setup.p1.id, label: "P1", notices: &notices)
+        let p2Result = loadFighter(id: setup.p2.id, label: "P2", notices: &notices)
+        let defs = [p1Result, p2Result]
+        let defMap = FighterDefinitionMap.keyedByFighterID(p1: p1Result, p2: p2Result)
         metadataTable = MoveMetadataTable(fighterDefs: defs)
         let context = CollisionMatchContext(fighterDefs: defs)
 
@@ -46,6 +48,10 @@ final class LocalMatchSession: ObservableObject {
         accumulator = 0
         paused = false
         model.matchSnapshot = snap
+        if !notices.isEmpty {
+            model.setContentLoadNotices(notices)
+        }
+        return notices
     }
 
     func pause() {
@@ -113,13 +119,25 @@ final class LocalMatchSession: ObservableObject {
         }
     }
 
-    private func loadFighter(id: String) -> FighterDef {
+    private func loadFighter(id: String, label: String, notices: inout [String]) -> FighterDef {
         let directory = ContentPaths.fighterDirectory(id, fromFile: #filePath)
-        if let def = try? FighterLoader.loadFighter(from: directory) {
-            return def
+        do {
+            return try FighterLoader.loadFighter(from: directory)
+        } catch {
+            let greybox = ContentPaths.greyboxDirectory(fromFile: #filePath)
+            if let fallback = try? FighterLoader.loadFighter(from: greybox) {
+                notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using greybox.")
+                return fallback
+            }
+            notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using built-in fallback.")
+            return FighterDef(id: "greybox", displayName: "Greybox", gamePlan: "fallback")
         }
-        let greybox = ContentPaths.greyboxDirectory(fromFile: #filePath)
-        return (try? FighterLoader.loadFighter(from: greybox))
-            ?? FighterDef(id: "greybox", displayName: "Greybox", gamePlan: "fallback")
+    }
+
+    private func describe(_ error: Error) -> String {
+        if let loadError = error as? FighterLoadError {
+            return String(describing: loadError)
+        }
+        return error.localizedDescription
     }
 }

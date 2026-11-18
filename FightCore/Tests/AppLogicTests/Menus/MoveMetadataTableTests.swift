@@ -30,7 +30,9 @@ final class MoveMetadataTableTests: XCTestCase {
             ),
         ]
         let table = MoveMetadataTable(fighterDefs: [a, b])
-        XCTAssertEqual(table.metadata(fighterID: "a", moveID: "lp")?.meterGain, 100)
-        XCTAssertEqual(table.metadata(fighterID: "b", moveID: "lp")?.meterGain, 200)
+        var snap = SimulationBootstrap.greyboxMatch()
+        snap.fighterIDs = ["a", "b"]
+        XCTAssertEqual(table.resolver.metadata(for: .p1, moveID: "lp", in: snap).meterGain, 100)
+        XCTAssertEqual(table.resolver.metadata(for: .p2, moveID: "lp", in: snap).meterGain, 200)
     }
 }

@@ -6,6 +6,7 @@ import Foundation
 final class MenuShellModel: ObservableObject {
     @Published private(set) var state: MenuShellState
     @Published var matchSnapshot: GameSnapshot?
+    @Published var contentLoadNotices: [String] = []
 
     init(state: MenuShellState = .initial) {
         self.state = state
@@ -56,6 +57,14 @@ final class MenuShellModel: ObservableObject {
         default:
             return false
         }
+    }
+
+    func setContentLoadNotices(_ notices: [String]) {
+        contentLoadNotices = notices
+    }
+
+    func clearContentLoadNotices() {
+        contentLoadNotices = []
     }
 
     var preferences: AppPreferences {

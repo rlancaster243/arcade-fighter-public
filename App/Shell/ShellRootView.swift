@@ -29,11 +29,23 @@ public struct ShellRootView: View {
         }
     }
 
+    private var showsMenuInputOverlay: Bool {
+        switch model.state.screen {
+        case .inMatch, .matchPaused:
+            return false
+        default:
+            return true
+        }
+    }
+
     public var body: some View {
         ZStack {
             menuLayer
             if let snapshot = model.matchSnapshot, showsMatchView {
                 matchLayer(snapshot: snapshot)
+            }
+            if case .matchPaused(let setup) = model.state.screen {
+                MatchPausedView(setup: setup, input: input)
             }
             MatchTickView(isActive: isFighting) { date in
                 guard isFighting else { return }
@@ -43,10 +55,13 @@ public struct ShellRootView: View {
         .frame(minWidth: 384, minHeight: 216)
         .windowPreferences(model.state.preferences)
         .overlay(alignment: .topTrailing) {
-            if !isFighting && !showsMatchView {
+            if showsMenuInputOverlay {
                 InputSettingsOverlay(input: input)
                     .padding(12)
             }
+        }
+        .overlay(alignment: .bottom) {
+            contentNoticeBanner
         }
         .onAppear {
             sfx.preloadIfNeeded()
@@ -54,6 +69,9 @@ public struct ShellRootView: View {
         }
         .onChange(of: model.state.screen) { _, _ in
             syncMatchSessionIfNeeded()
+            if !isFighting && !showsMatchView {
+                model.clearContentLoadNotices()
+            }
         }
         .sheet(isPresented: $input.showKeyTest) {
             KeyTestScreen(input: input)
@@ -64,6 +82,22 @@ public struct ShellRootView: View {
             if quit { NSApplication.shared.terminate(nil) }
         }
         #endif
+    }
+
+    @ViewBuilder
+    private var contentNoticeBanner: some View {
+        if !model.contentLoadNotices.isEmpty {
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(model.contentLoadNotices, id: \.self) { line in
+                    Text(line)
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(.ultraThinMaterial)
+        }
     }
 
     private func syncMatchSessionIfNeeded() {
@@ -102,14 +136,16 @@ public struct ShellRootView: View {
         case .characterSelect(let context):
             CharacterSelectView(context: context, cursor: model.state.characterCursor)
         case .settings:
-            SettingsView(preferences: model.state.preferences, cursor: model.state.cursor)
+            SettingsView(
+                preferences: model.state.preferences,
+                cursor: model.state.cursor,
+                onKeyTest: { input.showKeyTest = true }
+            )
         case .result(let summary):
             MatchResultView(summary: summary, cursor: model.state.cursor)
         case .rematchPrompt(let setup):
             RematchPromptView(setup: setup)
-        case .matchPaused(let setup):
-            MatchPausedView(setup: setup)
-        case .inMatch:
+        case .matchPaused, .inMatch:
             Color.clear
         }
     }
