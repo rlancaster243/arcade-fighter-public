@@ -8,6 +8,7 @@ import Combine
 final class SFXEventPlayer: ObservableObject {
     private let player: SFXPlayer
     private var loaded = false
+    private(set) var preloadErrorDescription: String?
 
     init(player: SFXPlayer? = nil) {
         self.player = player ?? SFXPlayer(audioDirectory: SFXContent.audioDirectory())
@@ -23,6 +24,8 @@ final class SFXEventPlayer: ObservableObject {
             let manifest = try SFXContent.loadManifest(repoRoot: root)
             try player.preload(manifest: manifest)
         } catch {
+            preloadErrorDescription = String(describing: error)
+            fputs("SFXEventPlayer preload failed: \(error)\n", stderr)
             notices.append("Audio preload failed: \(error.localizedDescription)")
         }
         return notices

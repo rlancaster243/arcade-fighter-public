@@ -14,8 +14,19 @@ final class MenuShellModel: ObservableObject {
 
     func send(_ command: MenuCommand) {
         var next = state
+        if next.alertMessage != nil {
+            next.alertMessage = nil
+        }
         MenuReducer.reduce(state: &next, command: command)
         applyTransition(from: state, to: next)
+        state = next
+    }
+
+    func handleMatchStartFailure(_ error: Error) {
+        matchSnapshot = nil
+        var next = state
+        let message = (error as? CustomStringConvertible)?.description ?? String(describing: error)
+        MenuReducer.abortFailedMatchStart(state: &next, message: message)
         state = next
     }
 

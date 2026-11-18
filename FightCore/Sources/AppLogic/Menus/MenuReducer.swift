@@ -32,6 +32,13 @@ public enum MenuReducer {
         return state
     }
 
+    /// Leave a broken in-match transition; surface the error on main menu (no frozen fight preview).
+    public static func abortFailedMatchStart(state: inout MenuShellState, message: String) {
+        state.alertMessage = message
+        state.screen = .mainMenu
+        state.cursor = 0
+    }
+
   public static func finishMatch(
         state: MenuShellState,
         snapshot: GameSnapshot

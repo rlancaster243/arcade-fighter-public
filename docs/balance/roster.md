@@ -4,6 +4,8 @@ Snapshot of playable fighter content on `main` as of schema version 1. All numbe
 
 **Roster covered:** `kestrel`, `bruno`, `ilse`, `rook`, `greybox` (present in Content; `greybox` remains the Phase 0 contract dummy).
 
+**Runtime (Phase 2 playable):** Local matches load starting **health from each fighter’s `fighter.json`** (e.g. Kestrel 950, Bruno 1050), use **stage `leftBound` / `rightBound`** for collision play space, and resolve overlapping move ids via **`MoveMetadataTable` / `RosterMatchDirector`** (attacker slot wins for active moves). Values in the tables below are content truth; if a number here disagrees with runtime, treat this doc as authoritative for balance and file an integration drift bug.
+
 ---
 
 ## How to read this report

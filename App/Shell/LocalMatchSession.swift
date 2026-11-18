@@ -21,34 +21,26 @@ final class LocalMatchSession: ObservableObject {
     var isPaused: Bool { paused && isRunning }
 
     @discardableResult
-    func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) -> [String] {
+    func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) throws -> [String] {
         var notices: [String] = []
-        let p1Result = loadFighter(id: setup.p1.id, label: "P1", notices: &notices)
-        let p2Result = loadFighter(id: setup.p2.id, label: "P2", notices: &notices)
-        let defs = FighterDefinitionMap.rosterOrdered(
+        let p1 = loadFighter(id: setup.p1.id, label: "P1", notices: &notices)
+        let p2 = loadFighter(id: setup.p2.id, label: "P2", notices: &notices)
+        let stageId = StageBoundsLoader.stageID(forSetupIndex: setup.stageIndex)
+        let built = try MatchSimulationFactory.make(
             p1PickID: setup.p1.id,
-            p1: p1Result,
+            p1: p1,
             p2PickID: setup.p2.id,
-            p2: p2Result
+            p2: p2,
+            stageId: stageId
         )
-        let defMap = FighterDefinitionMap.keyedByRosterPick(
-            p1PickID: setup.p1.id,
-            p1: p1Result,
-            p2PickID: setup.p2.id,
-            p2: p2Result
-        )
-        metadataTable = MoveMetadataTable(fighterDefs: defs)
-        let context = CollisionMatchContext(fighterDefs: defs)
-
-        simulation = Simulation(
-            motion: MotionParser(),
-            fighterStep: FighterStepper(definitions: defMap),
-            collision: CollisionResolver(context: context),
-            matchDirect: RosterMatchDirector(metadataTable: metadataTable)
-        )
+        simulation = built.simulation
+        metadataTable = built.metadata
 
         var snap = initialSnapshot
         snap.fighterIDs = [setup.p1.id, setup.p2.id]
+        snap.fighterStartHealth = [p1.health, p2.health]
+        snap.fighters[0].health = p1.health
+        snap.fighters[1].health = p2.health
         snapshot = snap
         self.setup = setup
         cpu = setup.mode == .arcade

@@ -57,7 +57,7 @@ final class HUDNode: SKNode {
             fill: p1HealthFill,
             frame: HUDLayout.p1HealthBarFrame(),
             current: model.p1Health,
-            cap: model.healthCap,
+            cap: model.p1HealthCap,
             fillColor: .green,
             alignLeft: true
         )
@@ -66,7 +66,7 @@ final class HUDNode: SKNode {
             fill: p2HealthFill,
             frame: HUDLayout.p2HealthBarFrame(),
             current: model.p2Health,
-            cap: model.healthCap,
+            cap: model.p2HealthCap,
             fillColor: .green,
             alignLeft: false
         )

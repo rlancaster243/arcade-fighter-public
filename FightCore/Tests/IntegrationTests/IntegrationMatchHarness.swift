@@ -1,12 +1,13 @@
+import AppLogic
 import Foundation
 import FightCore
 
 /// Wires shipped fighter defs and stage play bounds into the full simulation stack for integration runs.
 enum IntegrationMatchHarness {
-    static let shippedStageIDs = ["stage1", "stage2"]
+    static let shippedFighterIDs = ["greybox", "kestrel", "bruno", "ilse", "rook"]
+    static let shippedStageIDs = StageBoundsLoader.shippedStageIDs
     /// Scripted input steps (pre-tick hashes); total hashes = this + 1 final snapshot.
     static let scriptedInputTickCount = 5
-    private static let arenaCenterPx: Int32 = 192
 
     static func loadFighter(_ id: String, fromFile file: String = #filePath) throws -> FighterDef {
         try FighterLoader.loadFighter(from: ContentPaths.fighterDirectory(id, fromFile: file))
@@ -22,39 +23,8 @@ enum IntegrationMatchHarness {
         )
     }
 
-    static func loadStageJSON(_ id: String, fromFile file: String = #filePath) throws -> [String: Any] {
-        let dir = ContentPaths.stageDirectory(id, fromFile: file)
-        let data = try Data(contentsOf: dir.appendingPathComponent("stage.json"))
-        guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
-            throw HarnessError.invalidStageJSON(id)
-        }
-        return json
-    }
-
     static func playBounds(stageId: String, fromFile file: String = #filePath) throws -> (playLeftPx: Int32, playRightPx: Int32) {
-        let json = try loadStageJSON(stageId, fromFile: file)
-        if let left = json["leftBound"] as? Int, let right = json["rightBound"] as? Int {
-            return (Int32(left) - arenaCenterPx, Int32(right) - arenaCenterPx)
-        }
-        if let camera = json["cameraBounds"] as? [String: Any],
-           let left = camera["left"] as? Int,
-           let right = camera["right"] as? Int
-        {
-            return (Int32(left) - arenaCenterPx, Int32(right) - arenaCenterPx)
-        }
-        return (StageBounds.playLeftPx, StageBounds.playRightPx)
-    }
-
-    static func moveMetadata(p1: FighterDef, p2: FighterDef) -> [String: MatchMoveMetadata] {
-        var map: [String: MatchMoveMetadata] = [:]
-        for move in p1.moves + p2.moves {
-            map[move.id] = MatchMoveMetadata(
-                meterGain: move.meterGain,
-                hitstop: move.hitstop,
-                isSuper: move.inputKind == .superMove
-            )
-        }
-        return map
+        try StageBoundsLoader.playBounds(stageId: stageId, fromFile: file)
     }
 
     static func simulation(
@@ -63,29 +33,18 @@ enum IntegrationMatchHarness {
         stageId: String,
         fromFile file: String = #filePath
     ) throws -> Simulation {
-        let bounds = try playBounds(stageId: stageId, fromFile: file)
-        var stepper = FighterStepper()
-        stepper.registerDefinition(p1)
-        stepper.registerDefinition(p2)
-        let context = CollisionMatchContext(
-            fighterDefs: [p1, p2],
-            playLeftPx: bounds.playLeftPx,
-            playRightPx: bounds.playRightPx
-        )
-        return Simulation(
-            motion: MotionParser(),
-            fighterStep: stepper,
-            collision: CollisionResolver(context: context),
-            matchDirect: MatchDirector(moveMetadata: moveMetadata(p1: p1, p2: p2))
-        )
+        try MatchSimulationFactory.make(
+            p1PickID: p1.id,
+            p1: p1,
+            p2PickID: p2.id,
+            p2: p2,
+            stageId: stageId,
+            fromFile: file
+        ).simulation
     }
 
     static func snapshot(seed: UInt64, p1: FighterDef, p2: FighterDef) -> GameSnapshot {
-        var snap = SimulationBootstrap.greyboxMatch(seed: seed)
-        snap.fighterIDs = [p1.id, p2.id]
-        snap.fighters[0].health = p1.health
-        snap.fighters[1].health = p2.health
-        return snap
+        MatchSimulationFactory.matchSnapshot(seed: seed, p1: p1, p2: p2, fighterIDs: [p1.id, p2.id])
     }
 
     static func step(
@@ -159,8 +118,6 @@ enum IntegrationMatchHarness {
         stageId: String,
         fromFile file: String = #filePath
     ) throws -> [UInt64] {
-        var sim = try simulation(p1: p1, p2: p2, stageId: stageId, fromFile: file)
-        var snap = snapshot(seed: seed, p1: p1, p2: p2)
         let frames: [[InputFrame]] = [
             [.p1Forward, .neutral],
             [.p1LP, .neutral],
@@ -169,14 +126,14 @@ enum IntegrationMatchHarness {
             [.neutral, .neutral],
         ]
         precondition(frames.count == scriptedInputTickCount)
-        var hashes: [UInt64] = []
-        hashes.reserveCapacity(frames.count + 1)
-        for tick in frames {
-            hashes.append(snap.stateHash())
-            step(simulation: &sim, snapshot: &snap, inputs: tick)
-        }
-        hashes.append(snap.stateHash())
-        return hashes
+        return try PlayableScriptRunner.tickHashes(
+            p1: p1,
+            p2: p2,
+            stageId: stageId,
+            seed: seed,
+            frames: frames,
+            fromFile: file
+        )
     }
 
     static func tickHashes(for scenario: ExpectedHashesCatalog.Scenario, fromFile file: String = #filePath) throws -> [UInt64] {
@@ -238,7 +195,6 @@ enum IntegrationMatchHarness {
 
     enum HarnessError: Error, CustomStringConvertible {
         case needTwoFighters([String])
-        case invalidStageJSON(String)
         case missingReplayFile(String)
         case incompleteCPUScenario(String)
         case incompleteScriptScenario(String)
@@ -248,8 +204,6 @@ enum IntegrationMatchHarness {
             switch self {
             case .needTwoFighters(let ids):
                 return "need two fighter ids, got \(ids)"
-            case .invalidStageJSON(let id):
-                return "invalid stage.json for \(id)"
             case .missingReplayFile(let id):
                 return "replay scenario \(id) missing replayFile"
             case .incompleteCPUScenario(let id):

@@ -1,5 +1,5 @@
 enum RoundRules {
-    static func spawnFighter(slot: PlayerSlot) -> FighterState {
+    static func spawnFighter(slot: PlayerSlot, startHealth: Int32) -> FighterState {
         let xPixels: Int32 = slot == .p1 ? -80 : 80
         return FighterState(
             kind: .idle,
@@ -7,7 +7,7 @@ enum RoundRules {
             position: Vec2(x: Fixed(pixels: xPixels), y: .zero),
             velocity: .zero,
             facingRight: slot == .p1,
-            health: 1000,
+            health: startHealth,
             meter: 0,
             activeMoveID: "",
             stateTick: 0
@@ -71,8 +71,14 @@ enum RoundRules {
         snapshot.rules.roundTick = 0
         snapshot.rules.hitstopRemaining = 0
         snapshot.rules.roundNumber &+= 1
-        snapshot.fighters[0] = spawnFighter(slot: .p1)
-        snapshot.fighters[1] = spawnFighter(slot: .p2)
+        snapshot.fighters[0] = spawnFighter(
+            slot: .p1,
+            startHealth: RosterStartHealth.health(for: .p1, snapshot: snapshot)
+        )
+        snapshot.fighters[1] = spawnFighter(
+            slot: .p2,
+            startHealth: RosterStartHealth.health(for: .p2, snapshot: snapshot)
+        )
         snapshot.projectiles.removeAll(keepingCapacity: true)
         snapshot.events.append(
             GameEvent(kind: .roundStart, tick: snapshot.tick, attacker: .p1, defender: .p2)

@@ -7,6 +7,7 @@ public struct MenuShellState: Sendable, Equatable, Codable {
     public var settingsPane: SettingsPane
     public var characterCursor: Int
     public var requestedQuit: Bool
+    public var alertMessage: String?
 
     public init(
         screen: MenuScreen = .title,
@@ -14,7 +15,8 @@ public struct MenuShellState: Sendable, Equatable, Codable {
         cursor: Int = 0,
         settingsPane: SettingsPane = .display,
         characterCursor: Int = 0,
-        requestedQuit: Bool = false
+        requestedQuit: Bool = false,
+        alertMessage: String? = nil
     ) {
         self.screen = screen
         self.preferences = preferences
@@ -22,6 +24,7 @@ public struct MenuShellState: Sendable, Equatable, Codable {
         self.settingsPane = settingsPane
         self.characterCursor = characterCursor
         self.requestedQuit = requestedQuit
+        self.alertMessage = alertMessage
     }
 
     public static let initial = MenuShellState()

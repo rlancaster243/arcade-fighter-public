@@ -3,12 +3,17 @@ import SwiftUI
 
 struct InputSettingsOverlay: View {
     @ObservedObject var input: InputCoordinator
+    var canOpenKeyTest: Bool = true
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Input (L8)")
                 .font(.caption.bold())
-            Button("Key test…") { input.showKeyTest = true }
+            Button("Key test…") {
+                guard canOpenKeyTest else { return }
+                input.showKeyTest = true
+            }
+            .disabled(!canOpenKeyTest)
             Text("P1: WASD + F/G/H/J")
                 .font(.caption2)
             Text(p2Label)

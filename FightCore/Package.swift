@@ -49,7 +49,7 @@ let package = Package(
         ),
         .testTarget(
             name: "IntegrationTests",
-            dependencies: ["FightCore"],
+            dependencies: ["FightCore", "AppLogic"],
             path: "Tests/IntegrationTests"
         ),
     ]

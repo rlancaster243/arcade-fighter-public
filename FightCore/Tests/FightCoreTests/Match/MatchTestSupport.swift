@@ -11,12 +11,15 @@ enum MatchTestSupport {
     static func snapshot(
         p1Health: Int32 = 1000,
         p2Health: Int32 = 1000,
+        p1StartHealth: Int32 = 1000,
+        p2StartHealth: Int32 = 1000,
         roundTick: Int32 = 0,
         roundNumber: Int32 = 1,
         p1Rounds: Int32 = 0,
         p2Rounds: Int32 = 0
     ) -> GameSnapshot {
         var snap = SimulationBootstrap.greyboxMatch()
+        snap.fighterStartHealth = [p1StartHealth, p2StartHealth]
         snap.fighters[0].health = p1Health
         snap.fighters[1].health = p2Health
         snap.rules.roundTick = roundTick

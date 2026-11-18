@@ -29,12 +29,23 @@ public struct ShellRootView: View {
         }
     }
 
-    private var showsMenuInputOverlay: Bool {
+    /// Input settings / key test are menu-only; never during live or paused matches (fight bindings stay on `InputCoordinator`).
+    private var allowsInputSettingsOverlay: Bool {
         switch model.state.screen {
         case .inMatch, .matchPaused:
             return false
         default:
             return true
+        }
+    }
+
+    /// Full menu navigation is off during an active round; P/Esc still pause via `matchPauseHotkeysOnly`.
+    private var menuKeyboardMode: MenuKeyboardMode {
+        switch model.state.screen {
+        case .inMatch:
+            return .matchPauseHotkeysOnly
+        default:
+            return .fullNavigation
         }
     }
 
@@ -55,8 +66,8 @@ public struct ShellRootView: View {
         .frame(minWidth: 384, minHeight: 216)
         .windowPreferences(model.state.preferences)
         .overlay(alignment: .topTrailing) {
-            if showsMenuInputOverlay {
-                InputSettingsOverlay(input: input)
+            if allowsInputSettingsOverlay {
+                InputSettingsOverlay(input: input, canOpenKeyTest: allowsInputSettingsOverlay)
                     .padding(12)
             }
         }
@@ -70,17 +81,28 @@ public struct ShellRootView: View {
             }
             syncMatchSessionIfNeeded()
         }
-        .onChange(of: model.state.screen) { _, _ in
+        .onChange(of: model.state.screen) { _, screen in
+            switch screen {
+            case .inMatch, .matchPaused:
+                input.showKeyTest = false
+            default:
+                break
+            }
             syncMatchSessionIfNeeded()
             if !isFighting && !showsMatchView {
                 model.clearContentLoadNotices()
             }
         }
-        .sheet(isPresented: $input.showKeyTest) {
+        .sheet(
+            isPresented: Binding(
+                get: { input.showKeyTest && allowsInputSettingsOverlay },
+                set: { input.showKeyTest = $0 }
+            )
+        ) {
             KeyTestScreen(input: input)
         }
         #if os(macOS)
-        .background(MenuKeyboardBridge { model.send($0) })
+        .background(MenuKeyboardBridge(mode: menuKeyboardMode) { model.send($0) })
         .onChange(of: model.state.requestedQuit) { _, quit in
             if quit { NSApplication.shared.terminate(nil) }
         }
@@ -103,6 +125,16 @@ public struct ShellRootView: View {
         }
     }
 
+    private func tryStartMatch(setup: MatchSetup, snap: GameSnapshot) {
+        do {
+            _ = try matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+        } catch {
+            fputs("LocalMatchSession failed to start: \(error)\n", stderr)
+            matchSession.stop()
+            model.handleMatchStartFailure(error)
+        }
+    }
+
     private func syncMatchSessionIfNeeded() {
         switch model.state.screen {
         case .inMatch(let setup):
@@ -110,12 +142,12 @@ public struct ShellRootView: View {
                 matchSession.resume()
             } else if !matchSession.isRunning {
                 let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
-                matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+                tryStartMatch(setup: setup, snap: snap)
             }
         case .matchPaused(let setup):
             if !matchSession.isRunning {
                 let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
-                matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+                tryStartMatch(setup: setup, snap: snap)
             }
             matchSession.pause()
         default:
@@ -131,7 +163,7 @@ public struct ShellRootView: View {
         case .title:
             TitleScreenView { model.send(.confirm) }
         case .mainMenu:
-            MainMenuView(cursor: model.state.cursor)
+            MainMenuView(cursor: model.state.cursor, alertMessage: model.state.alertMessage)
         case .arcadeLadder:
             ArcadeLadderView()
         case .versusSetup:
