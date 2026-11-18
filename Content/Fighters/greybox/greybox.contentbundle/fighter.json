@@ -5,8 +5,8 @@
   "archetype": "test",
   "gamePlan": "Phase 0 validation dummy with every hurtbox state and one move per motion family.",
   "health": 1000,
-  "walkForward": 3,
-  "walkBack": 2,
+  "walkForward": 768,
+  "walkBack": 512,
   "jump": {
     "velocityY": -3584,
     "gravity": 256
@@ -495,7 +495,21 @@
       "meterGain": 120,
       "hitstop": 6,
       "guard": "mid",
-      "unblockable": false
+      "unblockable": false,
+      "projectile": {
+        "speed": 1536,
+        "lifetime": 90,
+        "hitbox": {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        },
+        "damage": 80,
+        "maxOnScreen": 99,
+        "spawnCount": 1,
+        "hitsAirborne": true
+      }
     },
     {
       "id": "sp_qcb",
@@ -683,7 +697,8 @@
       "meterGain": 120,
       "hitstop": 6,
       "guard": "mid",
-      "unblockable": false
+      "unblockable": false,
+      "armorHits": 1
     },
     {
       "id": "super_test",

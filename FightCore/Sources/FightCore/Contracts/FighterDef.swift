@@ -10,7 +10,9 @@ public struct FighterDef: Sendable, Equatable, Hashable, Codable {
     public var archetype: String
     public var gamePlan: String
     public var health: Int32
+    /// Walk speed in Q8 raw units (256 = 1 px per tick).
     public var walkForward: Int32
+    /// Walk speed in Q8 raw units (256 = 1 px per tick).
     public var walkBack: Int32
     public var jumpVelocityY: Int32
     public var gravity: Int32
@@ -26,8 +28,8 @@ public struct FighterDef: Sendable, Equatable, Hashable, Codable {
         archetype: String = "balanced",
         gamePlan: String,
         health: Int32 = 1000,
-        walkForward: Int32 = 3,
-        walkBack: Int32 = 2,
+        walkForward: Int32 = 3 * Fixed.scale,
+        walkBack: Int32 = 2 * Fixed.scale,
         jumpVelocityY: Int32 = -14 * Fixed.scale,
         gravity: Int32 = 1,
         pushbox: Hitbox = Hitbox(x: -20, y: -90, w: 40, h: 90),

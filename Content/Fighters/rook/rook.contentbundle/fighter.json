@@ -5,8 +5,8 @@
   "archetype": "rook",
   "gamePlan": "Stonework guardian: slow march, heavy blows, castle slam (236 HP), bulwark spin (214 LP), upward baton DP, super Rook Checkmate.",
   "health": 1050,
-  "walkForward": 2,
-  "walkBack": 2,
+  "walkForward": 512,
+  "walkBack": 512,
   "jump": {
     "velocityY": -3584,
     "gravity": 256

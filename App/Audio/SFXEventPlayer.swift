@@ -58,7 +58,7 @@ final class SFXEventPlayer: ObservableObject {
             return "round_start"
         case .matchWin:
             return "ko"
-        case .timeOver:
+        case .timeOver, .whiff:
             return nil
         }
     }

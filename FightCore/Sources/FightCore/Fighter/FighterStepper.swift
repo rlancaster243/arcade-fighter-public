@@ -40,6 +40,9 @@ public struct FighterStepper: FighterStepping, Sendable {
         guard let def = definitions[defID] ?? definitions.values.first else { return false }
         guard FighterStateMachine.isAttackState(fighter.kind) else { return false }
         guard let move = def.moves.first(where: { $0.id == fighter.activeMoveID }) else { return false }
+        if move.invulnerableFrames.contains(fighter.stateTick) {
+            return true
+        }
         let boxes = MovePhaseMath.frameBoxes(move, stateTick: fighter.stateTick)
         return MovePhaseMath.isInvulnerableFrame(boxes)
     }
@@ -54,11 +57,14 @@ public struct FighterStepper: FighterStepping, Sendable {
         definitions[def.id] = def
     }
 
-    public mutating func consumeArmorHit(slot: PlayerSlot) -> Bool {
+    public mutating func consumeArmorHit(slot: PlayerSlot, snapshot: inout GameSnapshot) -> Bool {
         let idx = Int(slot.rawValue)
-        guard idx < runtime.count else { return false }
-        guard runtime[idx].armorHitsRemaining > 0 else { return false }
-        runtime[idx].armorHitsRemaining &-= 1
+        guard idx < snapshot.fighters.count else { return false }
+        guard snapshot.fighters[idx].armorRemaining > 0 else { return false }
+        snapshot.fighters[idx].armorRemaining &-= 1
+        if idx < runtime.count {
+            runtime[idx].armorHitsRemaining = snapshot.fighters[idx].armorRemaining
+        }
         return true
     }
 
@@ -75,10 +81,13 @@ public struct FighterStepper: FighterStepping, Sendable {
         slot: PlayerSlot,
         snapshot: inout GameSnapshot
     ) {
+        runtime.executingMoveID = fighter.executingMoveID
+        runtime.armorHitsRemaining = fighter.armorRemaining
         captureQueuedCommands(fighter: &fighter, runtime: &runtime)
 
+        var startedThisStep = false
         if FighterStateMachine.canStartMove(kind: fighter.kind) {
-            tryStartQueued(fighter: &fighter, runtime: &runtime, def: def)
+            startedThisStep = tryStartQueued(fighter: &fighter, runtime: &runtime, def: def)
         }
 
         if runtime.jumpQueued,
@@ -94,8 +103,28 @@ public struct FighterStepper: FighterStepping, Sendable {
            FighterStateMachine.isAttackState(fighter.kind)
         {
             if !tryCancel(fighter: &fighter, runtime: &runtime, def: def, move: move) {
-                maybeSpawnProjectile(fighter: fighter, move: move, slot: slot, snapshot: &snapshot)
-                FighterStateMachine.advanceAttack(fighter: &fighter, runtime: &runtime, move: move)
+                if !startedThisStep {
+                    let wasActive = fighter.kind == .attackActive
+                    let connected = fighter.attackContact
+                    let moveID = fighter.activeMoveID
+                    FighterStateMachine.advanceAttack(fighter: &fighter, runtime: &runtime, move: move)
+                    if wasActive, fighter.kind != .attackActive, !connected, move.active > 0 {
+                        let defender: PlayerSlot = slot == .p1 ? .p2 : .p1
+                        snapshot.events.append(
+                            GameEvent(
+                                kind: .whiff,
+                                tick: snapshot.tick,
+                                attacker: slot,
+                                defender: defender,
+                                moveID: moveID,
+                                damage: 0
+                            )
+                        )
+                    }
+                }
+                if FighterStateMachine.isAttackState(fighter.kind) {
+                    maybeSpawnProjectile(fighter: fighter, move: move, slot: slot, snapshot: &snapshot)
+                }
             }
         }
 
@@ -106,6 +135,12 @@ public struct FighterStepper: FighterStepping, Sendable {
             walkForward: def.walkForward,
             walkBack: def.walkBack
         )
+        if let move = def.moves.first(where: { $0.id == fighter.activeMoveID }),
+           FighterStateMachine.isAttackState(fighter.kind),
+           !move.velocities.isEmpty
+        {
+            FighterStateMachine.applyMoveVelocity(fighter: &fighter, move: move)
+        }
         FighterStateMachine.integratePosition(fighter: &fighter, gravity: def.gravity)
     }
 
@@ -140,22 +175,23 @@ public struct FighterStepper: FighterStepping, Sendable {
         fighter: inout FighterState,
         runtime: inout FighterRuntimeSlot,
         def: FighterDef
-    ) {
-        guard !runtime.queuedMoveID.isEmpty else { return }
+    ) -> Bool {
+        guard !runtime.queuedMoveID.isEmpty else { return false }
         let moveID = runtime.queuedMoveID
         guard let move = def.moves.first(where: { $0.id == moveID }) else {
             runtime.queuedMoveID = ""
-            return
+            return false
         }
         if move.inputKind == .superMove, fighter.meter < MatchRules.superMeterCost {
             runtime.queuedMoveID = ""
-            return
+            return false
         }
         runtime.queuedMoveID = ""
         FighterStateMachine.beginAttack(fighter: &fighter, moveID: moveID, runtime: &runtime, move: move)
         if move.inputKind == .superMove {
             fighter.meter &-= MatchRules.superMeterCost
         }
+        return true
     }
 
     private func tryCancel(
@@ -183,13 +219,16 @@ public struct FighterStepper: FighterStepping, Sendable {
         slot: PlayerSlot,
         snapshot: inout GameSnapshot
     ) {
+        guard let spawn = move.projectile else { return }
         guard ProjectileLogic.moveSpawnsProjectile(move: move, stateTick: fighter.stateTick) else { return }
+        let onScreen = ProjectileLogic.activeCount(ownedBy: slot, in: snapshot)
+        guard onScreen < spawn.maxOnScreen else { return }
         let id = ProjectileLogic.spawnID(for: snapshot)
         let projectile = ProjectileLogic.makeProjectile(
             id: id,
             owner: slot,
             facingRight: fighter.facingRight,
-            move: move,
+            spawn: spawn,
             position: fighter.position
         )
         snapshot.projectiles.append(projectile)
@@ -211,11 +250,16 @@ public struct FighterStepper: FighterStepping, Sendable {
             var defender = snapshot.fighters[defenderIdx]
             let defenderQueued = defenderIdx < runtime.count ? runtime[defenderIdx].queuedMoveID : ""
 
+            if move.whiffsVsAirborne, defender.kind == .airborne {
+                continue
+            }
+
             if defender.activeMoveID == move.id || defenderQueued == move.id {
                 if defenderIdx < runtime.count {
                     runtime[defenderIdx].queuedMoveID = ""
                 }
                 ThrowLogic.techThrow(defender: &defender, attacker: &attacker)
+                attacker.attackContact = true
                 snapshot.fighters[aIdx] = attacker
                 snapshot.fighters[defenderIdx] = defender
                 continue
@@ -225,6 +269,7 @@ public struct FighterStepper: FighterStepping, Sendable {
                 continue
             }
             ThrowLogic.beginThrowStates(attacker: &attacker, defender: &defender, move: move)
+            attacker.attackContact = true
             snapshot.fighters[aIdx] = attacker
             snapshot.fighters[defenderIdx] = defender
             snapshot.events.append(

@@ -16,8 +16,8 @@ One bundle per fighter (e.g. `Content/Fighters/greybox/greybox.contentbundle/`) 
 | `archetype` | string | yes | Design tag |
 | `gamePlan` | string | yes | Non-empty design note |
 | `health` | integer | yes | Round start health |
-| `walkForward` | integer | yes | Pixels per tick (logical) |
-| `walkBack` | integer | yes | Pixels per tick |
+| `walkForward` | integer | yes | Q8 px/tick (`256` = 1 px). Must be ≥ 0 |
+| `walkBack` | integer | yes | Q8 px/tick (`256` = 1 px). Must be ≥ 0 |
 | `jump` | object | yes | `velocityY`, `gravity` integers |
 | `pushbox` | box | yes | Standing pushbox |
 | `hurtboxes` | array | yes | `{ "state": "<FighterStateKind>", "boxes": [box] }` per state |
@@ -42,7 +42,53 @@ Integer rectangle from bottom-centre anchor, facing right: `x`, `y`, `w`, `h`.
 | `pushbackHit`, `pushbackBlock` | integer | |
 | `meterGain`, `hitstop` | integer | |
 | `guard` | string | `high`, `mid`, `low`, `throw` |
-| `unblockable` | boolean | Only allowed when `guard` is `throw` |
+| `unblockable` | boolean | Only allowed when `guard` is `throw`. Omitted means false |
+| `armorHits` | integer | Omitted means `0`. Hits absorbed before this attack takes hitstun. Must be ≥ 0 |
+| `projectile` | object | Omitted means the move spawns nothing. See projectile |
+| `velocities` | array | Omitted or empty means no per-frame velocity. See velocity |
+| `invulnerableFrames` | array of integer | `stateTick` values that are invulnerable. Omitted means none |
+| `whiffsVsAirborne` | boolean | Command grab: no connect against `airborne`. Only when `guard` is `throw`. Omitted means false |
+| `counter` | object | Counter window. Omitted means no counter. See counter |
+| `hits` | array | Multi-hit specs. Omitted means every active frame uses the move's damage. See hit |
+
+### projectile
+
+Required keys when the object is present:
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `speed` | integer | Q8 magnitude along facing. Positive moves forward. `256` = 1 px/tick |
+| `lifetime` | integer | Ticks until the projectile expires. Must be > 0 |
+| `hitbox` | box | Must have `w` > 0 and `h` > 0 |
+| `damage` | integer | Must be ≥ 0 |
+| `maxOnScreen` | integer | Owner's active projectiles must be below this to spawn another. Must be > 0 |
+| `spawnCount` | integer | How many projectiles this activation spawns. Must be ≥ 1 and ≤ `active` |
+| `hitsAirborne` | boolean | `false` skips defenders in `airborne` (ground-only shockwaves) |
+
+Spawn rule: on each active frame index `i` with `0 ≤ i < spawnCount` (`stateTick == startup + i`), spawn one projectile if the owner has fewer than `maxOnScreen` active projectiles. A volley sets `spawnCount` above 1 and `active` at least that large.
+
+### velocity
+
+Each element is `{ "x": <Q8>, "y": <Q8> }`. When present, the array length must equal `startup + active + recovery`. Element `i` is applied on the settled `stateTick == i`. The tick an attack starts settles at `stateTick` 0 (velocity, invulnerability, and hitboxes for that index apply before the tick advances). Each later tick advances once, then applies that index. `x` is facing-right and is mirrored when the fighter faces left. `y` uses jump sign (negative is up). One large `x` on a single tick is a teleport; several forward samples are a dash.
+
+### counter
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `startTick` | integer | Inclusive `stateTick`. Must be ≥ 0 |
+| `endTick` | integer | Exclusive. Must be greater than `startTick` and ≤ total frames |
+| `followUpMoveID` | string | Must name another move on this fighter |
+
+A non-throw strike that connects inside the window is negated. `followUpMoveID` is applied immediately as a hit using that move's damage, hitstun, blockstun, and hitstop. Throws ignore the window.
+
+### hit
+
+| Field | Type | Notes |
+|-------|------|-------|
+| `activeFrame` | integer | Index within the active window. Must be unique and in `0 ..< active` |
+| `damage`, `hitstun`, `blockstun`, `hitstop` | integer | Must be ≥ 0 |
+
+When `hits` is non-empty, active frames that are not listed do not connect.
 
 ## sheet.json
 
@@ -64,3 +110,11 @@ Anchor is bottom-centre of the cell.
 - `unblockable: true` when guard is not throw
 - Empty `gamePlan`
 - Missing sheet or sprite references
+- Negative `walkForward` or `walkBack`
+- Negative `armorHits`
+- Projectile `lifetime` ≤ 0, `spawnCount` outside `1...active`, `maxOnScreen` ≤ 0, negative `damage`, or hitbox `w`/`h` ≤ 0
+- `velocities` length other than `startup + active + recovery`
+- `invulnerableFrames` out of range or duplicated
+- `whiffsVsAirborne: true` when guard is not throw
+- Counter window outside the move, or `followUpMoveID` missing
+- Multi-hit `activeFrame` out of range or duplicated, or negative hit damage/stun/hitstop

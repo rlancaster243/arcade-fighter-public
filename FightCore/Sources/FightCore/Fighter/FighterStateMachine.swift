@@ -46,11 +46,11 @@ enum FighterStateMachine {
     ) {
         switch fighter.kind {
         case .walkForward:
-            let px = fighter.facingRight ? walkForward : -walkForward
-            fighter.velocity = Vec2(x: Fixed(pixels: px), y: .zero)
+            let raw = fighter.facingRight ? walkForward : -walkForward
+            fighter.velocity = Vec2(x: Fixed(raw: raw), y: .zero)
         case .walkBack:
-            let px = fighter.facingRight ? -walkBack : walkBack
-            fighter.velocity = Vec2(x: Fixed(pixels: px), y: .zero)
+            let raw = fighter.facingRight ? -walkBack : walkBack
+            fighter.velocity = Vec2(x: Fixed(raw: raw), y: .zero)
         default:
             if isGrounded(fighter.kind) {
                 fighter.velocity = Vec2(x: .zero, y: fighter.velocity.y)
@@ -86,11 +86,25 @@ enum FighterStateMachine {
     static func beginAttack(fighter: inout FighterState, moveID: String, runtime: inout FighterRuntimeSlot, move: MoveDef) {
         fighter.kind = .attackStartup
         fighter.activeMoveID = moveID
+        fighter.executingMoveID = moveID
         fighter.stateTick = 0
         fighter.timer = 0
         runtime.executingMoveID = moveID
         runtime.armorHitsRemaining = MovePhaseMath.armorHits(for: move)
         runtime.queuedMoveID = ""
+        fighter.attackContact = false
+        fighter.armorRemaining = move.armorHits
+    }
+
+    static func applyMoveVelocity(fighter: inout FighterState, move: MoveDef) {
+        let index = Int(fighter.stateTick)
+        guard index >= 0, index < move.velocities.count else { return }
+        let sample = move.velocities[index]
+        let sign: Int32 = fighter.facingRight ? 1 : -1
+        fighter.velocity = Vec2(
+            x: Fixed(raw: sample.x &* sign),
+            y: Fixed(raw: sample.y)
+        )
     }
 
     static func advanceAttack(
@@ -102,9 +116,13 @@ enum FighterStateMachine {
         guard let phase = MovePhaseMath.attackPhase(for: fighter.stateTick, move: move) else {
             fighter.kind = .idle
             fighter.activeMoveID = ""
+            fighter.executingMoveID = ""
             fighter.stateTick = 0
             fighter.timer = 0
+            fighter.attackContact = false
+            fighter.armorRemaining = 0
             runtime.executingMoveID = ""
+            runtime.armorHitsRemaining = 0
             return
         }
         fighter.kind = MovePhaseMath.attackKind(for: phase)

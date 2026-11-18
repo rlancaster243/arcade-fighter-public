@@ -18,7 +18,7 @@ final class L10FighterTests: XCTestCase {
     func testRookLoadsAndIsSlower() throws {
         let def = try FighterLoader.loadFighter(from: L10ContentPaths.rookDirectory())
         XCTAssertEqual(def.id, "rook")
-        XCTAssertEqual(def.walkForward, 2)
+        XCTAssertEqual(def.walkForward, 2 * Fixed.scale)
         XCTAssertGreaterThan(def.health, 1000)
         let names = Set(def.moves.map(\.id))
         XCTAssertTrue(names.contains("rook_throw_lp_lk"))

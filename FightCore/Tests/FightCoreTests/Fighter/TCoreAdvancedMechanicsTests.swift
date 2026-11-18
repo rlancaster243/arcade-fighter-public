@@ -27,7 +27,8 @@ final class TCoreAdvancedMechanicsTests: XCTestCase {
         snap.fighters[0].activeMoveID = "sp_dp"
         stepper.stepFighters(snapshot: &snap)
         XCTAssertEqual(stepper.armorHitsRemaining(slot: .p1), 1)
-        XCTAssertTrue(stepper.consumeArmorHit(slot: .p1))
+        XCTAssertTrue(stepper.consumeArmorHit(slot: .p1, snapshot: &snap))
+        XCTAssertEqual(snap.fighters[0].armorRemaining, 0)
         XCTAssertEqual(stepper.armorHitsRemaining(slot: .p1), 0)
     }
 
@@ -78,7 +79,7 @@ final class TCoreAdvancedMechanicsTests: XCTestCase {
         snap.fighters[0].activeMoveID = "throw_lp_lk"
         stepper.stepFighters(snapshot: &snap)
 
-        let preActiveTicks = max(0, throwMove.startup - 2)
+        let preActiveTicks = max(0, throwMove.startup - 1)
         for _ in 0..<preActiveTicks {
             stepper.stepFighters(snapshot: &snap)
         }

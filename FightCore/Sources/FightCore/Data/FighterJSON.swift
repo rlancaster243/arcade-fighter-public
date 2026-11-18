@@ -31,6 +31,35 @@ struct FighterJSON: Decodable {
         let `throw`: [BoxJSON]?
     }
 
+    struct VelocityJSON: Decodable {
+        let x: Int32
+        let y: Int32
+    }
+
+    struct ProjectileJSON: Decodable {
+        let speed: Int32
+        let lifetime: Int32
+        let hitbox: BoxJSON
+        let damage: Int32
+        let maxOnScreen: Int32
+        let spawnCount: Int32
+        let hitsAirborne: Bool
+    }
+
+    struct CounterJSON: Decodable {
+        let startTick: Int32
+        let endTick: Int32
+        let followUpMoveID: String
+    }
+
+    struct HitJSON: Decodable {
+        let activeFrame: Int32
+        let damage: Int32
+        let hitstun: Int32
+        let blockstun: Int32
+        let hitstop: Int32
+    }
+
     struct MoveJSON: Decodable {
         let id: String
         let name: String
@@ -50,6 +79,13 @@ struct FighterJSON: Decodable {
         let hitstop: Int32
         let guardKind: String
         let unblockable: Bool?
+        let armorHits: Int32?
+        let projectile: ProjectileJSON?
+        let velocities: [VelocityJSON]?
+        let invulnerableFrames: [Int32]?
+        let whiffsVsAirborne: Bool?
+        let counter: CounterJSON?
+        let hits: [HitJSON]?
 
         private enum CodingKeys: String, CodingKey {
             case id
@@ -70,6 +106,13 @@ struct FighterJSON: Decodable {
             case hitstop
             case guardKind = "guard"
             case unblockable
+            case armorHits
+            case projectile
+            case velocities
+            case invulnerableFrames
+            case whiffsVsAirborne
+            case counter
+            case hits
         }
     }
 

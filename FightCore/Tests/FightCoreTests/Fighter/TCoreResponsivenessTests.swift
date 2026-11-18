@@ -12,7 +12,7 @@ final class TCoreResponsivenessTests: XCTestCase {
         snap.fighters[0].activeMoveID = "norm_lp"
         stepper.stepFighters(snapshot: &snap)
 
-        let ticksToLateRecovery = lp.startup + lp.active + lp.recovery - 3
+        let ticksToLateRecovery = lp.startup + lp.active + lp.recovery - 2
         for _ in 0..<ticksToLateRecovery {
             stepper.stepFighters(snapshot: &snap)
         }

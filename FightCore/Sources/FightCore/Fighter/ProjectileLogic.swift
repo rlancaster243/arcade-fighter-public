@@ -10,36 +10,40 @@ enum ProjectileLogic {
     }
 
     static func moveSpawnsProjectile(move: MoveDef, stateTick: Int32) -> Bool {
+        guard let projectile = move.projectile else { return false }
         guard MovePhaseMath.attackPhase(for: stateTick, move: move) == .active else {
             return false
         }
-        if move.id == "sp_qcf" {
-            return stateTick == move.startup
+        let activeIndex = stateTick - move.startup
+        return activeIndex >= 0 && activeIndex < projectile.spawnCount
+    }
+
+    static func activeCount(ownedBy owner: PlayerSlot, in snapshot: GameSnapshot) -> Int32 {
+        var count: Int32 = 0
+        for projectile in snapshot.projectiles where projectile.active && projectile.owner == owner {
+            count &+= 1
         }
-        if move.id.hasSuffix("_shot") {
-            return stateTick == move.startup
-        }
-        return false
+        return count
     }
 
     static func makeProjectile(
         id: UInt32,
         owner: PlayerSlot,
         facingRight: Bool,
-        move: MoveDef,
+        spawn: ProjectileSpawn,
         position: Vec2
     ) -> Projectile {
-        let speed = Fixed(pixels: facingRight ? 6 : -6)
-        let hit = move.frames.hit.first ?? Hitbox(x: 10, y: -40, w: 24, h: 24)
+        let speed = Fixed(raw: facingRight ? spawn.speed : -spawn.speed)
         return Projectile(
             id: id,
             owner: owner,
             position: position,
             velocity: Vec2(x: speed, y: .zero),
-            hitbox: hit,
-            damage: move.damage,
-            lifetimeTicks: 90,
-            active: true
+            hitbox: spawn.hitbox,
+            damage: spawn.damage,
+            lifetimeTicks: spawn.lifetime,
+            active: true,
+            hitsAirborne: spawn.hitsAirborne
         )
     }
 

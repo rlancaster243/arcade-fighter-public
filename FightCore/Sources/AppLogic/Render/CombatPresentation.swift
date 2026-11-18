@@ -35,7 +35,7 @@ public enum CombatPresentation: Sendable {
                 out.append(SparkRequest(kind: .hit, worldX: x, worldY: y))
             case .block:
                 out.append(SparkRequest(kind: .block, worldX: x, worldY: y))
-            case .none, .chip, .throwHit, .knockdown, .roundStart, .roundEnd, .matchWin, .timeOver:
+            case .none, .chip, .throwHit, .knockdown, .roundStart, .roundEnd, .matchWin, .timeOver, .whiff:
                 break
             }
         }

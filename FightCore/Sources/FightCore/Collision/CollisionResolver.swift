@@ -33,21 +33,41 @@ public struct CollisionResolver: CollisionResolving {
             let activeIndex = activeFrameIndex(for: attacker, move: move)
             guard activeIndex >= 0 else { continue }
 
-            let isThrow = move.guardLevel == .throwAttack
+            var resolvedMove = move
+            if !move.hits.isEmpty {
+                guard let spec = move.hits.first(where: { $0.activeFrame == Int32(activeIndex) }) else {
+                    continue
+                }
+                resolvedMove.damage = spec.damage
+                resolvedMove.hitstun = spec.hitstun
+                resolvedMove.blockstun = spec.blockstun
+                resolvedMove.hitstop = spec.hitstop
+            }
+
+            let isThrow = resolvedMove.guardLevel == .throwAttack
             let atkBoxes: [Hitbox]
             if isThrow {
-                guard activeIndex < move.frames.throwBoxes.count else { continue }
-                atkBoxes = [move.frames.throwBoxes[activeIndex]]
+                guard activeIndex < resolvedMove.frames.throwBoxes.count else { continue }
+                atkBoxes = [resolvedMove.frames.throwBoxes[activeIndex]]
             } else {
-                guard activeIndex < move.frames.hit.count else { continue }
-                atkBoxes = [move.frames.hit[activeIndex]]
+                guard activeIndex < resolvedMove.frames.hit.count else { continue }
+                atkBoxes = [resolvedMove.frames.hit[activeIndex]]
             }
 
             for defenderSlot in PlayerSlot.allCases where defenderSlot != attackerSlot {
                 let dIdx = Int(defenderSlot.rawValue)
                 guard dIdx < snapshot.fighters.count else { continue }
+                if resolvedMove.whiffsVsAirborne, snapshot.fighters[dIdx].kind == .airborne {
+                    continue
+                }
+                if dataInvulnerable(
+                    snapshot.fighters[dIdx],
+                    def: context.def(for: defenderSlot, snapshot: snapshot)
+                ) {
+                    continue
+                }
                 if isThrow && !canBeThrown(snapshot.fighters[dIdx]) { continue }
-                if move.guardLevel == .high,
+                if resolvedMove.guardLevel == .high,
                     snapshot.fighters[dIdx].kind == .crouch || snapshot.fighters[dIdx].kind == .blockstunCrouch
                 {
                     continue
@@ -78,12 +98,44 @@ public struct CollisionResolver: CollisionResolving {
                 }
                 guard connected else { continue }
 
-                let block = !isThrow && blocks(move: move, defender: snapshot.fighters[dIdx])
+                if let followUp = counterFollowUp(
+                    defender: snapshot.fighters[dIdx],
+                    defenderSlot: defenderSlot,
+                    incoming: resolvedMove,
+                    snapshot: snapshot
+                ) {
+                    snapshot.fighters[aIdx].attackContact = true
+                    applyHit(
+                        HitResolution(
+                            attacker: defenderSlot,
+                            defender: attackerSlot,
+                            move: followUp,
+                            blocked: false
+                        ),
+                        snapshot: &snapshot
+                    )
+                    var counterUser = snapshot.fighters[dIdx]
+                    counterUser.activeMoveID = followUp.id
+                    counterUser.executingMoveID = followUp.id
+                    counterUser.kind = .attackRecovery
+                    counterUser.stateTick = followUp.startup + followUp.active
+                    counterUser.timer = 0
+                    counterUser.attackContact = true
+                    snapshot.fighters[dIdx] = counterUser
+                    continue
+                }
+
+                let block = !isThrow && blocks(move: resolvedMove, defender: snapshot.fighters[dIdx])
+                if !isThrow, !block, snapshot.fighters[dIdx].armorRemaining > 0 {
+                    snapshot.fighters[dIdx].armorRemaining &-= 1
+                    snapshot.fighters[aIdx].attackContact = true
+                    continue
+                }
                 pending.append(
                     HitResolution(
                         attacker: attackerSlot,
                         defender: defenderSlot,
-                        move: move,
+                        move: resolvedMove,
                         blocked: block
                     )
                 )
@@ -256,9 +308,30 @@ private extension CollisionResolver {
         }
     }
 
+    func dataInvulnerable(_ fighter: FighterState, def: FighterDef?) -> Bool {
+        guard let def, FighterStateMachine.isAttackState(fighter.kind) else { return false }
+        guard let move = def.moves.first(where: { $0.id == fighter.activeMoveID }) else { return false }
+        return move.invulnerableFrames.contains(fighter.stateTick)
+    }
+
+    func counterFollowUp(
+        defender: FighterState,
+        defenderSlot: PlayerSlot,
+        incoming: MoveDef,
+        snapshot: GameSnapshot
+    ) -> MoveDef? {
+        guard incoming.guardLevel != .throwAttack else { return nil }
+        guard let def = context.def(for: defenderSlot, snapshot: snapshot) else { return nil }
+        guard let stance = def.moves.first(where: { $0.id == defender.activeMoveID }) else { return nil }
+        guard let counter = stance.counter else { return nil }
+        guard defender.stateTick >= counter.startTick, defender.stateTick < counter.endTick else { return nil }
+        return def.moves.first(where: { $0.id == counter.followUpMoveID })
+    }
+
     func applyHit(_ hit: HitResolution, snapshot: inout GameSnapshot) {
         let aIdx = Int(hit.attacker.rawValue)
         let dIdx = Int(hit.defender.rawValue)
+        snapshot.fighters[aIdx].attackContact = true
         var defender = snapshot.fighters[dIdx]
 
         let tick = snapshot.tick
@@ -359,6 +432,15 @@ private extension CollisionResolver {
                     box: projectile.hitbox,
                     facingRight: true
                 )
+                if !projectile.hitsAirborne, snapshot.fighters[dIdx].kind == .airborne {
+                    continue
+                }
+                if dataInvulnerable(
+                    snapshot.fighters[dIdx],
+                    def: context.def(for: defenderSlot, snapshot: snapshot)
+                ) {
+                    continue
+                }
                 for hurt in hurtBoxes {
                     let dx = snapshot.fighters[dIdx].position.x.raw
                     let dy = snapshot.fighters[dIdx].position.y.raw
@@ -367,6 +449,18 @@ private extension CollisionResolver {
                     if atkWorld.overlaps(defWorld) {
                         projectile.active = false
                         snapshot.projectiles[pIndex] = projectile
+                        let blocked = blocks(
+                            move: MoveDef(id: "projectile_\(projectile.id)", name: "Projectile", guardLevel: .mid),
+                            defender: snapshot.fighters[dIdx]
+                        )
+                        if !blocked, snapshot.fighters[dIdx].armorRemaining > 0 {
+                            snapshot.fighters[dIdx].armorRemaining &-= 1
+                            let ownerIdx = Int(owner.rawValue)
+                            if snapshot.fighters.indices.contains(ownerIdx) {
+                                snapshot.fighters[ownerIdx].attackContact = true
+                            }
+                            break
+                        }
                         let pseudoMove = MoveDef(
                             id: "projectile_\(projectile.id)",
                             name: "Projectile",

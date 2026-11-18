@@ -69,9 +69,6 @@ public enum MovePhaseMath {
     }
 
     public static func armorHits(for move: MoveDef) -> Int32 {
-        if move.id == "sp_dp" {
-            return 1
-        }
-        return 0
+        move.armorHits
     }
 }

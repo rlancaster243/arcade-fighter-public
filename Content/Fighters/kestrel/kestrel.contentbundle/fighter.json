@@ -5,8 +5,8 @@
   "archetype": "rushdown",
   "gamePlan": "Fast glacier-hunter footwork: pepper with lows, confirm into ice specials and Blizzard Waltz.",
   "health": 950,
-  "walkForward": 4,
-  "walkBack": 3,
+  "walkForward": 1024,
+  "walkBack": 768,
   "jump": {
     "velocityY": -3584,
     "gravity": 256
@@ -495,7 +495,21 @@
       "meterGain": 120,
       "hitstop": 6,
       "guard": "mid",
-      "unblockable": false
+      "unblockable": false,
+      "projectile": {
+        "speed": 1536,
+        "lifetime": 90,
+        "hitbox": {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        },
+        "damage": 95,
+        "maxOnScreen": 99,
+        "spawnCount": 1,
+        "hitsAirborne": true
+      }
     },
     {
       "id": "sp_qcb",
@@ -683,7 +697,8 @@
       "meterGain": 120,
       "hitstop": 6,
       "guard": "mid",
-      "unblockable": false
+      "unblockable": false,
+      "armorHits": 1
     },
     {
       "id": "super_blizzard",

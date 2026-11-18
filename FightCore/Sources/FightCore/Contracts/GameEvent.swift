@@ -9,6 +9,7 @@ public enum GameEventKind: UInt8, Sendable, Equatable, Hashable, Codable {
     case roundEnd
     case matchWin
     case timeOver
+    case whiff
 }
 
 public struct GameEvent: Sendable, Equatable, Hashable, Codable {

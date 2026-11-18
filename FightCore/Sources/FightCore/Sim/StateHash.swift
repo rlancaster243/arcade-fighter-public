@@ -18,6 +18,10 @@ public enum StateHash {
         appendVarint(snapshot.tick, to: &bytes)
         appendVarint(Int64(bitPattern: snapshot.rng.state), to: &bytes)
         appendStringList(snapshot.fighterIDs, to: &bytes)
+        appendVarint(Int32(snapshot.fighterStartHealth.count), to: &bytes)
+        for health in snapshot.fighterStartHealth {
+            appendVarint(health, to: &bytes)
+        }
         for f in snapshot.fighters {
             appendVarint(Int32(f.kind.rawValue), to: &bytes)
             appendVarint(f.timer, to: &bytes)
@@ -29,7 +33,10 @@ public enum StateHash {
             appendVarint(f.health, to: &bytes)
             appendVarint(f.meter, to: &bytes)
             appendString(f.activeMoveID, to: &bytes)
+            appendString(f.executingMoveID, to: &bytes)
             appendVarint(f.stateTick, to: &bytes)
+            bytes.append(f.attackContact ? 1 : 0)
+            appendVarint(f.armorRemaining, to: &bytes)
         }
         appendVarint(Int32(snapshot.projectiles.count), to: &bytes)
         for p in snapshot.projectiles {
@@ -42,6 +49,7 @@ public enum StateHash {
             appendVarint(p.damage, to: &bytes)
             appendVarint(p.lifetimeTicks, to: &bytes)
             bytes.append(p.active ? 1 : 0)
+            bytes.append(p.hitsAirborne ? 1 : 0)
         }
         let r = snapshot.rules
         appendVarint(r.roundNumber, to: &bytes)

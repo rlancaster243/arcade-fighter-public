@@ -5,8 +5,8 @@
   "archetype": "sister",
   "gamePlan": "Bell-tower acolyte: fast lights, prayer beam (236 LP), sanctified step (214 LK), rising censer DP, super Choir of Bells.",
   "health": 950,
-  "walkForward": 3,
-  "walkBack": 2,
+  "walkForward": 768,
+  "walkBack": 512,
   "jump": {
     "velocityY": -3584,
     "gravity": 256

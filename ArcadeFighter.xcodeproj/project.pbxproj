@@ -166,7 +166,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "set -euo pipefail\nSRC=\"$SRCROOT/Content\"\nDST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Content\"\nrm -rf \"$DST\"\nditto \"$SRC\" \"$DST\"\n";
+			shellScript = "set -euo pipefail\nSRC=\"$SRCROOT/Content\"\nDST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Content\"\nrm -rf \"$DST\"\nditto \"$SRC\" \"$DST\"\nBIN=\"${TARGET_BUILD_DIR}/${EXECUTABLE_PATH}\"\nif [ -f \"$BIN\" ]; then\n  strip -S -x \"$BIN\"\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 

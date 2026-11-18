@@ -73,6 +73,16 @@ final class T_CORE_ROUNDTests: XCTestCase {
         XCTAssertTrue(snap.events.contains { $0.kind == .timeOver })
     }
 
+    func testTimeOverFiresExactlyOnce() {
+        var director = MatchDirector()
+        var snap = MatchTestSupport.snapshot(p1Health: 600, p2Health: 400, roundTick: MatchRules.roundTickLimit - 1)
+        director.applyRules(snapshot: &snap)
+        XCTAssertEqual(snap.events.filter { $0.kind == .timeOver }.count, 1)
+        director.applyRules(snapshot: &snap)
+        XCTAssertEqual(snap.events.filter { $0.kind == .timeOver }.count, 1)
+        XCTAssertEqual(snap.rules.roundTick, 1)
+    }
+
     func testTimeOverDrawAwardsNoRound() {
         var director = MatchDirector()
         var snap = MatchTestSupport.snapshot(p1Health: 500, p2Health: 500, roundTick: MatchRules.roundTickLimit - 1)

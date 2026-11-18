@@ -12,6 +12,9 @@ enum FighterValidator {
         guard !fighter.gamePlan.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             throw FighterLoadError.emptyGamePlan
         }
+        if fighter.walkForward < 0 || fighter.walkBack < 0 {
+            throw FighterLoadError.negativeWalkSpeed
+        }
 
         let sheetNames = Set(sheet.map(\.name))
 
@@ -33,6 +36,20 @@ enum FighterValidator {
             if unblockable && guardLevel != .throwAttack {
                 throw FighterLoadError.unblockableNonThrow(move.id)
             }
+
+            let armorHits = move.armorHits ?? 0
+            if armorHits < 0 {
+                throw FighterLoadError.negativeArmorHits(move.id)
+            }
+            let whiffsVsAirborne = move.whiffsVsAirborne ?? false
+            if whiffsVsAirborne && guardLevel != .throwAttack {
+                throw FighterLoadError.whiffsVsAirborneNonThrow(move.id)
+            }
+            let projectile = try validateProjectile(move)
+            let velocities = try validateVelocities(move)
+            let invulnerableFrames = try validateInvulnerableFrames(move)
+            let hits = try validateHits(move)
+            let counter = try validateCounterWindow(move)
 
             try validateBoxCount(move.frames.hit ?? [], expected: move.active, moveID: move.id, phase: "hit")
             try validateBoxCount(move.frames.hurt ?? [], expected: move.active, moveID: move.id, phase: "hurt")
@@ -71,9 +88,23 @@ enum FighterValidator {
                     meterGain: move.meterGain,
                     hitstop: move.hitstop,
                     guardLevel: guardLevel,
-                    unblockable: unblockable
+                    unblockable: unblockable,
+                    armorHits: armorHits,
+                    projectile: projectile,
+                    velocities: velocities,
+                    invulnerableFrames: invulnerableFrames,
+                    whiffsVsAirborne: whiffsVsAirborne,
+                    counter: counter,
+                    hits: hits
                 )
             )
+        }
+
+        let moveIDs = Set(moves.map(\.id))
+        for move in moves {
+            if let counter = move.counter, !moveIDs.contains(counter.followUpMoveID) {
+                throw FighterLoadError.missingCounterFollowUp(move.id)
+            }
         }
 
         let spritePath = fighterDirectory.appendingPathComponent(fighter.spriteSheet)
@@ -116,6 +147,94 @@ enum FighterValidator {
         if expected == 0 && boxes.isEmpty { return }
         if Int32(boxes.count) != expected {
             throw FighterLoadError.frameBoxCountMismatch("\(moveID).\(phase)")
+        }
+    }
+
+    private static func validateProjectile(_ move: FighterJSON.MoveJSON) throws -> ProjectileSpawn? {
+        guard let projectile = move.projectile else { return nil }
+        if projectile.lifetime <= 0 {
+            throw FighterLoadError.invalidProjectileLifetime(move.id)
+        }
+        if projectile.spawnCount <= 0 || projectile.spawnCount > move.active {
+            throw FighterLoadError.invalidProjectileSpawnCount(move.id)
+        }
+        if projectile.maxOnScreen <= 0 {
+            throw FighterLoadError.invalidProjectileMaxOnScreen(move.id)
+        }
+        if projectile.damage < 0 {
+            throw FighterLoadError.invalidProjectileDamage(move.id)
+        }
+        if projectile.hitbox.w <= 0 || projectile.hitbox.h <= 0 {
+            throw FighterLoadError.invalidProjectileHitbox(move.id)
+        }
+        return ProjectileSpawn(
+            speed: projectile.speed,
+            lifetime: projectile.lifetime,
+            hitbox: mapBox(projectile.hitbox),
+            damage: projectile.damage,
+            maxOnScreen: projectile.maxOnScreen,
+            spawnCount: projectile.spawnCount,
+            hitsAirborne: projectile.hitsAirborne
+        )
+    }
+
+    private static func validateVelocities(_ move: FighterJSON.MoveJSON) throws -> [FrameVelocity] {
+        let samples = move.velocities ?? []
+        if samples.isEmpty { return [] }
+        let total = move.startup + move.active + move.recovery
+        if Int32(samples.count) != total {
+            throw FighterLoadError.velocityFrameCount(move.id)
+        }
+        return samples.map { FrameVelocity(x: $0.x, y: $0.y) }
+    }
+
+    private static func validateInvulnerableFrames(_ move: FighterJSON.MoveJSON) throws -> [Int32] {
+        let frames = move.invulnerableFrames ?? []
+        let total = move.startup + move.active + move.recovery
+        var seen: Set<Int32> = []
+        for frame in frames {
+            if frame < 0 || frame >= total || !seen.insert(frame).inserted {
+                throw FighterLoadError.invalidInvulnerableFrame(move.id)
+            }
+        }
+        return frames
+    }
+
+    private static func validateCounterWindow(_ move: FighterJSON.MoveJSON) throws -> CounterWindow? {
+        guard let counter = move.counter else { return nil }
+        let total = move.startup + move.active + move.recovery
+        if counter.startTick < 0 || counter.endTick <= counter.startTick || counter.endTick > total {
+            throw FighterLoadError.invalidCounterWindow(move.id)
+        }
+        if counter.followUpMoveID.isEmpty {
+            throw FighterLoadError.missingCounterFollowUp(move.id)
+        }
+        return CounterWindow(
+            startTick: counter.startTick,
+            endTick: counter.endTick,
+            followUpMoveID: counter.followUpMoveID
+        )
+    }
+
+    private static func validateHits(_ move: FighterJSON.MoveJSON) throws -> [MoveHit] {
+        let hits = move.hits ?? []
+        var seen: Set<Int32> = []
+        for hit in hits {
+            if hit.activeFrame < 0 || hit.activeFrame >= move.active || !seen.insert(hit.activeFrame).inserted {
+                throw FighterLoadError.invalidMultiHit(move.id)
+            }
+            if hit.damage < 0 || hit.hitstun < 0 || hit.blockstun < 0 || hit.hitstop < 0 {
+                throw FighterLoadError.invalidMultiHit(move.id)
+            }
+        }
+        return hits.map {
+            MoveHit(
+                activeFrame: $0.activeFrame,
+                damage: $0.damage,
+                hitstun: $0.hitstun,
+                blockstun: $0.blockstun,
+                hitstop: $0.hitstop
+            )
         }
     }
 
