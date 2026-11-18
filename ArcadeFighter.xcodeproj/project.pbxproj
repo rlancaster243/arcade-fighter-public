@@ -78,7 +78,6 @@
 				A1458BA6249141C7AFC2EB43 /* Frameworks */,
 				C9D8E7F6A5B4432109876543 /* Copy Content */,
 				594503BFC0A0432DA76002FE /* Resources */,
-				F8E2A1B3C4D546E7A9B0C1D2 /* Copy Content */,
 			);
 			buildRules = (
 			);
@@ -131,26 +130,6 @@
 		};
 /* End PBXProject section */
 
-/* Begin PBXShellScriptBuildPhase section */
-		F8E2A1B3C4D546E7A9B0C1D2 /* Copy Content */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-				"$(SRCROOT)/Content",
-			);
-			name = "Copy Content";
-			outputPaths = (
-				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Content",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "ditto \"${SRCROOT}/Content\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Content\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
-
 /* Begin PBXResourcesBuildPhase section */
 		594503BFC0A0432DA76002FE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
@@ -174,6 +153,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		C9D8E7F6A5B4432109876543 /* Copy Content */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
