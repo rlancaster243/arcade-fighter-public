@@ -11,8 +11,5 @@ struct FightSimMain {
         for _ in 0..<ticks {
             sim.step(inputs: frames, snapshot: &snap)
         }
-        if snap.rules.matchOver {
-            fputs("match ended early\n", stderr)
-        }
     }
 }
