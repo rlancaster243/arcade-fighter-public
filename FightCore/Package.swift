@@ -38,7 +38,8 @@ let package = Package(
         .testTarget(
             name: "AppLogicTests",
             dependencies: ["AppLogic", "FightCore"],
-            path: "Tests/AppLogicTests"
+            path: "Tests/AppLogicTests",
+            exclude: ["InputMap/T-ADAPT-SCRIPT.sh"]
         ),
         .testTarget(
             name: "ContentTests",
