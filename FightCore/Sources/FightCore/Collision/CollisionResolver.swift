@@ -8,6 +8,7 @@ public struct CollisionResolver: CollisionResolving {
     public mutating func resolveMovement(snapshot: inout GameSnapshot) {
         guard snapshot.rules.hitstopRemaining <= 0 else { return }
         guard snapshot.fighters.count >= 2 else { return }
+        guard !context.fighterDefs.isEmpty else { return }
 
         clampToStage(snapshot: &snapshot)
         separatePushboxes(snapshot: &snapshot)
@@ -143,8 +144,8 @@ private extension CollisionResolver {
 
     func separatePushboxes(snapshot: inout GameSnapshot) {
         guard snapshot.fighters.count >= 2 else { return }
-        var a = worldPushbox(fighter: snapshot.fighters[0], slot: .p1, snapshot: snapshot)
-        var b = worldPushbox(fighter: snapshot.fighters[1], slot: .p2, snapshot: snapshot)
+        let a = worldPushbox(fighter: snapshot.fighters[0], slot: .p1, snapshot: snapshot)
+        let b = worldPushbox(fighter: snapshot.fighters[1], slot: .p2, snapshot: snapshot)
         let overlap = BoxMath.horizontalOverlap(a, b)
         guard overlap > 0 else { return }
 
@@ -217,10 +218,12 @@ private extension CollisionResolver {
         }
     }
 
-    func activeFrameIndex(for fighter: FighterState, move: MoveDef) -> Int32 {
-        let t = fighter.stateTick
-        guard t >= move.startup, t < move.startup + move.active else { return -1 }
-        return t - move.startup
+    func activeFrameIndex(for fighter: FighterState, move: MoveDef) -> Int {
+        let t = Int(fighter.stateTick)
+        let startup = Int(move.startup)
+        let active = Int(move.active)
+        guard t >= startup, t < startup + active else { return -1 }
+        return t - startup
     }
 
     enum GuardStance {
