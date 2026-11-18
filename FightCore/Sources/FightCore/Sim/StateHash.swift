@@ -31,7 +31,7 @@ public enum StateHash {
             appendString(f.activeMoveID, to: &bytes)
             appendVarint(f.stateTick, to: &bytes)
         }
-        appendVarint(snapshot.projectiles.count, to: &bytes)
+        appendVarint(Int32(snapshot.projectiles.count), to: &bytes)
         for p in snapshot.projectiles {
             appendVarint(Int32(p.id), to: &bytes)
             appendVarint(Int32(p.owner.rawValue), to: &bytes)
@@ -57,7 +57,7 @@ public enum StateHash {
         } else {
             bytes.append(0)
         }
-        appendVarint(snapshot.events.count, to: &bytes)
+        appendVarint(Int32(snapshot.events.count), to: &bytes)
         for e in snapshot.events {
             appendVarint(Int32(e.kind.rawValue), to: &bytes)
             appendVarint(e.tick, to: &bytes)

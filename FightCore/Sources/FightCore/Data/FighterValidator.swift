@@ -28,7 +28,7 @@ enum FighterValidator {
                 throw FighterLoadError.negativeFrameCount(move.id)
             }
 
-            let guardLevel = try parseGuard(move.guard)
+            let guardLevel = try parseGuard(move.guardKind)
             let unblockable = move.unblockable ?? false
             if unblockable && guardLevel != .throwAttack {
                 throw FighterLoadError.unblockableNonThrow(move.id)

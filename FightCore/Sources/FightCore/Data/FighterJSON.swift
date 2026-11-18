@@ -48,8 +48,29 @@ struct FighterJSON: Decodable {
         let pushbackBlock: Int32
         let meterGain: Int32
         let hitstop: Int32
-        let guard: String
+        let guardKind: String
         let unblockable: Bool?
+
+        private enum CodingKeys: String, CodingKey {
+            case id
+            case name
+            case sprite
+            case input
+            case startup
+            case active
+            case recovery
+            case frames
+            case damage
+            case chip
+            case hitstun
+            case blockstun
+            case pushbackHit
+            case pushbackBlock
+            case meterGain
+            case hitstop
+            case guardKind = "guard"
+            case unblockable
+        }
     }
 
     let schemaVersion: Int
