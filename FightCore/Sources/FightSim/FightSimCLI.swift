@@ -1,6 +1,14 @@
 import Foundation
 import FightCore
 
+enum FightSimStdio {
+    static func writeError(_ text: String) {
+        let line = text.hasSuffix("\n") ? text : text + "\n"
+        guard let data = line.data(using: .utf8) else { return }
+        FileHandle.standardError.write(data)
+    }
+}
+
 enum FightSimCLI {
     struct Options: Sendable {
         var batchSeed: UInt64 = 0xA11CE

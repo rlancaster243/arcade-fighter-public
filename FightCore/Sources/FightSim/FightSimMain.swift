@@ -7,7 +7,7 @@ struct FightSimMain {
         let args = Array(CommandLine.arguments.dropFirst())
         guard let options = FightSimCLI.parseArguments(args) else {
             if !args.isEmpty {
-                fputs("Invalid arguments.\n", stderr)
+                FightSimStdio.writeError("Invalid arguments.")
             }
             FightSimCLI.printUsage()
             exit(args.isEmpty ? 0 : 2)
@@ -15,7 +15,7 @@ struct FightSimMain {
         do {
             try FightSimCLI.run(options: options)
         } catch {
-            fputs("FightSim error: \(error)\n", stderr)
+            FightSimStdio.writeError("FightSim error: \(error)")
             exit(1)
         }
     }
