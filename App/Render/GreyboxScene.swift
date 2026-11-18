@@ -16,6 +16,7 @@ final class GreyboxScene: SKScene {
     private let ground = SKSpriteNode(color: .darkGray, size: .zero)
     private var atlases: [String: SpriteAtlas] = [:]
     private var loadedAtlasIDs: Set<String> = []
+    private var atlasFailureNotified: Set<String> = []
     private var fighterNodes: [SKNode] = []
     private var activeSparks: [SparkBurst] = []
     private var lastProcessedTick: Int32 = -1
@@ -73,6 +74,7 @@ final class GreyboxScene: SKScene {
     /// Re-run atlas loads after `onAtlasLoadNotice` is attached (e.g. post-`didMove`).
     func revalidateAtlases() {
         loadedAtlasIDs = []
+        atlasFailureNotified = []
         syncAtlasesIfNeeded()
     }
 
@@ -88,6 +90,8 @@ final class GreyboxScene: SKScene {
                 let atlas = try SpriteAtlas(sheetPNG: png, sheetJSON: json)
                 atlases[id] = atlas
             } catch {
+                guard !atlasFailureNotified.contains(id) else { continue }
+                atlasFailureNotified.insert(id)
                 onAtlasLoadNotice?("Sprite sheet for “\(id)” failed: \(error.localizedDescription)")
             }
         }

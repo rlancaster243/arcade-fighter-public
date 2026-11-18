@@ -13,6 +13,7 @@ struct MatchPreviewView: View {
     var onAtlasLoadNotice: ((String) -> Void)?
 
     @State private var scene = GreyboxScene(size: CGSize(width: 384, height: 216))
+    @State private var atlasRosterIDs: [String] = []
 
     var body: some View {
         let forcedScale = wantsFullscreen ? nil : windowIntegerScale
@@ -33,16 +34,19 @@ struct MatchPreviewView: View {
             .position(x: posX, y: posY)
             .onAppear {
                 scene.scaleMode = .resizeFill
-                wireAtlasNoticesAndSnapshot(snapshot)
+                scene.onAtlasLoadNotice = onAtlasLoadNotice
+                atlasRosterIDs = snapshot.fighterIDs
+                scene.snapshot = snapshot
+                scene.revalidateAtlases()
             }
             .onChange(of: snapshot) { _, newValue in
-                wireAtlasNoticesAndSnapshot(newValue)
+                scene.onAtlasLoadNotice = onAtlasLoadNotice
+                scene.snapshot = newValue
+                let rosterChanged = newValue.fighterIDs != atlasRosterIDs
+                if rosterChanged {
+                    atlasRosterIDs = newValue.fighterIDs
+                    scene.revalidateAtlases()
+                }
             }
-    }
-
-    private func wireAtlasNoticesAndSnapshot(_ snapshot: GameSnapshot) {
-        scene.onAtlasLoadNotice = onAtlasLoadNotice
-        scene.snapshot = snapshot
-        scene.revalidateAtlases()
     }
 }
