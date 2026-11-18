@@ -9,24 +9,83 @@ import AppKit
 /// Root shell: menus, match preview, window/fullscreen preferences. Wire from `AppMain` when Phase 0 entry is unfrozen.
 public struct ShellRootView: View {
     @StateObject private var model = MenuShellModel()
+    @StateObject private var input = InputCoordinator()
+    @StateObject private var matchSession = LocalMatchSession()
+    @StateObject private var sfx = SFXEventPlayer()
 
     public init() {}
+
+    private var isFighting: Bool {
+        if case .inMatch = model.state.screen { return true }
+        return false
+    }
+
+    private var showsMatchView: Bool {
+        switch model.state.screen {
+        case .inMatch, .matchPaused:
+            return model.matchSnapshot != nil
+        default:
+            return false
+        }
+    }
 
     public var body: some View {
         ZStack {
             menuLayer
-            if let snapshot = model.matchSnapshot {
+            if let snapshot = model.matchSnapshot, showsMatchView {
                 matchLayer(snapshot: snapshot)
+            }
+            MatchTickView(isActive: isFighting) { date in
+                guard isFighting else { return }
+                matchSession.advance(to: date, input: input, model: model, sfx: sfx)
             }
         }
         .frame(minWidth: 384, minHeight: 216)
         .windowPreferences(model.state.preferences)
+        .overlay(alignment: .topTrailing) {
+            if !isFighting && !showsMatchView {
+                InputSettingsOverlay(input: input)
+                    .padding(12)
+            }
+        }
+        .onAppear {
+            sfx.preloadIfNeeded()
+            syncMatchSessionIfNeeded()
+        }
+        .onChange(of: model.state.screen) { _, _ in
+            syncMatchSessionIfNeeded()
+        }
+        .sheet(isPresented: $input.showKeyTest) {
+            KeyTestScreen(input: input)
+        }
         #if os(macOS)
         .background(MenuKeyboardBridge { model.send($0) })
         .onChange(of: model.state.requestedQuit) { _, quit in
             if quit { NSApplication.shared.terminate(nil) }
         }
         #endif
+    }
+
+    private func syncMatchSessionIfNeeded() {
+        switch model.state.screen {
+        case .inMatch(let setup):
+            if matchSession.isPaused {
+                matchSession.resume()
+            } else if !matchSession.isRunning {
+                let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
+                matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+            }
+        case .matchPaused(let setup):
+            if !matchSession.isRunning {
+                let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
+                matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+            }
+            matchSession.pause()
+        default:
+            if matchSession.isRunning {
+                matchSession.stop()
+            }
+        }
     }
 
     @ViewBuilder
@@ -48,6 +107,8 @@ public struct ShellRootView: View {
             MatchResultView(summary: summary, cursor: model.state.cursor)
         case .rematchPrompt(let setup):
             RematchPromptView(setup: setup)
+        case .matchPaused(let setup):
+            MatchPausedView(setup: setup)
         case .inMatch:
             Color.clear
         }

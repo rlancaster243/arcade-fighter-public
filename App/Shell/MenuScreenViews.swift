@@ -165,6 +165,20 @@ struct MatchResultView: View {
     }
 }
 
+struct MatchPausedView: View {
+    let setup: MatchSetup
+
+    var body: some View {
+        MenuBackground(title: "PAUSED") {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("\(setup.p1.id) vs \(setup.p2.id)")
+                Text("P or Esc — resume fight")
+            }
+            .foregroundStyle(.white)
+        }
+    }
+}
+
 struct RematchPromptView: View {
     let setup: MatchSetup
 

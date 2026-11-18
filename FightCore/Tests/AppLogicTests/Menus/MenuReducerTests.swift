@@ -122,4 +122,24 @@ final class MenuReducerTests: XCTestCase {
         MenuReducer.reduce(state: &state, command: .confirm)
         XCTAssertTrue(state.requestedQuit)
     }
+
+    func testInMatchPauseAndResume() {
+        let setup = MatchSetup(
+            mode: .versus,
+            p1: FighterPick(rosterIndex: 0, id: "greybox"),
+            p2: FighterPick(rosterIndex: 0, id: "greybox")
+        )
+        var state = MenuShellState(screen: .inMatch(setup))
+        MenuReducer.reduce(state: &state, command: .pause)
+        guard case .matchPaused(let pausedSetup) = state.screen else {
+            return XCTFail("expected paused")
+        }
+        XCTAssertEqual(pausedSetup, setup)
+
+        MenuReducer.reduce(state: &state, command: .cancel)
+        guard case .inMatch(let resumed) = state.screen else {
+            return XCTFail("expected resume")
+        }
+        XCTAssertEqual(resumed, setup)
+    }
 }
