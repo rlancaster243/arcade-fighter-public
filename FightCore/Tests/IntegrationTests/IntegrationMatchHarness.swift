@@ -3,8 +3,9 @@ import FightCore
 
 /// Wires shipped fighter defs and stage play bounds into the full simulation stack for integration runs.
 enum IntegrationMatchHarness {
-    static let shippedFighterIDs = ["greybox", "kestrel", "bruno", "ilse", "rook"]
     static let shippedStageIDs = ["stage1", "stage2"]
+    /// Scripted input steps (pre-tick hashes); total hashes = this + 1 final snapshot.
+    static let scriptedInputTickCount = 5
     private static let arenaCenterPx: Int32 = 192
 
     static func loadFighter(_ id: String, fromFile file: String = #filePath) throws -> FighterDef {
@@ -151,8 +152,13 @@ enum IntegrationMatchHarness {
         return (snap, ticks, hashes)
     }
 
-    static func runScriptedKestrelBruno(seed: UInt64, stageId: String, fromFile file: String = #filePath) throws -> [UInt64] {
-        let (p1, p2) = try loadFighters(["kestrel", "bruno"], fromFile: file)
+    static func runScriptedMatch(
+        seed: UInt64,
+        p1: FighterDef,
+        p2: FighterDef,
+        stageId: String,
+        fromFile file: String = #filePath
+    ) throws -> [UInt64] {
         var sim = try simulation(p1: p1, p2: p2, stageId: stageId, fromFile: file)
         var snap = snapshot(seed: seed, p1: p1, p2: p2)
         let frames: [[InputFrame]] = [
@@ -162,6 +168,7 @@ enum IntegrationMatchHarness {
             [.p1HP, .p2LK],
             [.neutral, .neutral],
         ]
+        precondition(frames.count == scriptedInputTickCount)
         var hashes: [UInt64] = []
         hashes.reserveCapacity(frames.count + 1)
         for tick in frames {
@@ -210,7 +217,13 @@ enum IntegrationMatchHarness {
             guard let seed = scenario.scriptSeed else {
                 throw HarnessError.incompleteScriptScenario(scenario.id)
             }
-            return try runScriptedKestrelBruno(seed: seed, stageId: scenario.stageId, fromFile: file)
+            return try runScriptedMatch(
+                seed: seed,
+                p1: p1,
+                p2: p2,
+                stageId: scenario.stageId,
+                fromFile: file
+            )
         }
     }
 

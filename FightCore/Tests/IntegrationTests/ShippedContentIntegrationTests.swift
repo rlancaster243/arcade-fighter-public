@@ -40,6 +40,18 @@ final class ShippedContentIntegrationTests: XCTestCase {
         for scenario in catalog.scenarios {
             let hashes = try IntegrationMatchHarness.tickHashes(for: scenario)
             XCTAssertEqual(
+                hashes.count,
+                scenario.tickHashes.count,
+                "\(scenario.id): golden tickHashes must match actual simulated length"
+            )
+            if scenario.kind == .cpu, let tickLimit = scenario.tickLimit {
+                XCTAssertLessThanOrEqual(
+                    hashes.count,
+                    Int(tickLimit) + 1,
+                    "\(scenario.id): cpu hashes must not assume full tickLimit when match ends early"
+                )
+            }
+            XCTAssertEqual(
                 hashes,
                 scenario.tickHashes,
                 hashDiag(actual: hashes, expected: scenario.tickHashes, scenario: scenario.id)
