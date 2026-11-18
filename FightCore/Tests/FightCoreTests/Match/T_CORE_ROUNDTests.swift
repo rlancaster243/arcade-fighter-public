@@ -30,19 +30,19 @@ final class T_CORE_ROUNDTests: XCTestCase {
         var snap = MatchTestSupport.snapshot(p1Health: 0, p2Rounds: 1)
         director.applyRules(snapshot: &snap)
         XCTAssertTrue(snap.rules.matchOver)
-        XCTAssertEqual(snap.rules.winner, .p2)
+        XCTAssertEqual(snap.rules.winner, PlayerSlot.p2)
         XCTAssertTrue(snap.events.contains { $0.kind == .matchWin })
     }
 
     func testFiveRoundCapEndsMatchWhenStillTied() {
         var director = MatchDirector()
         var snap = MatchTestSupport.snapshot(
-            roundNumber: 5,
-            p1Rounds: 1,
-            p2Rounds: 1,
             p1Health: 500,
             p2Health: 500,
-            roundTick: MatchRules.roundTickLimit - 1
+            roundTick: MatchRules.roundTickLimit - 1,
+            roundNumber: 5,
+            p1Rounds: 1,
+            p2Rounds: 1
         )
         director.applyRules(snapshot: &snap)
         XCTAssertTrue(snap.rules.matchOver)
@@ -52,16 +52,16 @@ final class T_CORE_ROUNDTests: XCTestCase {
     func testFiveRoundCapPicksLeader() {
         var director = MatchDirector()
         var snap = MatchTestSupport.snapshot(
-            roundNumber: 5,
-            p1Rounds: 1,
-            p2Rounds: 1,
             p1Health: 700,
             p2Health: 400,
-            roundTick: MatchRules.roundTickLimit - 1
+            roundTick: MatchRules.roundTickLimit - 1,
+            roundNumber: 5,
+            p1Rounds: 1,
+            p2Rounds: 1
         )
         director.applyRules(snapshot: &snap)
         XCTAssertTrue(snap.rules.matchOver)
-        XCTAssertEqual(snap.rules.winner, .p1)
+        XCTAssertEqual(snap.rules.winner, PlayerSlot.p1)
     }
 
     func testTimeOverHigherHealthWinsRound() {
