@@ -2,7 +2,7 @@ import XCTest
 @testable import AppLogic
 
 final class AppLogicTests: XCTestCase {
-    func testPlaceholderPhase() {
-        XCTAssertEqual(AppLogicMarker.phase, 0)
+    func testInputMapModuleLoads() {
+        XCTAssertEqual(KeyMapDefaults.playerOne.up, MacVirtualKeyCode.ansiW.rawValue)
     }
 }

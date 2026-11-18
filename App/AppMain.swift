@@ -14,12 +14,20 @@ struct ArcadeFighterApp: App {
 }
 
 struct GameRootView: View {
+    @StateObject private var input = InputCoordinator()
     @State private var snapshot = SimulationBootstrap.greyboxMatch(seed: 0xAFC)
 
     var body: some View {
-        SpriteView(scene: makeScene())
-            .ignoresSafeArea()
-            .onAppear { tickRender() }
+        ZStack(alignment: .topLeading) {
+            SpriteView(scene: makeScene())
+                .ignoresSafeArea()
+            InputSettingsOverlay(input: input)
+                .padding(12)
+        }
+        .onAppear { tickRender() }
+        .sheet(isPresented: $input.showKeyTest) {
+            KeyTestScreen(input: input)
+        }
     }
 
     private func makeScene() -> SKScene {
@@ -31,6 +39,7 @@ struct GameRootView: View {
 
     private func tickRender() {
         var sim = Simulation()
-        sim.step(inputs: [InputFrame(), InputFrame()], snapshot: &snapshot)
+        let frames = input.framesForTick()
+        sim.step(inputs: frames, snapshot: &snapshot)
     }
 }
