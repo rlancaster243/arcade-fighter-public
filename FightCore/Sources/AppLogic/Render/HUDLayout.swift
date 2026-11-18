@@ -88,7 +88,7 @@ public enum HUDLayout: Sendable {
 
     public static func timerFrame() -> IntRect {
         let w: Int32 = 48
-        IntRect(
+        return IntRect(
             x: (SceneConstants.width - w) / 2,
             y: topRowY,
             w: w,
