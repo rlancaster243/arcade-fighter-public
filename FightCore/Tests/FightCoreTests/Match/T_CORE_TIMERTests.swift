@@ -40,8 +40,10 @@ final class T_CORE_TIMERTests: XCTestCase {
         var director = MatchDirector()
         var snap = MatchTestSupport.snapshot(p1Health: 700, p2Health: 500, roundTick: MatchRules.roundTickLimit - 1)
         director.applyRules(snapshot: &snap)
-        XCTAssertEqual(snap.rules.roundTick, MatchRules.roundTickLimit)
         XCTAssertEqual(snap.rules.p1RoundsWon, 1)
+        XCTAssertEqual(snap.rules.roundNumber, 2)
+        XCTAssertEqual(snap.rules.roundTick, 0)
+        XCTAssertTrue(snap.events.contains { $0.kind == .timeOver })
     }
 
     func testGlobalTickAlwaysAdvances() {
