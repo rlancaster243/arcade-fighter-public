@@ -5,7 +5,6 @@ let package = Package(
     name: "FightCore",
     platforms: [
         .macOS(.v14),
-        .linux,
     ],
     products: [
         .library(name: "FightCore", targets: ["FightCore"]),
