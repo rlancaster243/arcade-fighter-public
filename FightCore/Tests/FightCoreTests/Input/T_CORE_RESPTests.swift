@@ -35,12 +35,11 @@ final class T_CORE_RESPTests: XCTestCase {
             let buttons: UInt8 = (i == pads.count - 1) ? (1 << Button.lightPunch.rawValue) : 0
             sim.step(inputs: [InputFrame(direction: dir, buttons: buttons), InputFrame()], snapshot: &snap)
         }
-        guard var parsed = sim.motion as? MotionParser else {
+        guard let parsed = sim.motion as? MotionParser else {
             XCTFail("expected MotionParser")
             return
         }
         XCTAssertEqual(parsed.resolvedInput(for: .p1).motion, .qcf236)
-        _ = parsed
     }
 
     func testFacingMirrorRoundTrip() {

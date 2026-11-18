@@ -47,20 +47,19 @@ public enum MotionMatcher: Sendable {
     }
 
     /// Tick span from oldest matched direction through the newest frame (ago 0).
+    /// Walks newest→oldest so the terminal direction must be recent (motion ends on button frame).
     public static func matchingSpan(pattern: [UInt8], buffer: InputRingBuffer) -> Int? {
         guard !pattern.isEmpty, buffer.frameCount > 0 else { return nil }
-        var step = 0
-        var firstAgo: Int?
+        var step = pattern.count - 1
         let limit = buffer.frameCount
-        for ago in stride(from: limit - 1, through: 0, by: -1) {
+        for ago in 0 ..< limit {
             let pad = buffer.entry(ago: ago)?.numpad ?? 0
             if pad == 0 { continue }
             if pad == pattern[step] {
-                firstAgo = ago
-                step += 1
-                if step == pattern.count, let start = firstAgo {
-                    return start + 1
+                if step == 0 {
+                    return ago + 1
                 }
+                step -= 1
             }
         }
         return nil

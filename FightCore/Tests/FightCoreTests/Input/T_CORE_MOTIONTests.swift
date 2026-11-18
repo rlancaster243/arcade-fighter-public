@@ -35,14 +35,18 @@ final class T_CORE_MOTIONTests: XCTestCase {
     }
 
     func test236AcceptedWithinSpecialLeniency() {
-        for gap in 0 ... 8 {
+        for span in 3 ... 11 {
             var ring = InputRingBuffer()
             ring.push(numpad: 2, buttons: 0)
-            for _ in 0 ..< gap { ring.push(numpad: 0, buttons: 0) }
+            for _ in 0 ..< (span - 2) {
+                ring.push(numpad: 0, buttons: 0)
+            }
             ring.push(numpad: 3, buttons: 0)
-            for _ in 0 ..< gap { ring.push(numpad: 0, buttons: 0) }
             ring.push(numpad: 6, buttons: 1)
-            XCTAssertTrue(MotionMatcher.spanMatches(pattern: pattern236, maxSpan: 11, buffer: ring))
+            XCTAssertTrue(
+                MotionMatcher.spanMatches(pattern: pattern236, maxSpan: 11, buffer: ring),
+                "span \(span) should be accepted"
+            )
         }
         var p = MotionParser()
         for pad in pattern236 {
