@@ -23,7 +23,9 @@ struct MatchPreviewView: View {
         let posX = CGFloat(viewport.offsetX) + contentW / 2
         let posY = CGFloat(viewport.offsetY) + contentH / 2
         SpriteView(scene: makeScene())
+            #if os(iOS)
             .interpolation(.none)
+            #endif
             .frame(width: contentW, height: contentH)
             .position(x: posX, y: posY)
     }

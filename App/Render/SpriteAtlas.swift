@@ -1,5 +1,8 @@
 import AppLogic
 import SpriteKit
+#if os(macOS)
+import AppKit
+#endif
 
 /// Platform adapter: builds SK textures from a sprite sheet and JSON frames.
 final class SpriteAtlas {
@@ -26,7 +29,10 @@ final class SpriteAtlas {
         )
         let sub = SKTexture(rect: rect, in: texture)
         sub.filteringMode = .nearest
-        let node = SKSpriteNode(texture: sub, size: CGSize(width: frame.w, height: frame.h))
+        let node = SKSpriteNode(
+            texture: sub,
+            size: CGSize(width: CGFloat(frame.w), height: CGFloat(frame.h))
+        )
         node.anchorPoint = CGPoint(
             x: CGFloat(frame.anchorX) / CGFloat(frame.w),
             y: CGFloat(frame.anchorY) / CGFloat(frame.h)

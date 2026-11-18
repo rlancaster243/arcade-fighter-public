@@ -136,7 +136,8 @@ final class GreyboxScene: SKScene {
         let cam = FightCameraMath.compute(snapshot: snapshot)
         var offset = CGPoint(x: CGFloat(-cam.scrollX), y: 0)
         if shakeTicks > 0 {
-            offset = offset + ShakeState.offset(tick: renderTick, amplitude: shakeAmp)
+            let shake = ShakeState.offset(tick: renderTick, amplitude: shakeAmp)
+            offset = CGPoint(x: offset.x + shake.x, y: offset.y + shake.y)
             shakeTicks -= 1
         }
         arenaNode.position = offset
