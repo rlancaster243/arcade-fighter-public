@@ -37,8 +37,10 @@ public enum ViewScaleMath: Sendable {
       if scale < 1 { scale = 1 }
       let contentWidth = SceneConstants.width * scale
       let contentHeight = SceneConstants.height * scale
-      let contentOffsetX = (w - contentWidth) / 2
-      let contentOffsetY = (h - contentHeight) / 2
+      let rawOffsetX = (w - contentWidth) / 2
+      let rawOffsetY = (h - contentHeight) / 2
+      let contentOffsetX = rawOffsetX < 0 ? 0 : rawOffsetX
+      let contentOffsetY = rawOffsetY < 0 ? 0 : rawOffsetY
       return ViewScale(
           scale: scale,
           viewportWidth: w,

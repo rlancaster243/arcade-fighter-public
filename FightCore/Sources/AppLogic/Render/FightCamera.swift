@@ -8,7 +8,8 @@ public struct FightCamera: Sendable, Equatable, Hashable {
         self.scrollX = scrollX
     }
 
-    public static let arenaWidth: Int32 = SceneConstants.width
+    /// Scrollable stage is wider than the 384px viewport (fighters use center-origin coords).
+    public static let arenaWidth: Int32 = SceneConstants.width * 2
     public static let visibleWidth: Int32 = SceneConstants.width
 }
 
