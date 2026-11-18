@@ -16,7 +16,7 @@ public struct CPUAIController: AIController {
         let phase = snapshot.tick % period
         var epochRNG = SeededRNG(
             seed: profile.decisionSeed
-                ^ UInt64(epoch &* 0x85EB_CA6B)
+                ^ (UInt64(bitPattern: Int64(epoch)) &* 0x85EB_CA6B)
                 ^ (UInt64(slot.rawValue) << 48)
         )
         let intent = pickIntent(slot: slot, snapshot: snapshot, rng: &epochRNG)
