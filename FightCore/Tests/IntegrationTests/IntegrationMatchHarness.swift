@@ -6,6 +6,8 @@ import FightCore
 enum IntegrationMatchHarness {
     static let shippedFighterIDs = ["greybox", "kestrel", "bruno", "ilse", "rook"]
     static let shippedStageIDs = StageBoundsLoader.shippedStageIDs
+    /// Scripted input steps (pre-tick hashes); total hashes = this + 1 final snapshot.
+    static let scriptedInputTickCount = 5
 
     static func loadFighter(_ id: String, fromFile file: String = #filePath) throws -> FighterDef {
         try FighterLoader.loadFighter(from: ContentPaths.fighterDirectory(id, fromFile: file))
@@ -109,8 +111,13 @@ enum IntegrationMatchHarness {
         return (snap, ticks, hashes)
     }
 
-    static func runScriptedKestrelBruno(seed: UInt64, stageId: String, fromFile file: String = #filePath) throws -> [UInt64] {
-        let (p1, p2) = try loadFighters(["kestrel", "bruno"], fromFile: file)
+    static func runScriptedMatch(
+        seed: UInt64,
+        p1: FighterDef,
+        p2: FighterDef,
+        stageId: String,
+        fromFile file: String = #filePath
+    ) throws -> [UInt64] {
         let frames: [[InputFrame]] = [
             [.p1Forward, .neutral],
             [.p1LP, .neutral],
@@ -118,6 +125,7 @@ enum IntegrationMatchHarness {
             [.p1HP, .p2LK],
             [.neutral, .neutral],
         ]
+        precondition(frames.count == scriptedInputTickCount)
         return try PlayableScriptRunner.tickHashes(
             p1: p1,
             p2: p2,
@@ -166,7 +174,13 @@ enum IntegrationMatchHarness {
             guard let seed = scenario.scriptSeed else {
                 throw HarnessError.incompleteScriptScenario(scenario.id)
             }
-            return try runScriptedKestrelBruno(seed: seed, stageId: scenario.stageId, fromFile: file)
+            return try runScriptedMatch(
+                seed: seed,
+                p1: p1,
+                p2: p2,
+                stageId: scenario.stageId,
+                fromFile: file
+            )
         }
     }
 
