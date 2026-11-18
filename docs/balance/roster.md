@@ -11,7 +11,7 @@ Snapshot of playable fighter content on `main` as of schema version 1. All numbe
 | Term | Meaning |
 |------|---------|
 | **Total** | `startup + active + recovery` for the move (attack animation length in ticks). |
-| **Chip** | Block damage on specials/supers only (content field; engine applies 25% rules on block). |
+| **Chip** | Block damage on specials/supers only: values in this report are authored `chip` from JSON. On block, the engine uses that field when non-zero; if `chip` is 0 on a special or super, it falls back to **`damage / 4`** (normals never chip). |
 | **Meter gain** | `meterGain` on the move (attacker on hit; half on block per match rules). |
 | **Super cost** | Not stored in `fighter.json`. Every super (`236236` + button) spends **1000** meter at startup (`MatchRules.superMeterCost`). |
 
@@ -165,8 +165,8 @@ Bruno’s throw is **+30** over the 120 baseline and **+30** over Kestrel—cons
 | Value | Moves |
 |-------|--------|
 | **130** | Kestrel LP only |
-| **120** | Every fighter’s **stand HP**; all specials, supers, throws; **Rook** stand LK/HK (Ilse stand HP is here—Ilse HK is not) |
-| **110** | Bruno LP; **Ilse** stand LP, LK, and HK |
+| **120** | Every fighter’s **stand HP**; **Rook** and **Greybox** stand LP; all specials, supers, throws; **Rook** stand LK/HK (Ilse stand HP is here—Ilse HK is not) |
+| **110** | **Bruno** stand LP; **Ilse** stand LP, LK, and HK |
 
 Kestrel’s LP is the fastest meter-positive light in the roster. Ilse and Bruno gain less meter on lights and (for Ilse) on kicks than Rook on the same kick shells—Ilse stand HP still earns 120.
 
@@ -174,7 +174,7 @@ Kestrel’s LP is the fastest meter-positive light in the roster. Ilse and Bruno
 
 - **Spend:** 1000 per super activation (not authored in JSON).
 - **Earn:** Primarily `meterGain` on confirmed hits; defender gains meter from damage taken (sim rule, not in fighter JSON).
-- **Rough lights-to-super (attacker, all hits):** at 110–130 per LP, ~8–10 clean lights before a super—faster for Kestrel LP, slower for 110-gain lights.
+- **Rough lights-to-super (attacker, all hits):** at 110–130 per LP (Rook/Greybox LP at 120; Kestrel 130; Bruno/Ilse 110), ~8–10 clean lights before a super—faster for Kestrel LP, slower for 110-gain lights.
 
 No fighter defines a cheaper or more expensive super in content; balance differences are damage/chip and how quickly each kit builds meter via normals.
 
