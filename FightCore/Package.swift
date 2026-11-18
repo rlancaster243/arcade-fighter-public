@@ -46,5 +46,10 @@ let package = Package(
             dependencies: ["FightCore"],
             path: "Tests/ContentTests"
         ),
+        .testTarget(
+            name: "IntegrationTests",
+            dependencies: ["FightCore"],
+            path: "../Tests/IntegrationTests"
+        ),
     ]
 )

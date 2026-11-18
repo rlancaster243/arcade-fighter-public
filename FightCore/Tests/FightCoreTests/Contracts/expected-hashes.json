@@ -1,0 +1,25 @@
+{
+  "schemaVersion": 1,
+  "scenarios": [
+    {
+      "id": "replay-greybox-idle",
+      "finalHash": 0
+    },
+    {
+      "id": "replay-greybox-short",
+      "finalHash": 0
+    },
+    {
+      "id": "script-kestrel-bruno-5t",
+      "finalHash": 0
+    },
+    {
+      "id": "cpu-greybox-normal-hard-180t",
+      "finalHash": 0
+    },
+    {
+      "id": "cpu-ilse-rook-easy-normal-240t",
+      "finalHash": 0
+    }
+  ]
+}
