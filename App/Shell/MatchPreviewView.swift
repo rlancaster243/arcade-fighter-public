@@ -34,8 +34,11 @@ struct MatchPreviewView: View {
                 scene.scaleMode = .resizeFill
                 scene.snapshot = snapshot
             }
-            .onChange(of: snapshot) { _, newValue in
-                scene.snapshot = newValue
+            .onChange(of: snapshot.fighterIDs) { _, _ in
+                scene.snapshot = snapshot
+            }
+            .onChange(of: snapshot.tick) { _, _ in
+                scene.snapshot = snapshot
             }
     }
 }

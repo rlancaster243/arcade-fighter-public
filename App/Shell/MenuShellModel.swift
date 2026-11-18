@@ -27,14 +27,34 @@ final class MenuShellModel: ObservableObject {
     private func applyTransition(from old: MenuShellState, to new: MenuShellState) {
         switch new.screen {
         case .inMatch(let setup):
-            if case .inMatch = old.screen {
-                break
+            if shouldBootstrapMatch(from: old.screen, to: new.screen) {
+                matchSnapshot = MatchBootstrap.snapshot(for: setup)
             }
-            matchSnapshot = MatchBootstrap.snapshot(for: setup)
+        case .matchPaused:
+            break
         case .title, .mainMenu, .arcadeLadder, .versusSetup, .characterSelect, .result, .settings, .rematchPrompt:
-            if case .inMatch = old.screen {
+            if isLiveMatchScreen(old.screen) {
                 matchSnapshot = nil
             }
+        }
+    }
+
+    private func shouldBootstrapMatch(from old: MenuScreen, to new: MenuScreen) -> Bool {
+        guard case .inMatch = new else { return false }
+        switch old {
+        case .inMatch, .matchPaused:
+            return false
+        default:
+            return true
+        }
+    }
+
+    private func isLiveMatchScreen(_ screen: MenuScreen) -> Bool {
+        switch screen {
+        case .inMatch, .matchPaused:
+            return true
+        default:
+            return false
         }
     }
 

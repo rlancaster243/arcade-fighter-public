@@ -15,24 +15,39 @@ public struct ShellRootView: View {
 
     public init() {}
 
-  private var inMatch: Bool {
-    if case .inMatch = model.state.screen { return true }
-    return false
-  }
+    private var isFighting: Bool {
+        if case .inMatch = model.state.screen { return true }
+        return false
+    }
+
+    private var showsMatchView: Bool {
+        switch model.state.screen {
+        case .inMatch, .matchPaused:
+            return model.matchSnapshot != nil
+        default:
+            return false
+        }
+    }
 
     public var body: some View {
         ZStack {
             menuLayer
-            if let snapshot = model.matchSnapshot {
+            if let snapshot = model.matchSnapshot, showsMatchView {
                 matchLayer(snapshot: snapshot)
             }
-            MatchTickView(isActive: inMatch) { date in
-                guard inMatch else { return }
+            MatchTickView(isActive: isFighting) { date in
+                guard isFighting else { return }
                 matchSession.advance(to: date, input: input, model: model, sfx: sfx)
             }
         }
         .frame(minWidth: 384, minHeight: 216)
         .windowPreferences(model.state.preferences)
+        .overlay(alignment: .topTrailing) {
+            if !isFighting && !showsMatchView {
+                InputSettingsOverlay(input: input)
+                    .padding(12)
+            }
+        }
         .onAppear {
             sfx.preloadIfNeeded()
             syncMatchSessionIfNeeded()
@@ -52,12 +67,24 @@ public struct ShellRootView: View {
     }
 
     private func syncMatchSessionIfNeeded() {
-        if case .inMatch(let setup) = model.state.screen {
-            guard !matchSession.isRunning else { return }
-            let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
-            matchSession.start(setup: setup, initialSnapshot: snap, model: model)
-        } else {
-            matchSession.stop()
+        switch model.state.screen {
+        case .inMatch(let setup):
+            if matchSession.isPaused {
+                matchSession.resume()
+            } else if !matchSession.isRunning {
+                let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
+                matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+            }
+        case .matchPaused(let setup):
+            if !matchSession.isRunning {
+                let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
+                matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+            }
+            matchSession.pause()
+        default:
+            if matchSession.isRunning {
+                matchSession.stop()
+            }
         }
     }
 
@@ -80,6 +107,8 @@ public struct ShellRootView: View {
             MatchResultView(summary: summary, cursor: model.state.cursor)
         case .rematchPrompt(let setup):
             RematchPromptView(setup: setup)
+        case .matchPaused(let setup):
+            MatchPausedView(setup: setup)
         case .inMatch:
             Color.clear
         }

@@ -15,6 +15,8 @@ public enum MenuReducer {
             handleCharacterSelect(&state, context: context, command: command)
         case .inMatch:
             handleInMatch(&state, command: command)
+        case .matchPaused(let setup):
+            handleMatchPaused(&state, setup: setup, command: command)
         case .result(let summary):
             handleResult(&state, summary: summary, command: command)
         case .settings(let pane):
@@ -178,8 +180,21 @@ public enum MenuReducer {
     private static func handleInMatch(_ state: inout MenuShellState, command: MenuCommand) {
         guard command == .pause || command == .cancel else { return }
         guard case .inMatch(let setup) = state.screen else { return }
-        state.screen = .rematchPrompt(setup)
+        state.screen = .matchPaused(setup)
         state.cursor = 0
+    }
+
+    private static func handleMatchPaused(
+        _ state: inout MenuShellState,
+        setup: MatchSetup,
+        command: MenuCommand
+    ) {
+        switch command {
+        case .pause, .cancel:
+            state.screen = .inMatch(setup)
+        default:
+            break
+        }
     }
 
     // MARK: - Result

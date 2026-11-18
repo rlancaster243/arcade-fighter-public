@@ -1,3 +1,4 @@
+import AppLogic
 import FightCore
 import Foundation
 import Combine
@@ -20,24 +21,24 @@ final class SFXEventPlayer: ObservableObject {
         try? player.preload(manifest: manifest)
     }
 
-    func handle(events: [GameEvent]) {
+    func handle(events: [GameEvent], snapshot: GameSnapshot, metadata: MoveMetadataTable) {
         for event in events {
-            guard let clipID = clipID(for: event) else { continue }
+            guard let clipID = clipID(for: event, snapshot: snapshot, metadata: metadata) else { continue }
             player.play(id: clipID)
         }
     }
 
-    private func clipID(for event: GameEvent) -> String? {
+    private func clipID(
+        for event: GameEvent,
+        snapshot: GameSnapshot,
+        metadata: MoveMetadataTable
+    ) -> String? {
         switch event.kind {
-        case .none:
+        case .none, .roundEnd:
             return nil
-        case .hit:
-            let id = event.moveID.lowercased()
-            if id.hasPrefix("hp") || id.hasPrefix("hk") || id.contains("heavy") {
-                return "hit_heavy"
-            }
-            return "hit_light"
-        case .block, .chip:
+        case .hit, .chip:
+            return hitClip(for: event, snapshot: snapshot, metadata: metadata)
+        case .block:
             return "block"
         case .throwHit:
             return "throw"
@@ -45,12 +46,32 @@ final class SFXEventPlayer: ObservableObject {
             return "ko"
         case .roundStart:
             return "round_start"
-        case .roundEnd:
-            return nil
         case .matchWin:
             return "ko"
         case .timeOver:
-            return "round_start"
+            return nil
         }
+    }
+
+    private func hitClip(
+        for event: GameEvent,
+        snapshot: GameSnapshot,
+        metadata: MoveMetadataTable
+    ) -> String {
+        switch metadata.moveInputKindForEvent(event, snapshot: snapshot) {
+        case .superMove:
+            return "super"
+        case .special:
+            return "special"
+        case .throwMove:
+            return "throw"
+        case .normal, .none:
+            break
+        }
+        let id = event.moveID.lowercased()
+        if id.hasPrefix("hp") || id.hasPrefix("hk") || id.contains("heavy") {
+            return "hit_heavy"
+        }
+        return "hit_light"
     }
 }

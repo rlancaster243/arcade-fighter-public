@@ -9,24 +9,30 @@ final class LocalMatchSession: ObservableObject {
     private var snapshot: GameSnapshot?
     private var setup: MatchSetup?
     private var cpu: CPUAIController?
+    private var metadataTable = MoveMetadataTable(fighterDefs: [])
     private var lastTickTime: Date?
     private var accumulator: TimeInterval = 0
+    private var paused = false
 
     private let tickDuration = 1.0 / 60.0
+    private let maxCatchUpSteps = 5
 
     var isRunning: Bool { setup != nil && snapshot != nil }
+    var isPaused: Bool { paused && isRunning }
 
     func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) {
-        let defs = loadFighterDefs(p1: setup.p1.id, p2: setup.p2.id)
-        let defMap = Dictionary(uniqueKeysWithValues: defs.map { ($0.id, $0) })
-        let moveMetadata = Self.moveMetadata(for: defs)
+        let p1 = loadFighter(id: setup.p1.id)
+        let p2 = loadFighter(id: setup.p2.id)
+        let defs = [p1, p2]
+        let defMap = FighterDefinitionMap.keyedByFighterID(p1: p1, p2: p2)
+        metadataTable = MoveMetadataTable(fighterDefs: defs)
         let context = CollisionMatchContext(fighterDefs: defs)
 
         simulation = Simulation(
             motion: MotionParser(),
             fighterStep: FighterStepper(definitions: defMap),
             collision: CollisionResolver(context: context),
-            matchDirect: MatchDirector(moveMetadata: moveMetadata)
+            matchDirect: RosterMatchDirector(metadataTable: metadataTable)
         )
 
         var snap = initialSnapshot
@@ -38,7 +44,21 @@ final class LocalMatchSession: ObservableObject {
             : nil
         lastTickTime = nil
         accumulator = 0
+        paused = false
         model.matchSnapshot = snap
+    }
+
+    func pause() {
+        guard isRunning else { return }
+        paused = true
+        lastTickTime = nil
+    }
+
+    func resume() {
+        guard isRunning, paused else { return }
+        paused = false
+        lastTickTime = nil
+        accumulator = 0
     }
 
     func stop() {
@@ -47,6 +67,8 @@ final class LocalMatchSession: ObservableObject {
         cpu = nil
         lastTickTime = nil
         accumulator = 0
+        paused = false
+        metadataTable = MoveMetadataTable(fighterDefs: [])
     }
 
     func advance(
@@ -55,7 +77,7 @@ final class LocalMatchSession: ObservableObject {
         model: MenuShellModel,
         sfx: SFXEventPlayer
     ) {
-        guard var snap = snapshot else { return }
+        guard var snap = snapshot, !paused else { return }
 
         if lastTickTime == nil {
             lastTickTime = date
@@ -65,7 +87,9 @@ final class LocalMatchSession: ObservableObject {
         accumulator += date.timeIntervalSince(last)
         lastTickTime = date
 
-        while accumulator >= tickDuration {
+        var steps = 0
+        while accumulator >= tickDuration, steps < maxCatchUpSteps {
+            steps += 1
             accumulator -= tickDuration
             guard !snap.rules.matchOver else { break }
 
@@ -79,7 +103,7 @@ final class LocalMatchSession: ObservableObject {
             simulation.step(inputs: frames, snapshot: &snap)
             snapshot = snap
             model.matchSnapshot = snap
-            sfx.handle(events: snap.events)
+            sfx.handle(events: snap.events, snapshot: snap, metadata: metadataTable)
 
             if snap.rules.matchOver {
                 model.endMatch(snapshot: snap)
@@ -87,10 +111,6 @@ final class LocalMatchSession: ObservableObject {
                 return
             }
         }
-    }
-
-    private func loadFighterDefs(p1: String, p2: String) -> [FighterDef] {
-        [loadFighter(id: p1), loadFighter(id: p2)]
     }
 
     private func loadFighter(id: String) -> FighterDef {
@@ -101,19 +121,5 @@ final class LocalMatchSession: ObservableObject {
         let greybox = ContentPaths.greyboxDirectory(fromFile: #filePath)
         return (try? FighterLoader.loadFighter(from: greybox))
             ?? FighterDef(id: "greybox", displayName: "Greybox", gamePlan: "fallback")
-    }
-
-    private static func moveMetadata(for defs: [FighterDef]) -> [String: MatchMoveMetadata] {
-        var meta: [String: MatchMoveMetadata] = [:]
-        for def in defs {
-            for move in def.moves {
-                meta[move.id] = MatchMoveMetadata(
-                    meterGain: move.meterGain,
-                    hitstop: move.hitstop,
-                    isSuper: move.inputKind == .superMove
-                )
-            }
-        }
-        return meta
     }
 }
