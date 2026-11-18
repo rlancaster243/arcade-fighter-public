@@ -13,9 +13,22 @@
 		1E7E458ADA67423193300CFB /* ArcadeFighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArcadeFighter.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		F8A1C2D3E4B5467890ABCDE1 /* Exceptions for "App" folder in "ArcadeFighter" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 8ED50FFB38F04559A4019B41 /* ArcadeFighter */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		EAD2191773EA471D879F4079 /* App */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				F8A1C2D3E4B5467890ABCDE1 /* Exceptions for "App" folder in "ArcadeFighter" target */,
+			);
 			path = App;
 			sourceTree = "<group>";
 		};
@@ -63,6 +76,7 @@
 			buildPhases = (
 				D0BFAE527D2449EB8B18E199 /* Sources */,
 				A1458BA6249141C7AFC2EB43 /* Frameworks */,
+				C9D8E7F6A5B4432109876543 /* Copy Content */,
 				594503BFC0A0432DA76002FE /* Resources */,
 				F8E2A1B3C4D546E7A9B0C1D2 /* Copy Content */,
 			);
@@ -156,6 +170,25 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		C9D8E7F6A5B4432109876543 /* Copy Content */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Content",
+			);
+			name = "Copy Content";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Content",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "set -euo pipefail\nSRC=\"$SRCROOT/Content\"\nDST=\"$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH/Content\"\nrm -rf \"$DST\"\nditto \"$SRC\" \"$DST\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		5036BDD5212244758E7FAE04 /* Debug */ = {
