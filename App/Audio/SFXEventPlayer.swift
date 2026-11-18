@@ -8,6 +8,7 @@ import Combine
 final class SFXEventPlayer: ObservableObject {
     private let player: SFXPlayer
     private var loaded = false
+    private(set) var preloadErrorDescription: String?
 
     init(player: SFXPlayer? = nil) {
         self.player = player ?? SFXPlayer(audioDirectory: SFXContent.audioDirectory())
@@ -17,8 +18,13 @@ final class SFXEventPlayer: ObservableObject {
         guard !loaded else { return }
         loaded = true
         let root = ContentPaths.repoRoot(fromFile: #filePath)
-        guard let manifest = try? SFXContent.loadManifest(repoRoot: root) else { return }
-        try? player.preload(manifest: manifest)
+        do {
+            let manifest = try SFXContent.loadManifest(repoRoot: root)
+            try player.preload(manifest: manifest)
+        } catch {
+            preloadErrorDescription = String(describing: error)
+            fputs("SFXEventPlayer preload failed: \(error)\n", stderr)
+        }
     }
 
     func handle(events: [GameEvent], snapshot: GameSnapshot, metadata: MoveMetadataTable) {

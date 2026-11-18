@@ -21,22 +21,30 @@ final class LocalMatchSession: ObservableObject {
     var isPaused: Bool { paused && isRunning }
 
     func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) {
-        let p1 = loadFighter(id: setup.p1.id)
-        let p2 = loadFighter(id: setup.p2.id)
+        let p1 = MatchSimulationFactory.loadFighter(id: setup.p1.id)
+        let p2 = MatchSimulationFactory.loadFighter(id: setup.p2.id)
         let defs = [p1, p2]
-        let defMap = FighterDefinitionMap.keyedByFighterID(p1: p1, p2: p2)
+        let stageId = StageBoundsLoader.stageID(forSetupIndex: setup.stageIndex)
         metadataTable = MoveMetadataTable(fighterDefs: defs)
-        let context = CollisionMatchContext(fighterDefs: defs)
 
-        simulation = Simulation(
-            motion: MotionParser(),
-            fighterStep: FighterStepper(definitions: defMap),
-            collision: CollisionResolver(context: context),
-            matchDirect: RosterMatchDirector(metadataTable: metadataTable)
-        )
+        do {
+            let built = try MatchSimulationFactory.make(p1: p1, p2: p2, stageId: stageId)
+            simulation = built.simulation
+            metadataTable = built.metadata
+        } catch {
+            let context = CollisionMatchContext(fighterDefs: defs)
+            simulation = Simulation(
+                motion: MotionParser(),
+                fighterStep: FighterStepper(definitions: FighterDefinitionMap.keyedByFighterID(p1: p1, p2: p2)),
+                collision: CollisionResolver(context: context),
+                matchDirect: RosterMatchDirector(metadataTable: metadataTable)
+            )
+        }
 
         var snap = initialSnapshot
         snap.fighterIDs = [setup.p1.id, setup.p2.id]
+        snap.fighters[0].health = p1.health
+        snap.fighters[1].health = p2.health
         snapshot = snap
         self.setup = setup
         cpu = setup.mode == .arcade
@@ -111,15 +119,5 @@ final class LocalMatchSession: ObservableObject {
                 return
             }
         }
-    }
-
-    private func loadFighter(id: String) -> FighterDef {
-        let directory = ContentPaths.fighterDirectory(id, fromFile: #filePath)
-        if let def = try? FighterLoader.loadFighter(from: directory) {
-            return def
-        }
-        let greybox = ContentPaths.greyboxDirectory(fromFile: #filePath)
-        return (try? FighterLoader.loadFighter(from: greybox))
-            ?? FighterDef(id: "greybox", displayName: "Greybox", gamePlan: "fallback")
     }
 }

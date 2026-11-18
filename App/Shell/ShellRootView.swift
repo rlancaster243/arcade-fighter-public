@@ -44,7 +44,7 @@ public struct ShellRootView: View {
         .windowPreferences(model.state.preferences)
         .overlay(alignment: .topTrailing) {
             if !isFighting && !showsMatchView {
-                InputSettingsOverlay(input: input)
+                InputSettingsOverlay(input: input, canOpenKeyTest: !showsMatchView)
                     .padding(12)
             }
         }
@@ -52,10 +52,21 @@ public struct ShellRootView: View {
             sfx.preloadIfNeeded()
             syncMatchSessionIfNeeded()
         }
-        .onChange(of: model.state.screen) { _, _ in
+        .onChange(of: model.state.screen) { _, screen in
+            switch screen {
+            case .inMatch, .matchPaused:
+                input.showKeyTest = false
+            default:
+                break
+            }
             syncMatchSessionIfNeeded()
         }
-        .sheet(isPresented: $input.showKeyTest) {
+        .sheet(
+            isPresented: Binding(
+                get: { input.showKeyTest && !showsMatchView },
+                set: { input.showKeyTest = $0 }
+            )
+        ) {
             KeyTestScreen(input: input)
         }
         #if os(macOS)
