@@ -6,6 +6,7 @@ import Foundation
 final class MenuShellModel: ObservableObject {
     @Published private(set) var state: MenuShellState
     @Published var matchSnapshot: GameSnapshot?
+    @Published var contentLoadNotices: [String] = []
 
     init(state: MenuShellState = .initial) {
         self.state = state
@@ -27,15 +28,37 @@ final class MenuShellModel: ObservableObject {
     private func applyTransition(from old: MenuShellState, to new: MenuShellState) {
         switch new.screen {
         case .inMatch(let setup):
-            if case .inMatch = old.screen {
-                break
+            if shouldBootstrapMatch(from: old.screen, to: new.screen) {
+                matchSnapshot = MatchBootstrap.snapshot(for: setup)
             }
-            matchSnapshot = MatchBootstrap.snapshot(for: setup)
-        case .title, .mainMenu, .arcadeLadder, .versusSetup, .characterSelect, .result, .settings, .rematchPrompt:
-            if case .inMatch = old.screen {
-                matchSnapshot = nil
-            }
+        case .matchPaused, .result:
+            break
+        case .title, .mainMenu, .arcadeLadder, .versusSetup, .characterSelect, .settings, .rematchPrompt:
+            matchSnapshot = nil
         }
+    }
+
+    private func shouldBootstrapMatch(from old: MenuScreen, to new: MenuScreen) -> Bool {
+        guard case .inMatch = new else { return false }
+        switch old {
+        case .inMatch, .matchPaused:
+            return false
+        default:
+            return true
+        }
+    }
+
+    func setContentLoadNotices(_ notices: [String]) {
+        contentLoadNotices = notices
+    }
+
+    func appendContentLoadNotices(_ notices: [String]) {
+        guard !notices.isEmpty else { return }
+        contentLoadNotices.append(contentsOf: notices)
+    }
+
+    func clearContentLoadNotices() {
+        contentLoadNotices = []
     }
 
     var preferences: AppPreferences {

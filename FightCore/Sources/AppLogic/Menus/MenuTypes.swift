@@ -8,6 +8,7 @@ public enum MenuScreen: Sendable, Equatable, Hashable, Codable {
     case versusSetup
     case characterSelect(CharacterSelectContext)
     case inMatch(MatchSetup)
+    case matchPaused(MatchSetup)
     case result(MatchResultSummary)
     case settings(SettingsPane)
     case rematchPrompt(MatchSetup)

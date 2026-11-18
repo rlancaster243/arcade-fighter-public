@@ -4,12 +4,13 @@ enum HitstopRules {
 
     static func applyEvents(
         snapshot: inout GameSnapshot,
-        moveMetadata: [String: MatchMoveMetadata]
+        metadata: MatchMoveMetadataResolver
     ) {
         var peak: Int32 = snapshot.rules.hitstopRemaining
 
         for event in snapshot.events {
-            guard let meta = moveMetadata[event.moveID] else { continue }
+            let meta = metadata.metadata(for: event.attacker, moveID: event.moveID, in: snapshot)
+            guard meta.hitstop > 0 || meta.isSuper else { continue }
             switch event.kind {
             case .hit, .block, .chip, .throwHit:
                 var stop = meta.hitstop

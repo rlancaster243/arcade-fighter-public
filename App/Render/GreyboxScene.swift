@@ -4,13 +4,19 @@ import SpriteKit
 
 /// Reads one immutable `GameSnapshot` per frame; does not mutate core state.
 final class GreyboxScene: SKScene {
-    var snapshot: GameSnapshot = SimulationBootstrap.greyboxMatch()
+    var snapshot: GameSnapshot = SimulationBootstrap.greyboxMatch() {
+        didSet {
+            syncAtlasesIfNeeded()
+        }
+    }
 
     private let letterboxNode = SKNode()
     private let arenaNode = SKNode()
     private let hud = HUDNode()
     private let ground = SKSpriteNode(color: .darkGray, size: .zero)
     private var atlases: [String: SpriteAtlas] = [:]
+    private var loadedAtlasIDs: Set<String> = []
+    private var atlasFailureNotified: Set<String> = []
     private var fighterNodes: [SKNode] = []
     private var activeSparks: [SparkBurst] = []
     private var lastProcessedTick: Int32 = -1
@@ -18,6 +24,7 @@ final class GreyboxScene: SKScene {
     private var shakeAmp: Int32 = 0
     private var renderTick: Int32 = 0
     private var contentOffset = CGPoint.zero
+    var onAtlasLoadNotice: ((String) -> Void)?
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -41,7 +48,7 @@ final class GreyboxScene: SKScene {
         letterboxNode.addChild(hud)
         addChild(letterboxNode)
         applyViewLayout(to: view)
-        preloadAtlases()
+        syncAtlasesIfNeeded()
     }
 
     override func didChangeSize(_ oldSize: CGSize) {
@@ -64,16 +71,31 @@ final class GreyboxScene: SKScene {
         view.layer?.magnificationFilter = .nearest
     }
 
-    private func preloadAtlases() {
+    /// Re-run atlas loads after `onAtlasLoadNotice` is attached (e.g. post-`didMove`).
+    func revalidateAtlases() {
+        loadedAtlasIDs = []
+        atlasFailureNotified = []
+        syncAtlasesIfNeeded()
+    }
+
+    private func syncAtlasesIfNeeded() {
+        let ids = Set(snapshot.fighterIDs)
+        guard ids != loadedAtlasIDs else { return }
         let root = ContentPaths.repoRoot(fromFile: #filePath)
-        for id in Set(snapshot.fighterIDs) {
+        for id in ids where !loadedAtlasIDs.contains(id) {
             let dir = ContentPaths.fighterDirectory(id, repoRoot: root)
             let png = dir.appendingPathComponent("\(id).png")
             let json = dir.appendingPathComponent("sheet.json")
-            if let atlas = try? SpriteAtlas(sheetPNG: png, sheetJSON: json) {
+            do {
+                let atlas = try SpriteAtlas(sheetPNG: png, sheetJSON: json)
                 atlases[id] = atlas
+            } catch {
+                guard !atlasFailureNotified.contains(id) else { continue }
+                atlasFailureNotified.insert(id)
+                onAtlasLoadNotice?("Sprite sheet for “\(id)” failed: \(error.localizedDescription)")
             }
         }
+        loadedAtlasIDs = ids
     }
 
     override func update(_: TimeInterval) {

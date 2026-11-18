@@ -10,6 +10,10 @@ struct MatchPreviewView: View {
     let viewHeight: Int
     let wantsFullscreen: Bool
     let windowIntegerScale: Int
+    var onAtlasLoadNotice: ((String) -> Void)?
+
+    @State private var scene = GreyboxScene(size: CGSize(width: 384, height: 216))
+    @State private var atlasRosterIDs: [String] = []
 
     var body: some View {
         let forcedScale = wantsFullscreen ? nil : windowIntegerScale
@@ -22,18 +26,27 @@ struct MatchPreviewView: View {
         let contentH = CGFloat(viewport.contentHeight)
         let posX = CGFloat(viewport.offsetX) + contentW / 2
         let posY = CGFloat(viewport.offsetY) + contentH / 2
-        SpriteView(scene: makeScene())
+        SpriteView(scene: scene)
             #if os(iOS)
             .interpolation(.none)
             #endif
             .frame(width: contentW, height: contentH)
             .position(x: posX, y: posY)
-    }
-
-    private func makeScene() -> SKScene {
-        let scene = GreyboxScene(size: CGSize(width: 384, height: 216))
-        scene.scaleMode = .resizeFill
-        scene.snapshot = snapshot
-        return scene
+            .onAppear {
+                scene.scaleMode = .resizeFill
+                scene.onAtlasLoadNotice = onAtlasLoadNotice
+                atlasRosterIDs = snapshot.fighterIDs
+                scene.snapshot = snapshot
+                scene.revalidateAtlases()
+            }
+            .onChange(of: snapshot) { _, newValue in
+                scene.onAtlasLoadNotice = onAtlasLoadNotice
+                scene.snapshot = newValue
+                let rosterChanged = newValue.fighterIDs != atlasRosterIDs
+                if rosterChanged {
+                    atlasRosterIDs = newValue.fighterIDs
+                    scene.revalidateAtlases()
+                }
+            }
     }
 }
