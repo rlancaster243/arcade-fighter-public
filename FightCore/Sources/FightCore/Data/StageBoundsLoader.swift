@@ -32,6 +32,14 @@ public enum StageBoundsLoader {
         fromFile file: String = #filePath
     ) throws -> (playLeftPx: Int32, playRightPx: Int32) {
         let json = try loadStageJSON(stageId, fromFile: file)
+        return try playBounds(fromJSON: json, stageId: stageId)
+    }
+
+    /// Parses bounds from a loaded `stage.json` object; throws instead of defaulting play space.
+    public static func playBounds(
+        fromJSON json: [String: Any],
+        stageId: String
+    ) throws -> (playLeftPx: Int32, playRightPx: Int32) {
         if let left = json["leftBound"] as? Int, let right = json["rightBound"] as? Int {
             return (Int32(left) - arenaCenterPx, Int32(right) - arenaCenterPx)
         }

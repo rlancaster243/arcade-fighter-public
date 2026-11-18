@@ -4,14 +4,6 @@ import SwiftUI
 #if os(macOS)
 import AppKit
 
-/// How menu keys are routed relative to fight input (`InputCoordinator`).
-enum MenuKeyboardMode: Equatable {
-    /// Menu first responder: navigation + confirm + pause/cancel.
-    case fullNavigation
-    /// During `.inMatch`: no navigation steal; only P / Esc via a local monitor.
-    case matchPauseHotkeysOnly
-}
-
 struct MenuKeyboardBridge: NSViewRepresentable {
     let mode: MenuKeyboardMode
     let onCommand: (MenuCommand) -> Void
@@ -83,7 +75,7 @@ final class MenuKeyCatcherView: NSView {
         pauseHotkeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
             guard let self, self.mode == .matchPauseHotkeysOnly else { return event }
             if event.isARepeat { return event }
-            if let command = Self.pauseHotkeyCommand(for: event) {
+            if let command = MenuKeyboardRouting.menuCommand(keyCode: event.keyCode, mode: .matchPauseHotkeysOnly) {
                 self.onCommand?(command)
                 return nil
             }
@@ -108,33 +100,10 @@ final class MenuKeyCatcherView: NSView {
             return
         }
         if event.isARepeat { return }
-        if let command = mapFullNavigation(event) {
+        if let command = MenuKeyboardRouting.menuCommand(keyCode: event.keyCode, mode: .fullNavigation) {
             onCommand?(command)
         } else {
             super.keyDown(with: event)
-        }
-    }
-
-    private func mapFullNavigation(_ event: NSEvent) -> MenuCommand? {
-        switch event.keyCode {
-        case 126, 13: return .up // up / W
-        case 125, 1: return .down // down / S
-        case 123, 0: return .left
-        case 124, 2: return .right
-        case 36, 49: return .confirm // return / space
-        case 53: return .cancel // escape
-        case 35: return .pause // P
-        default:
-            return nil
-        }
-    }
-
-    private static func pauseHotkeyCommand(for event: NSEvent) -> MenuCommand? {
-        switch event.keyCode {
-        case 53: return .cancel
-        case 35: return .pause
-        default:
-            return nil
         }
     }
 }
