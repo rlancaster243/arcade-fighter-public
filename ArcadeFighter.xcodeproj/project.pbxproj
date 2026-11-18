@@ -64,6 +64,7 @@
 				D0BFAE527D2449EB8B18E199 /* Sources */,
 				A1458BA6249141C7AFC2EB43 /* Frameworks */,
 				594503BFC0A0432DA76002FE /* Resources */,
+				F8E2A1B3C4D546E7A9B0C1D2 /* Copy Content */,
 			);
 			buildRules = (
 			);
@@ -71,7 +72,6 @@
 			);
 			fileSystemSynchronizedGroups = (
 				EAD2191773EA471D879F4079 /* App */,
-				E92F9EB316054CBEBC9CAD48 /* Content */,
 			);
 			name = ArcadeFighter;
 			packageProductDependencies = (
@@ -116,6 +116,26 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		F8E2A1B3C4D546E7A9B0C1D2 /* Copy Content */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Content",
+			);
+			name = "Copy Content";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Content",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "ditto \"${SRCROOT}/Content\" \"${TARGET_BUILD_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/Content\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXResourcesBuildPhase section */
 		594503BFC0A0432DA76002FE /* Resources */ = {
