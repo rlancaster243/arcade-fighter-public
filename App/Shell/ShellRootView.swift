@@ -2,6 +2,9 @@ import AppLogic
 import FightCore
 import SpriteKit
 import SwiftUI
+#if os(macOS)
+import AppKit
+#endif
 
 /// Root shell: menus, match preview, window/fullscreen preferences. Wire from `AppMain` when Phase 0 entry is unfrozen.
 public struct ShellRootView: View {
@@ -20,6 +23,9 @@ public struct ShellRootView: View {
         .windowPreferences(model.state.preferences)
         #if os(macOS)
         .background(MenuKeyboardBridge { model.send($0) })
+        .onChange(of: model.state.requestedQuit) { _, quit in
+            if quit { NSApplication.shared.terminate(nil) }
+        }
         #endif
     }
 
