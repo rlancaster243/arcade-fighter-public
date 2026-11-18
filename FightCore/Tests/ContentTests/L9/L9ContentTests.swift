@@ -3,11 +3,11 @@ import XCTest
 
 final class L9ContentTests: XCTestCase {
     private func fighterDirectory(_ id: String) -> URL {
-        ContentPaths.repoRoot().appendingPathComponent("Content/Fighters/\(id)", isDirectory: true)
+        ContentPaths.fighterDirectory(id)
     }
 
     private func stageDirectory() -> URL {
-        ContentPaths.repoRoot().appendingPathComponent("Content/Stages/stage1", isDirectory: true)
+        ContentPaths.stageDirectory("stage1")
     }
 
     func testKestrelLoadsWithFullRosterStates() throws {

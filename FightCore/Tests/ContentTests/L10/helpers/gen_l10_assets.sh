@@ -18,10 +18,11 @@ mk_sheet_pair() {
     -filter_complex "[0][1]hstack=inputs=2" -frames:v 1 "${dir}/${name}.png"
 }
 
-mkdir -p Content/Fighters/ilse Content/Fighters/rook Content/Stages/stage2 Content/Audio
+mkdir -p Content/Fighters/ilse/ilse.contentbundle Content/Fighters/rook/rook.contentbundle \
+  Content/Stages/stage2/stage2.contentbundle Content/Audio
 
-mk_sheet_pair "Content/Fighters/ilse" "ilse" "0xE8E0D0" "0xC8B890"
-mk_sheet_pair "Content/Fighters/rook" "rook" "0x707880" "0x505860"
+mk_sheet_pair "Content/Fighters/ilse/ilse.contentbundle" "ilse" "0xE8E0D0" "0xC8B890"
+mk_sheet_pair "Content/Fighters/rook/rook.contentbundle" "rook" "0x707880" "0x505860"
 
 for layer in sky bells floor; do
   case "$layer" in
@@ -30,7 +31,7 @@ for layer in sky bells floor; do
     floor) c=0x4a4038; s=384x96 ;;
   esac
   ffmpeg -y -loglevel error -f lavfi -i "color=c=${c}:s=${s}" \
-    -frames:v 1 -pix_fmt pal8 "Content/Stages/stage2/cloister_${layer}.png"
+    -frames:v 1 -pix_fmt pal8 "Content/Stages/stage2/stage2.contentbundle/cloister_${layer}.png"
 done
 
 mkdir -p Content/Audio

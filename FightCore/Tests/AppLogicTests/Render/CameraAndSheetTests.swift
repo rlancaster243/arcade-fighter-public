@@ -17,8 +17,8 @@ final class CameraAndSheetTests: XCTestCase {
     }
 
     func testSpriteSheetLoaderGreybox() throws {
-        let root = ContentPaths.repoRoot(fromFile: #filePath)
-        let sheet = root.appendingPathComponent("Content/Fighters/greybox/sheet.json")
+        let sheet = ContentPaths.greyboxDirectory(fromFile: #filePath)
+            .appendingPathComponent("sheet.json")
         let frames = try SpriteSheetLoader.loadFrames(fromSheetJSON: sheet)
         XCTAssertFalse(frames.isEmpty)
         let idx = SpriteSheetLoader.indexByName(frames)

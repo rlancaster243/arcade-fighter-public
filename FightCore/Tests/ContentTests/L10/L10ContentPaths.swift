@@ -7,15 +7,15 @@ enum L10ContentPaths {
     }
 
     static func ilseDirectory(fromFile file: String = #filePath) -> URL {
-        repoRoot(fromFile: file).appendingPathComponent("Content/Fighters/ilse", isDirectory: true)
+        ContentPaths.fighterDirectory("ilse", fromFile: file)
     }
 
     static func rookDirectory(fromFile file: String = #filePath) -> URL {
-        repoRoot(fromFile: file).appendingPathComponent("Content/Fighters/rook", isDirectory: true)
+        ContentPaths.fighterDirectory("rook", fromFile: file)
     }
 
     static func stage2Directory(fromFile file: String = #filePath) -> URL {
-        repoRoot(fromFile: file).appendingPathComponent("Content/Stages/stage2", isDirectory: true)
+        ContentPaths.stageDirectory("stage2", fromFile: file)
     }
 
     static func audioDirectory(fromFile file: String = #filePath) -> URL {

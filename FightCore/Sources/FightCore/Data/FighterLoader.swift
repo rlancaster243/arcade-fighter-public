@@ -39,12 +39,12 @@ public enum FighterLoader {
 }
 
 public enum ContentPaths {
-    /// Walks upward from `file` until `Content/Fighters/greybox` exists under the candidate root.
+    /// Walks upward from `file` until greybox’s content bundle exists under the candidate root.
     public static func repoRoot(fromFile file: String = #filePath) -> URL {
         var url = URL(fileURLWithPath: file).deletingLastPathComponent()
         let fm = FileManager.default
         for _ in 0..<10 {
-            let greybox = url.appendingPathComponent("Content/Fighters/greybox", isDirectory: true)
+            let greybox = fighterDirectory("greybox", fromFile: file, repoRoot: url)
             if fm.fileExists(atPath: greybox.appendingPathComponent("fighter.json").path) {
                 return url
             }
@@ -74,8 +74,23 @@ public enum ContentPaths {
     FileManager.default.fileExists(atPath: url.appendingPathComponent("Package.swift").path)
   }
 
+    public static func fighterDirectory(
+        _ id: String,
+        fromFile file: String = #filePath,
+        repoRoot root: URL? = nil
+    ) -> URL {
+        let root = root ?? repoRoot(fromFile: file)
+        return root
+            .appendingPathComponent("Content/Fighters/\(id)/\(id).contentbundle", isDirectory: true)
+    }
+
+    public static func stageDirectory(_ id: String, fromFile file: String = #filePath) -> URL {
+        repoRoot(fromFile: file)
+            .appendingPathComponent("Content/Stages/\(id)/\(id).contentbundle", isDirectory: true)
+    }
+
     public static func greyboxDirectory(fromFile file: String = #filePath) -> URL {
-        repoRoot(fromFile: file).appendingPathComponent("Content/Fighters/greybox", isDirectory: true)
+        fighterDirectory("greybox", fromFile: file)
     }
 
     public static func replaysDirectory(fromFile file: String = #filePath) -> URL {

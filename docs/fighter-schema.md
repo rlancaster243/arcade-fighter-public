@@ -1,6 +1,6 @@
 # Fighter content schema (schemaVersion 1)
 
-One folder per fighter (e.g. `Content/Fighters/greybox/`) containing:
+One bundle per fighter (e.g. `Content/Fighters/greybox/greybox.contentbundle/`) containing:
 
 - `fighter.json` — definition and moves
 - Sprite sheet PNG (indexed, 112×112 cells, ≤16 colours + optional alternate palettes)

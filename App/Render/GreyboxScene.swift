@@ -67,7 +67,7 @@ final class GreyboxScene: SKScene {
     private func preloadAtlases() {
         let root = ContentPaths.repoRoot(fromFile: #filePath)
         for id in Set(snapshot.fighterIDs) {
-            let dir = root.appendingPathComponent("Content/Fighters/\(id)", isDirectory: true)
+            let dir = ContentPaths.fighterDirectory(id, repoRoot: root)
             let png = dir.appendingPathComponent("\(id).png")
             let json = dir.appendingPathComponent("sheet.json")
             if let atlas = try? SpriteAtlas(sheetPNG: png, sheetJSON: json) {

@@ -54,29 +54,17 @@ public struct ShellRootView: View {
     }
 
     private func matchLayer(snapshot: GameSnapshot) -> some View {
-        GeometryReader { geo in
-            let w = Int(geo.size.width.rounded(.down))
-            let h = Int(geo.size.height.rounded(.down))
-            let forced = model.state.preferences.display.wantsFullscreen
-                ? nil
-                : model.state.preferences.display.windowIntegerScale
-            let vp = DisplayLayout.viewport(viewWidth: w, viewHeight: h, forcedScale: forced)
-            SpriteView(scene: greyboxScene(snapshot: snapshot))
-                .interpolation(.none)
-                .frame(width: CGFloat(vp.contentWidth), height: CGFloat(vp.contentHeight))
-                .position(
-                    x: CGFloat(vp.offsetX) + CGFloat(vp.contentWidth) / 2,
-                    y: CGFloat(vp.offsetY) + CGFloat(vp.contentHeight) / 2
-                )
+        let display = model.state.preferences.display
+        return GeometryReader { geo in
+            MatchPreviewView(
+                snapshot: snapshot,
+                viewWidth: Int(geo.size.width.rounded(.down)),
+                viewHeight: Int(geo.size.height.rounded(.down)),
+                wantsFullscreen: display.wantsFullscreen,
+                windowIntegerScale: display.windowIntegerScale
+            )
         }
         .allowsHitTesting(false)
-    }
-
-    private func greyboxScene(snapshot: GameSnapshot) -> SKScene {
-        let scene = GreyboxScene(size: CGSize(width: 384, height: 216))
-        scene.scaleMode = .resizeFill
-        scene.snapshot = snapshot
-        return scene
     }
 }
 
