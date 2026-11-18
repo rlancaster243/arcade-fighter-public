@@ -5,7 +5,7 @@ import XCTest
 final class TCoreAdvancedMechanicsTests: XCTestCase {
     func testT_CORE_ADV_invulnerableActiveFramesWhenHurtCleared() throws {
         let def = try greyboxWithInvulnSpecial()
-        var stepper = FighterTestFixtures.stepper(with: def)
+        let stepper = FighterTestFixtures.stepper(with: def)
         var snap = FighterTestFixtures.baseSnapshot(def: def)
 
         snap.fighterIDs = [def.id, def.id]
@@ -77,7 +77,9 @@ final class TCoreAdvancedMechanicsTests: XCTestCase {
 
         snap.fighters[0].activeMoveID = "throw_lp_lk"
         stepper.stepFighters(snapshot: &snap)
-        for _ in 0..<throwMove.startup {
+
+        let preActiveTicks = max(0, throwMove.startup - 2)
+        for _ in 0..<preActiveTicks {
             stepper.stepFighters(snapshot: &snap)
         }
 
