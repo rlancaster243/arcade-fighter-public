@@ -36,10 +36,8 @@ struct MatchPreviewView: View {
                 scene.onAtlasLoadNotice = onAtlasLoadNotice
                 scene.snapshot = snapshot
             }
-            .onChange(of: onAtlasLoadNotice) { _, handler in
-                scene.onAtlasLoadNotice = handler
-            }
             .onChange(of: snapshot) { _, newValue in
+                scene.onAtlasLoadNotice = onAtlasLoadNotice
                 scene.snapshot = newValue
             }
     }
