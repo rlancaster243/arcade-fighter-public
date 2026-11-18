@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "id": "bruno",
-  "displayName": "Bruno Okafor",
-  "archetype": "brawler",
-  "gamePlan": "Quarry bruiser: thick normals and armored specials that trade into Forge Break.",
-  "health": 1050,
-  "walkForward": 512,
+  "displayName": "Bruno \"Anvil\" Okafor",
+  "archetype": "grappler",
+  "gamePlan": "Grappler. Forge Quake (214+P) is a ground shockwave that travels along the floor and does not hit airborne opponents. Bellows Lift (236+K) is a short-range command grab: guard throw, unblockable, whiffs versus airborne, and is punishable on whiff. Anvil Drop (236236+P) is a command-grab super (guard throw).",
+  "health": 1150,
+  "walkForward": 320,
   "walkBack": 512,
   "jump": {
     "velocityY": -3584,
@@ -395,16 +395,16 @@
       "unblockable": false
     },
     {
-      "id": "sp_qcf",
-      "name": "Quarry Rush",
-      "sprite": "stance_1",
+      "id": "norm_lk",
+      "name": "Light Kick",
+      "sprite": "idle_0",
       "input": {
-        "motion": "236",
-        "button": "LP"
+        "button": "LK",
+        "stance": "stand"
       },
-      "startup": 3,
-      "active": 4,
-      "recovery": 5,
+      "startup": 4,
+      "active": 2,
+      "recovery": 6,
       "frames": {
         "hit": [
           {
@@ -413,6 +413,67 @@
             "w": 50,
             "h": 95
           },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 75,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 110,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "norm_hk",
+      "name": "Heavy Kick",
+      "sprite": "idle_0",
+      "input": {
+        "button": "HK",
+        "stance": "stand"
+      },
+      "startup": 5,
+      "active": 3,
+      "recovery": 7,
+      "frames": {
+        "hit": [
           {
             "x": -25,
             "y": -95,
@@ -450,21 +511,9 @@
             "y": -95,
             "w": 50,
             "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
           }
         ],
         "push": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
           {
             "x": -25,
             "y": -95,
@@ -486,82 +535,44 @@
         ],
         "throw": []
       },
-      "damage": 115,
-      "chip": 28,
-      "hitstun": 12,
+      "damage": 120,
+      "chip": 0,
+      "hitstun": 14,
       "blockstun": 8,
       "pushbackHit": 4,
       "pushbackBlock": 2,
       "meterGain": 120,
-      "hitstop": 6,
+      "hitstop": 9,
       "guard": "mid",
-      "unblockable": false,
-      "projectile": {
-        "speed": 1536,
-        "lifetime": 90,
-        "hitbox": {
-          "x": -25,
-          "y": -95,
-          "w": 50,
-          "h": 95
-        },
-        "damage": 115,
-        "maxOnScreen": 99,
-        "spawnCount": 1,
-        "hitsAirborne": true
-      }
+      "unblockable": false
     },
     {
-      "id": "sp_qcb",
-      "name": "Stone Shove",
+      "id": "sp_forge_quake",
+      "name": "Forge Quake",
       "sprite": "idle_0",
       "input": {
         "motion": "214",
-        "button": "LK"
+        "button": "P"
       },
-      "startup": 3,
-      "active": 4,
-      "recovery": 5,
+      "startup": 8,
+      "active": 2,
+      "recovery": 18,
       "frames": {
         "hit": [
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
           }
         ],
         "hurt": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
           {
             "x": -25,
             "y": -95,
@@ -577,177 +588,69 @@
         ],
         "push": [
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
           }
         ],
         "throw": []
       },
-      "damage": 90,
-      "chip": 22,
+      "damage": 0,
+      "chip": 0,
       "hitstun": 12,
-      "blockstun": 8,
+      "blockstun": 0,
       "pushbackHit": 4,
       "pushbackBlock": 2,
-      "meterGain": 120,
-      "hitstop": 6,
-      "guard": "mid",
-      "unblockable": false
-    },
-    {
-      "id": "sp_dp",
-      "name": "Forge Upper",
-      "sprite": "stance_1",
-      "input": {
-        "motion": "623",
-        "button": "HP"
-      },
-      "startup": 3,
-      "active": 3,
-      "recovery": 5,
-      "frames": {
-        "hit": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "hurt": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "push": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "throw": []
-      },
-      "damage": 125,
-      "chip": 30,
-      "hitstun": 12,
-      "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
-      "meterGain": 120,
-      "hitstop": 6,
+      "meterGain": 80,
+      "hitstop": 8,
       "guard": "mid",
       "unblockable": false,
-      "armorHits": 1
+      "projectile": {
+        "speed": 1024,
+        "lifetime": 50,
+        "hitbox": {
+          "x": -16,
+          "y": -28,
+          "w": 32,
+          "h": 24
+        },
+        "damage": 100,
+        "maxOnScreen": 1,
+        "spawnCount": 1,
+        "hitsAirborne": false
+      }
     },
     {
-      "id": "super_forge_break",
-      "name": "Forge Break",
-      "sprite": "stance_1",
+      "id": "sp_bellows",
+      "name": "Bellows Lift",
+      "sprite": "idle_0",
       "input": {
-        "motion": "236236",
-        "button": "HP"
+        "motion": "236",
+        "button": "K"
       },
-      "startup": 3,
-      "active": 6,
-      "recovery": 5,
+      "startup": 5,
+      "active": 2,
+      "recovery": 22,
       "frames": {
         "hit": [
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
           }
         ],
         "hurt": [
@@ -762,13 +665,200 @@
             "y": -95,
             "w": 50,
             "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          }
+        ],
+        "throw": [
+          {
+            "x": 4,
+            "y": -80,
+            "w": 44,
+            "h": 72
           },
+          {
+            "x": 4,
+            "y": -80,
+            "w": 44,
+            "h": 72
+          }
+        ]
+      },
+      "damage": 150,
+      "chip": 0,
+      "hitstun": 18,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 9,
+      "guard": "throw",
+      "unblockable": true,
+      "velocities": [
+        {
+          "x": 256,
+          "y": 0
+        },
+        {
+          "x": 256,
+          "y": 0
+        },
+        {
+          "x": 256,
+          "y": 0
+        },
+        {
+          "x": 256,
+          "y": 0
+        },
+        {
+          "x": 256,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        }
+      ],
+      "whiffsVsAirborne": true
+    },
+    {
+      "id": "super_anvil",
+      "name": "Anvil Drop",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "236236",
+        "button": "P"
+      },
+      "startup": 8,
+      "active": 3,
+      "recovery": 26,
+      "frames": {
+        "hit": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          }
+        ],
+        "hurt": [
           {
             "x": -25,
             "y": -95,
@@ -790,61 +880,63 @@
         ],
         "push": [
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
           }
         ],
-        "throw": []
+        "throw": [
+          {
+            "x": 2,
+            "y": -84,
+            "w": 52,
+            "h": 76
+          },
+          {
+            "x": 2,
+            "y": -84,
+            "w": 52,
+            "h": 76
+          },
+          {
+            "x": 2,
+            "y": -84,
+            "w": 52,
+            "h": 76
+          }
+        ]
       },
-      "damage": 320,
-      "chip": 80,
-      "hitstun": 12,
+      "damage": 260,
+      "chip": 0,
+      "hitstun": 22,
       "blockstun": 8,
       "pushbackHit": 4,
       "pushbackBlock": 2,
-      "meterGain": 120,
+      "meterGain": 0,
       "hitstop": 10,
-      "guard": "mid",
-      "unblockable": false
+      "guard": "throw",
+      "unblockable": true,
+      "whiffsVsAirborne": true
     },
     {
       "id": "throw_lp_lk",
       "name": "Slag Throw",
       "sprite": "idle_0",
       "input": {
-        "button": "LP",
+        "button": "LP+LK",
         "stance": "throw"
       },
       "startup": 3,

@@ -37,24 +37,24 @@ final class PlayableMatchCatalogAlignmentTests: XCTestCase {
             stageIndex: 0
         )
         let snap = MatchBootstrap.snapshot(for: setup, seed: 0xBEEF)
-        XCTAssertEqual(snap.fighters[0].health, 950)
-        XCTAssertEqual(snap.fighters[1].health, 1050)
-        XCTAssertEqual(snap.fighterStartHealth, [950, 1050])
+        XCTAssertEqual(snap.fighters[0].health, 900)
+        XCTAssertEqual(snap.fighters[1].health, 1150)
+        XCTAssertEqual(snap.fighterStartHealth, [900, 1150])
     }
 
     func testRoundTwoRespawnUsesFighterStartHealthFromContent() {
         var snap = MatchSimulationFactory.matchSnapshot(
             seed: 1,
-            p1: FighterDef(id: "kestrel", displayName: "K", gamePlan: "t", health: 950),
-            p2: FighterDef(id: "bruno", displayName: "B", gamePlan: "t", health: 1050),
+            p1: FighterDef(id: "kestrel", displayName: "K", gamePlan: "t", health: 900),
+            p2: FighterDef(id: "bruno", displayName: "B", gamePlan: "t", health: 1150),
             fighterIDs: ["kestrel", "bruno"]
         )
         snap.fighters[0].health = 0
         var director = MatchDirector()
         director.applyRules(snapshot: &snap)
         XCTAssertEqual(snap.rules.roundNumber, 2)
-        XCTAssertEqual(snap.fighters[0].health, 950)
-        XCTAssertEqual(snap.fighters[1].health, 1050)
+        XCTAssertEqual(snap.fighters[0].health, 900)
+        XCTAssertEqual(snap.fighters[1].health, 1150)
     }
 
     func testHUDHealthCapFromFighterStartHealth() throws {
@@ -66,8 +66,8 @@ final class PlayableMatchCatalogAlignmentTests: XCTestCase {
         )
         let snap = MatchBootstrap.snapshot(for: setup)
         let hud = HUDLayout.model(from: snap)
-        XCTAssertEqual(hud.p1HealthCap, 950)
-        XCTAssertEqual(hud.p2HealthCap, 1050)
+        XCTAssertEqual(hud.p1HealthCap, 900)
+        XCTAssertEqual(hud.p2HealthCap, 1150)
     }
 }
 

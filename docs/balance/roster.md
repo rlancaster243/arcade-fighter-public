@@ -1,204 +1,93 @@
-# Roster balance report (Phase 2)
+# Roster balance report (FIX-B kits)
 
-Snapshot of playable fighter content on `main` as of schema version 1. All numbers are taken from each fighter’s `fighter.json` under `Content/Fighters/<id>/<id>.contentbundle/`. No sim or engine constants are changed here—only documented.
+Numbers are the authored `fighter.json` values for schema version 1. Walk speeds are Q8 raw units (`256` = 1 px/tick). Frame data, damage, and boxes the spec does not give were chosen in the FIX-B PR and are listed below. Greybox is unchanged.
 
-**Roster covered:** `kestrel`, `bruno`, `ilse`, `rook`, `greybox` (present in Content; `greybox` remains the Phase 0 contract dummy).
-
-**Runtime (Phase 2 playable):** Local matches load starting **health from each fighter’s `fighter.json`** (e.g. Kestrel 950, Bruno 1050), use **stage `leftBound` / `rightBound`** for collision play space, and resolve overlapping move ids via **`MoveMetadataTable` / `RosterMatchDirector`** (attacker slot wins for active moves). Values in the tables below are content truth; if a number here disagrees with runtime, treat this doc as authoritative for balance and file an integration drift bug.
-
----
-
-## How to read this report
-
-| Term | Meaning |
-|------|---------|
-| **Total** | `startup + active + recovery` for the move (attack animation length in ticks). |
-| **Chip** | Block damage on specials/supers only: values in this report are authored `chip` from JSON. On block, the engine uses that field when non-zero; if `chip` is 0 on a special or super, it falls back to **`damage / 4`** (normals never chip). |
-| **Meter gain** | `meterGain` on the move (attacker on hit; half on block per match rules). |
-| **Super cost** | Not stored in `fighter.json`. Every super (`236236` + button) spends **1000** meter at startup (`MatchRules.superMeterCost`). |
-
-Shared across the roster unless noted:
-
-- Jump: `velocityY -3584`, `gravity 256`
-- Default hitstun / blockstun on strikes: **12** / **8**
-- Throw frame shell: **3 + 1 + 5** (total 9)
-- Most strike families: **3 + 2 + 5** (LP), **3|4|5 + 3 + 5|6|7** (HP), specials **3 + 4 + 5** (QCF/QCB) or **3 + 3 + 5** (DP), supers **3 + 6 + 5**
-
----
+On block, advantage is `blockstun - (active frames after the connecting hit + recovery)`. No authored strike is above +4. Throws and command grabs are unblockable, so they have no block advantage. Command grabs and Vesper Step use recovery of 22 or more so a 3-frame light can punish a whiff.
 
 ## 1. Character stats
 
-| Fighter | Archetype | Health | Walk F / B | Move count |
-|---------|-----------|--------|------------|------------|
-| Kestrel Vane | rushdown | 950 | **4** / 3 | 7 |
-| Bruno Okafor | brawler | **1050** | 2 / 2 | 7 |
-| Sister Ilse | sister | 950 | 3 / 2 | **9** (includes LK/HK) |
-| Rook | rook | **1050** | 2 / 2 | **9** (includes LK/HK) |
-| Greybox | test | 1000 | 3 / 2 | 7 |
+| Fighter | Archetype | Health | Walk F / B (Q8) | Moves |
+|---|---|---|---|---|
+| Kestrel Vane | rushdown | 900 | 640 / 768 | 10 |
+| Bruno "Anvil" Okafor | grappler | 1150 | 320 / 512 | 8 |
+| Sister Ilse | zoner | 950 | 448 / 512 | 10 |
+| Rook | armor/counter | 1000 | 448 / 512 | 9 |
+| Greybox | test | 1000 | 768 / 512 | 7 |
 
-**Movement:** Kestrel is the only roster member with faster forward walk (4) and retain back-walk 3. Bruno and Rook trade speed for 100 extra HP. Ilse sits between Kestrel and the tanks on walks.
+Walk forward: Kestrel 640 (2.5 px), Bruno 320 (1.25 px), Ilse and Rook 448 (1.75 px). Walk back stays the previous speed, already stored as Q8: Kestrel 768 (3 px), Bruno, Ilse, Rook, and Greybox 512 (2 px).
 
-**Kit breadth:** Ilse and Rook ship four standing normals (LP/HP/LK/HK); L9 pair (Kestrel/Bruno) and Greybox only define LP/HP in content.
+## 2. Normals and throws
 
----
+Kestrel and Bruno gained LK and HK. Existing LP, HP, and throw frame data on each fighter is unchanged. Throw input is `LP+LK`.
 
-## 2. Normals — frame data and damage
+| Fighter | Move | Button | Startup | Active | Recovery | Damage | Meter | Hitstop | Guard |
+|---|---|---|---|---|---|---|---|---|---|
+| Kestrel Vane | Light Punch | LP | 3 | 2 | 5 | 70 | 130 | 6 | mid |
+| Kestrel Vane | Heavy Punch | HP | 3 | 3 | 5 | 110 | 120 | 9 | mid |
+| Kestrel Vane | Light Kick | LK | 3 | 2 | 5 | 60 | 110 | 6 | mid |
+| Kestrel Vane | Heavy Kick | HK | 4 | 3 | 6 | 100 | 120 | 9 | mid |
+| Kestrel Vane | Ice Toss | LP+LK | 3 | 1 | 5 | 130 | 120 | 6 | throw |
+| Bruno "Anvil" Okafor | Light Punch | LP | 3 | 2 | 5 | 85 | 110 | 6 | mid |
+| Bruno "Anvil" Okafor | Heavy Punch | HP | 3 | 3 | 5 | 140 | 120 | 9 | mid |
+| Bruno "Anvil" Okafor | Light Kick | LK | 4 | 2 | 6 | 75 | 110 | 6 | mid |
+| Bruno "Anvil" Okafor | Heavy Kick | HK | 5 | 3 | 7 | 120 | 120 | 9 | mid |
+| Bruno "Anvil" Okafor | Slag Throw | LP+LK | 3 | 1 | 5 | 160 | 120 | 6 | throw |
+| Sister Ilse | Light Punch | LP | 3 | 2 | 5 | 70 | 110 | 6 | mid |
+| Sister Ilse | Heavy Punch | HP | 4 | 3 | 5 | 95 | 120 | 7 | mid |
+| Sister Ilse | Light Kick | LK | 3 | 2 | 5 | 65 | 110 | 6 | mid |
+| Sister Ilse | Heavy Kick | HK | 4 | 3 | 6 | 100 | 110 | 6 | mid |
+| Sister Ilse | Throw | LP+LK | 3 | 1 | 5 | 120 | 120 | 6 | throw |
+| Rook | Light Punch | LP | 3 | 2 | 5 | 75 | 120 | 6 | mid |
+| Rook | Heavy Punch | HP | 5 | 3 | 7 | 120 | 120 | 9 | mid |
+| Rook | Light Kick | LK | 3 | 2 | 5 | 65 | 120 | 6 | mid |
+| Rook | Heavy Kick | HK | 4 | 3 | 6 | 100 | 120 | 6 | mid |
+| Rook | Throw | LP+LK | 3 | 1 | 5 | 120 | 120 | 6 | throw |
 
-### Light punch (stand LP)
+## 3. Specials and supers
 
-| Fighter | Startup | Active | Recovery | Total | Damage | Meter gain | Hitstop |
-|---------|---------|--------|----------|-------|--------|------------|---------|
-| Kestrel | 3 | 2 | 5 | 10 | 70 | **130** | 6 |
-| Bruno | 3 | 2 | 5 | 10 | **85** | 110 | 6 |
-| Ilse | 3 | 2 | 5 | 10 | 70 | 110 | 6 |
-| Rook | 3 | 2 | 5 | 10 | 75 | 120 | 6 |
-| Greybox | 3 | 2 | 5 | 10 | 80 | 120 | 6 |
+A strength variant is its own move with the same name. `P` accepts LP and HP. `K` accepts LK and HK. Each fighter has two special names and one super name.
 
-Kestrel is the only fighter with **above-baseline meter on LP** (130) but ties for lowest damage (70). Bruno’s LP is the heaviest at 85 with no frame tax.
+| Fighter | Move | Motion | Button | S/A/R | Damage | Chip | Hitstop | Guard | Properties |
+|---|---|---|---|---|---|---|---|---|---|
+| Kestrel Vane | Rime Slide | 236 | LK | 3/7/14 | 80 | 20 | 8 | low | hits 2; vel x 0..896 y 0..0 |
+| Kestrel Vane | Rime Slide | 236 | HK | 3/11/16 | 110 | 27 | 10 | low | hits 2; vel x 0..1280 y 0..0 |
+| Kestrel Vane | Crag Hook | 623 | LP | 5/4/16 | 90 | 22 | 8 | high | vel x 0..256 y -1024..1024 |
+| Kestrel Vane | Crag Hook | 623 | HP | 6/5/18 | 120 | 30 | 10 | high | invuln [0, 1]; vel x 0..256 y -1536..1536 |
+| Kestrel Vane | Whiteout Line | 236236 | P | 4/10/18 | 55 | 40 | 10 | mid | hits 5; vel x 0..1024 y 0..0 |
+| Bruno "Anvil" Okafor | Forge Quake | 214 | P | 8/2/18 | 0 | 0 | 8 | mid | projectile speed 1024 life 50 dmg 100 max 1 spawn 1 air False |
+| Bruno "Anvil" Okafor | Bellows Lift | 236 | K | 5/2/22 | 150 | 0 | 9 | throw | whiffs vs airborne; vel x 0..256 y 0..0 |
+| Bruno "Anvil" Okafor | Anvil Drop | 236236 | P | 8/3/26 | 260 | 0 | 10 | throw | whiffs vs airborne |
+| Sister Ilse | Prayer Bead | 236 | LP | 10/3/14 | 0 | 0 | 8 | mid | projectile speed 768 life 70 dmg 60 max 1 spawn 1 air True |
+| Sister Ilse | Prayer Bead | 236 | HP | 12/3/16 | 0 | 0 | 10 | mid | projectile speed 1792 life 50 dmg 80 max 1 spawn 1 air True |
+| Sister Ilse | Vesper Step | 214 | LK | 5/1/22 | 0 | 0 | 8 | mid | vel x 0..9216 y 0..0 |
+| Sister Ilse | Vesper Step | 214 | HK | 5/1/22 | 0 | 0 | 8 | mid | vel x -9216..0 y 0..0 |
+| Sister Ilse | Rosary Storm | 236236 | P | 6/6/18 | 0 | 0 | 10 | mid | projectile speed 1280 life 80 dmg 45 max 4 spawn 4 air True |
+| Rook | Rocket Jab | 236 | LP | 5/3/12 | 85 | 21 | 8 | mid | vel x 0..640 y 0..0 |
+| Rook | Rocket Jab | 236 | HP | 7/4/16 | 120 | 30 | 10 | mid | armorHits 1; vel x 0..896 y 0..0 |
+| Rook | Guard Protocol | 214 | P | 4/8/14 | 0 | 0 | 8 | mid | counter 0..<12 -> rook_norm_hp |
+| Rook | Overclock Barrage | 236236 | K | 4/10/18 | 48 | 40 | 10 | mid | hits 5; vel x 0..768 y 0..0 |
 
-### Heavy punch (stand HP)
+## 4. Chosen frame data, damage, and boxes
 
-| Fighter | Startup | Active | Recovery | Total | Damage | Meter gain | Hitstop |
-|---------|---------|--------|----------|-------|--------|------------|---------|
-| Kestrel | 3 | 3 | 5 | 11 | 110 | 120 | 9 |
-| Bruno | 3 | 3 | 5 | 11 | **140** | 120 | 9 |
-| Ilse | **4** | 3 | 5 | **12** | 95 | 120 | 7 |
-| Rook | **5** | 3 | **7** | **15** | 120 | 120 | 9 |
-| Greybox | 3 | 3 | 5 | 11 | 80 | 120 | 6 |
+Spec text did not give these numbers. Hitstop is light 6, heavy 9, special 8–10, super 10. Strike boxes are integer rects from the bottom-centre anchor, facing right.
 
-Bruno’s HP leads on damage (140) with the same 11-frame shell as Kestrel. Rook pays **+4 frames** over the fast heavy (15 total) for 120 damage—clear tank pacing. Ilse’s HP is slower than Kestrel/Bruno (12f) for mid-tier damage.
+- Shared strike box `x 16, y -72, w 40, h 40`. Low strike `x 12, y -36, w 44, h 28` with low hurt `x -28, y -40, w 56, h 36`. Anti-air `x 4, y -130, w 36, h 90`. Throw box `x 4, y -80, w 44, h 72` (Anvil Drop `w 52, h 76`). Bead `x -12, y -70, w 24, h 24`. Ground wave `x -16, y -28, w 32, h 24`. Moves that should not strike with their body use a zero-size hit box.
+- Kestrel LK `3/2/5`, damage 60, hitstop 6, meter 110. Kestrel HK `4/3/6`, damage 100, hitstop 9, meter 120.
+- Bruno LK `4/2/6`, damage 75, hitstop 6, meter 110. Bruno HK `5/3/7`, damage 120, hitstop 9, meter 120.
+- Rime Slide LK `3/7/14`, dash 896 Q8 for 9 ticks, hits on active frames 5–6, damage 80, chip 20, hitstop 8, guard low. HK `3/11/16`, dash 1280 Q8 for 13 ticks, hits on frames 9–10, damage 110, chip 27, hitstop 10.
+- Crag Hook LP `5/4/16`, rise −1024 Q8 for 2 ticks then +1024 for 2 ticks, damage 90, chip 22, hitstop 8, guard high. HP `6/5/18`, rise −1536 Q8 for 3 ticks then +1536 for 3 ticks, invulnerable on state ticks 0 and 1, damage 120, chip 30, hitstop 10.
+- Whiteout Line `4/10/18`, five hits (55×4 then 70) on active frames 1, 3, 5, 7, 9, hitstop 10, dash 1024 Q8 for 12 ticks, meter gain 30 per connecting hit.
+- Forge Quake `8/2/18`, projectile speed 1024, lifetime 50, damage 100, one on screen, ground-only. The body does not hit.
+- Bellows Lift `5/2/22`, damage 150, hitstop 9, 256 Q8 step for 5 ticks, guard throw. Anvil Drop `8/3/26`, damage 260, hitstop 10, guard throw, whiffs versus airborne.
+- Prayer Bead LP `10/3/14`, speed 768, lifetime 70, damage 60. HP `12/3/16`, speed 1792, lifetime 50, damage 80. Both maxOnScreen 1 and hit airborne. Rosary Storm `6/6/18` spawns 4 beads, speed 1280, lifetime 80, damage 45, maxOnScreen 4.
+- Vesper Step both versions `5/1/22`, one tick of ±9216 Q8 (36 px) on state tick 3, damage 0, hitstop 8.
+- Rocket Jab LP `5/3/12`, forward 640 Q8 for 8 ticks, damage 85, chip 21, hitstop 8. HP `7/4/16`, forward 896 Q8 for 11 ticks, damage 120, chip 30, hitstop 10, armorHits 1.
+- Guard Protocol `4/8/14`, counter window state ticks 0 until 12, follow-up `rook_norm_hp`, body does not hit, hitstop 8. Overclock Barrage `4/10/18`, five hits on frames 0, 2, 4, 6, 8 (48×4 then 60), forward 768 Q8 for 14 ticks, hitstop 10.
 
-### Extra normals (Ilse / Rook only)
-
-| Fighter | Move | Total | Damage | Meter gain | Notes |
-|---------|------|-------|--------|------------|-------|
-| Ilse | LK | 10 | 65 | 110 | Same cadence and meter as Ilse LP |
-| Ilse | HK | **13** | 100 | **110** | 4+3+6; slower heavy kick—not 120 like stand HP |
-| Rook | LK | 10 | 65 | **120** | Same frames/damage as Ilse LK; +10 meter |
-| Rook | HK | **13** | 100 | **120** | Same HK frame/damage profile as Ilse; +10 meter |
-
----
-
-## 3. Specials — frame data, damage, chip, meter
-
-Frame totals match **QCF/QCB: 12f**, **DP: 11f** for all roster members with standard mappings. Button mappings differ on Rook (see inputs table).
-
-### Quarter-circle forward (`236`)
-
-| Fighter | Move | Button | Damage | Chip | Meter gain | Hitstop | Guard |
-|---------|------|--------|--------|------|------------|---------|-------|
-| Kestrel | Frost Cut | LP | 95 | 24 | 120 | 6 | mid |
-| Bruno | Quarry Rush | LP | 115 | **28** | 120 | 6 | mid |
-| Ilse | Prayer Beam | LP | 110 | 25 | 120 | **9** | mid |
-| Rook | Castle Slam | **HP** | **130** | 20 | 120 | 6 | mid |
-| Greybox | QCF Special | LP | 80 | 20 | 120 | 6 | mid |
-
-**Damage spread:** 80 (greybox) → 130 (Rook Castle Slam). Bruno and Ilse QCFs are premium chip (25–28) relative to Rook’s 20.
-
-### Quarter-circle back (`214`)
-
-| Fighter | Move | Button | Damage | Chip | Guard |
-|---------|------|--------|--------|------|-------|
-| Kestrel | Glacier Step | LK | 85 | 22 | mid |
-| Bruno | Stone Shove | LK | 90 | 22 | mid |
-| Ilse | Sanctified Step | LK | 80 | 20 | mid |
-| Rook | Bulwark Spin | **LP** | 80 | 20 | **low** |
-| Greybox | QCB Special | LK | 80 | 20 | mid |
-
-Rook alone has a **low** QCB; everyone else uses mid. Damage cluster is tight (80–90).
-
-### Dragon punch (`623`)
-
-| Fighter | Move | Button | Damage | Chip | Guard |
-|---------|------|--------|--------|------|-------|
-| Kestrel | Kestrel Rise | HP | **100** | **25** | mid |
-| Bruno | Forge Upper | HP | **125** | **30** | mid |
-| Ilse | Rising Censer | HP | 80 | 20 | **high** |
-| Rook | Upward Baton | **LK** | 80 | 20 | mid |
-| Greybox | DP Special | HP | 80 | 20 | mid |
-
-Ilse’s DP is the only **high** anti-air profile in the set. Bruno’s DP is the top damage/chip DP; Kestrel sits in the middle.
-
-### Special input summary (content)
-
-| Fighter | `236` | `214` | `623` |
-|---------|-------|-------|-------|
-| Kestrel, Bruno, Ilse, Greybox | LP | LK | HP |
-| Rook | HP | LP | LK |
-
----
-
-## 4. Supers — damage, chip, frames, meter
-
-All supers: **3 + 6 + 5 = 14** frames, **meter cost 1000** (global, not per-move JSON).
-
-| Fighter | Super | Damage | Chip | Meter gain (on hit) | Hitstop (content) |
-|---------|-------|--------|------|---------------------|-------------------|
-| Kestrel | Blizzard Waltz | 280 | 70 | 120 | 10 |
-| Bruno | Forge Break | **320** | **80** | 120 | 10 |
-| Ilse | Choir of Bells | 280 | 70 | 120 | 10 |
-| Rook | Rook Checkmate | 300 | **20** | 120 | **6** |
-| Greybox | Super | 80 | 20 | 120 | 6 |
-
-**Relative power:** Bruno super leads raw damage and chip. Kestrel and Ilse tie at 280/70. Rook sits between on damage (300) but chip is an outlier (20 vs 70–80 elsewhere)—worth a design pass if chip parity with other supers is intended.
-
-**Hitstop:** Content lists 10 for Kestrel/Bruno/Ilse supers (matches engine super minimum). Rook and Greybox list 6; engine may still floor supers at 10 via `HitstopRules`—confirm in playtests.
-
----
-
-## 5. Throws
-
-| Fighter | Damage | Total frames | Meter gain |
-|---------|--------|--------------|------------|
-| Kestrel | 130 | 9 | 120 |
-| Bruno | **160** | 9 | 120 |
-| Ilse | 120 | 9 | 120 |
-| Rook | 120 | 9 | 120 |
-| Greybox | 120 | 9 | 120 |
-
-Bruno’s throw is **+40** over the 120 baseline and **+30** over Kestrel—consistent with brawler damage bias. Frame data is identical across the roster.
-
----
-
-## 6. Meter economy (content-only)
-
-### Meter gain on hit (`meterGain`)
-
-| Value | Moves |
-|-------|--------|
-| **130** | Kestrel LP only |
-| **120** | Every fighter’s **stand HP**; **Rook** and **Greybox** stand LP; all specials, supers, throws; **Rook** stand LK/HK (Ilse stand HP is here—Ilse HK is not) |
-| **110** | **Bruno** stand LP; **Ilse** stand LP, LK, and HK |
-
-Kestrel’s LP is the fastest meter-positive light in the roster. Ilse and Bruno gain less meter on lights and (for Ilse) on kicks than Rook on the same kick shells—Ilse stand HP still earns 120.
-
-### Super spend and earn
-
-- **Spend:** 1000 per super activation (not authored in JSON).
-- **Earn:** Primarily `meterGain` on confirmed hits; defender gains meter from damage taken (sim rule, not in fighter JSON).
-- **Rough lights-to-super (attacker, all hits):** at 110–130 per LP (Rook/Greybox LP at 120; Kestrel 130; Bruno/Ilse 110), ~8–10 clean lights before a super—faster for Kestrel LP, slower for 110-gain lights.
-
-No fighter defines a cheaper or more expensive super in content; balance differences are damage/chip and how quickly each kit builds meter via normals.
-
----
-
-## 7. Cross-roster observations
-
-1. **Two HP tiers:** 950 (Kestrel, Ilse) vs 1050 (Bruno, Rook). Greybox at 1000 is the neutral reference.
-2. **Brawlers scale damage:** Bruno leads normals, QCF, DP, super, and throw. Frame shells stay aligned with others—power is mostly numbers, not frame traps.
-3. **Rushdown tax is subtle:** Kestrel trades LP damage for speed and extra LP meter; supers are not stronger than Ilse’s—mobility is the main perk.
-4. **Ilse zoner hints:** Strong QCF (110) and high DP; lows are not in this JSON slice—QCB is standard mid 80.
-5. **Rook anomalies:** Slowest HP (15f), strongest single special (Castle Slam 130), low super chip, nonstandard special buttons, only low-guard QCB in the roster.
-6. **Greybox flat 80:** Useful baseline for strike damage (normals, specials, super all 80); **throw is 120** like the rest of the roster. Every production fighter diverges on at least one axis (health, walks, or move damage).
-7. **Stun parity:** All **39** roster moves use **12** hitstun and **8** blockstun—balance is damage, chip, frames, and walks—not stun shapes.
-8. **Content gaps vs full buttons:** Kestrel/Bruno lack LK/HK move entries; comparing full button coverage to Ilse/Rook is asymmetric until L9 kits are extended.
-
----
-
-## 8. Source paths
+## 5. Source paths
 
 | Fighter | Content bundle |
-|---------|------------------|
+|---|---|
 | kestrel | `Content/Fighters/kestrel/kestrel.contentbundle/fighter.json` |
 | bruno | `Content/Fighters/bruno/bruno.contentbundle/fighter.json` |
 | ilse | `Content/Fighters/ilse/ilse.contentbundle/fighter.json` |
@@ -206,7 +95,3 @@ No fighter defines a cheaper or more expensive super in content; balance differe
 | greybox | `Content/Fighters/greybox/greybox.contentbundle/fighter.json` |
 
 Schema reference: `docs/fighter-schema.md`.
-
----
-
-*Phase 2 slice — documentation only; no JSON or code changes.*

@@ -41,6 +41,13 @@ final class ShippedContentIntegrationTests: XCTestCase {
     func testExpectedHashScenarios() throws {
         for scenario in catalog.scenarios {
             let hashes = try IntegrationMatchHarness.tickHashes(for: scenario)
+            if hashes != scenario.tickHashes {
+                print("HASHDUMP_BEGIN \(scenario.id) \(hashes.count)")
+                for hash in hashes {
+                    print(hash)
+                }
+                print("HASHDUMP_END \(scenario.id)")
+            }
             XCTAssertEqual(
                 hashes.count,
                 scenario.tickHashes.count,

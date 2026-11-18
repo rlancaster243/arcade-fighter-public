@@ -111,29 +111,119 @@ enum IntegrationMatchHarness {
         return (snap, ticks, hashes)
     }
 
+    static func scriptedTickCount(for scenarioID: String) -> Int {
+        if let script = KitScripts.script(for: scenarioID) {
+            return script.frames.count
+        }
+        return scriptedInputTickCount
+    }
+
     static func runScriptedMatch(
         seed: UInt64,
         p1: FighterDef,
         p2: FighterDef,
         stageId: String,
+        scenarioID: String = "",
         fromFile file: String = #filePath
     ) throws -> [UInt64] {
-        let frames: [[InputFrame]] = [
+        try runScriptedMatchTracing(
+            seed: seed,
+            p1: p1,
+            p2: p2,
+            stageId: stageId,
+            scenarioID: scenarioID,
+            fromFile: file
+        ).hashes
+    }
+
+    static func runScriptedMatchTracing(
+        seed: UInt64,
+        p1: FighterDef,
+        p2: FighterDef,
+        stageId: String,
+        scenarioID: String,
+        fromFile file: String = #filePath
+    ) throws -> (hashes: [UInt64], trace: KitTrace) {
+        let script = KitScripts.script(for: scenarioID)
+        let frames = script?.frames ?? legacyScriptFrames()
+        if script == nil {
+            precondition(frames.count == scriptedInputTickCount)
+        }
+        var (simulation, _) = try MatchSimulationFactory.make(
+            p1PickID: p1.id,
+            p1: p1,
+            p2PickID: p2.id,
+            p2: p2,
+            stageId: stageId,
+            fromFile: file
+        )
+        var snap = MatchSimulationFactory.matchSnapshot(
+            seed: seed,
+            p1: p1,
+            p2: p2,
+            fighterIDs: [p1.id, p2.id]
+        )
+        if let script {
+            snap.fighters[0].meter = script.meterP1
+            snap.fighters[1].meter = script.meterP2
+            if let p1X = script.p1XPx {
+                snap.fighters[0].position.x = Fixed(pixels: p1X)
+            }
+            if let p2X = script.p2XPx {
+                snap.fighters[1].position.x = Fixed(pixels: p2X)
+            }
+        }
+        var hashes: [UInt64] = []
+        hashes.reserveCapacity(frames.count + 1)
+        var trace = KitTrace()
+        var activeProjectileIDs: Set<UInt32> = []
+        for tick in frames {
+            hashes.append(snap.stateHash())
+            recordTrace(snap, into: &trace, activeProjectileIDs: &activeProjectileIDs)
+            simulation.step(inputs: tick, snapshot: &snap)
+            for event in snap.events {
+                trace.events.append((event.kind, event.moveID))
+            }
+        }
+        hashes.append(snap.stateHash())
+        recordTrace(snap, into: &trace, activeProjectileIDs: &activeProjectileIDs)
+        return (hashes, trace)
+    }
+
+    private static func legacyScriptFrames() -> [[InputFrame]] {
+        [
             [.p1Forward, .neutral],
             [.p1LP, .neutral],
             [.neutral, .p2BackBlock],
             [.p1HP, .p2LK],
             [.neutral, .neutral],
         ]
-        precondition(frames.count == scriptedInputTickCount)
-        return try PlayableScriptRunner.tickHashes(
-            p1: p1,
-            p2: p2,
-            stageId: stageId,
-            seed: seed,
-            frames: frames,
-            fromFile: file
-        )
+    }
+
+    private static func recordTrace(
+        _ snap: GameSnapshot,
+        into trace: inout KitTrace,
+        activeProjectileIDs: inout Set<UInt32>
+    ) {
+        for fighter in snap.fighters where !fighter.activeMoveID.isEmpty {
+            trace.moveIDs.insert(fighter.activeMoveID)
+        }
+        if snap.fighters.count > 0, snap.fighters[0].activeMoveID == "sp_rocket_hp" {
+            trace.rocketArmor.append(snap.fighters[0].armorRemaining)
+        }
+        // Spawn ids restart after an inactive bead is removed, so a new bead can reuse id 1.
+        var activeNow: Set<UInt32> = []
+        for projectile in snap.projectiles where projectile.active {
+            activeNow.insert(projectile.id)
+            if !activeProjectileIDs.contains(projectile.id) {
+                trace.spawned.append((
+                    projectile.id,
+                    projectile.velocity.x.raw,
+                    projectile.hitsAirborne
+                ))
+            }
+        }
+        activeProjectileIDs = activeNow
     }
 
     static func tickHashes(for scenario: ExpectedHashesCatalog.Scenario, fromFile file: String = #filePath) throws -> [UInt64] {
@@ -179,6 +269,7 @@ enum IntegrationMatchHarness {
                 p1: p1,
                 p2: p2,
                 stageId: scenario.stageId,
+                scenarioID: scenario.id,
                 fromFile: file
             )
         }

@@ -74,7 +74,7 @@ struct ExpectedHashesCatalog: Decodable, Sendable {
                     throw ValidationError.tickHashLengthMismatch(scenario.id, expected: expected, actual: scenario.tickHashes.count)
                 }
             case .script:
-                let expected = IntegrationMatchHarness.scriptedInputTickCount + 1
+                let expected = IntegrationMatchHarness.scriptedTickCount(for: scenario.id) + 1
                 guard scenario.tickHashes.count == expected else {
                     throw ValidationError.tickHashLengthMismatch(scenario.id, expected: expected, actual: scenario.tickHashes.count)
                 }

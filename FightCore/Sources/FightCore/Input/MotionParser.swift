@@ -13,9 +13,11 @@ public struct MotionParser: MotionParsing, Sendable {
     }
 
     public private(set) var trackers: [PlayerTracker]
+    public var commands: MoveCommandTable
 
-    public init() {
+    public init(commands: MoveCommandTable = MoveCommandTable()) {
         trackers = [PlayerTracker(), PlayerTracker()]
+        self.commands = commands
     }
 
     public mutating func apply(inputs: [InputFrame], to snapshot: inout GameSnapshot) {
@@ -27,10 +29,11 @@ public struct MotionParser: MotionParsing, Sendable {
             let facing = snapshot.fighters[index].facingRight
             let numpad = FacingInput.logicalNumpad(from: raw.direction, facingRight: facing)
             tracker.buffer.push(numpad: numpad, buttons: raw.buttons)
-            tracker.lastResolved = resolve(raw: raw, buffer: tracker.buffer)
+            let resolved = resolve(raw: raw, buffer: tracker.buffer)
+            tracker.lastResolved = resolved
             trackers[index] = tracker
+            applyResolved(resolved, logicalNumpad: numpad, index: index, snapshot: &snapshot)
         }
-        _ = snapshot.tick
     }
 
     public func resolvedInput(for slot: PlayerSlot) -> ResolvedInput {
@@ -66,5 +69,38 @@ public struct MotionParser: MotionParsing, Sendable {
             return ResolvedInput(motion: motion, buttons: raw.buttons, priority: priority)
         }
         return ResolvedInput(buttons: raw.buttons, priority: .normal)
+    }
+
+    /// Writes the move id the stepper consumes, or a walk/crouch/jump from the stick.
+    private func applyResolved(
+        _ resolved: ResolvedInput,
+        logicalNumpad: UInt8,
+        index: Int,
+        snapshot: inout GameSnapshot
+    ) {
+        guard FighterStateMachine.canStartMove(kind: snapshot.fighters[index].kind) else { return }
+        let fighterID = index < snapshot.fighterIDs.count ? snapshot.fighterIDs[index] : ""
+        if let moveID = commands.moveID(fighterID: fighterID, resolved: resolved) {
+            snapshot.fighters[index].activeMoveID = moveID
+            return
+        }
+        if logicalNumpad == 7 || logicalNumpad == 8 || logicalNumpad == 9 {
+            snapshot.fighters[index].activeMoveID = FighterConstants.builtinJumpCommand
+            return
+        }
+        snapshot.fighters[index].kind = locomotionKind(logicalNumpad)
+    }
+
+    private func locomotionKind(_ numpad: UInt8) -> FighterStateKind {
+        switch numpad {
+        case 1, 2, 3:
+            return .crouch
+        case 4:
+            return .walkBack
+        case 6:
+            return .walkForward
+        default:
+            return .idle
+        }
     }
 }

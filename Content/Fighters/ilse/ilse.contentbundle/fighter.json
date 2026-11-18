@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "id": "ilse",
   "displayName": "Sister Ilse",
-  "archetype": "sister",
-  "gamePlan": "Bell-tower acolyte: fast lights, prayer beam (236 LP), sanctified step (214 LK), rising censer DP, super Choir of Bells.",
+  "archetype": "zoner",
+  "gamePlan": "Zoner. Prayer Bead (236+P) is a bead projectile, LP slow and HP fast, one on screen at a time. Vesper Step (214+K) is a short teleport, LK forward and HK back, with punishable recovery. Rosary Storm (236236+P) is a volley of beads.",
   "health": 950,
-  "walkForward": 768,
+  "walkForward": 448,
   "walkBack": 512,
   "jump": {
     "velocityY": -3584,
@@ -395,492 +395,6 @@
       "unblockable": false
     },
     {
-      "id": "ilse_sp_qcf",
-      "name": "Prayer Beam",
-      "sprite": "idle_0",
-      "input": {
-        "motion": "236",
-        "button": "LP"
-      },
-      "startup": 3,
-      "active": 4,
-      "recovery": 5,
-      "frames": {
-        "hit": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "hurt": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "push": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "throw": []
-      },
-      "damage": 110,
-      "chip": 25,
-      "hitstun": 12,
-      "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
-      "meterGain": 120,
-      "hitstop": 9,
-      "guard": "mid",
-      "unblockable": false
-    },
-    {
-      "id": "ilse_sp_qcb",
-      "name": "Sanctified Step",
-      "sprite": "idle_0",
-      "input": {
-        "motion": "214",
-        "button": "LK"
-      },
-      "startup": 3,
-      "active": 4,
-      "recovery": 5,
-      "frames": {
-        "hit": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "hurt": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "push": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "throw": []
-      },
-      "damage": 80,
-      "chip": 20,
-      "hitstun": 12,
-      "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
-      "meterGain": 120,
-      "hitstop": 6,
-      "guard": "mid",
-      "unblockable": false
-    },
-    {
-      "id": "ilse_sp_dp",
-      "name": "Rising Censer",
-      "sprite": "idle_0",
-      "input": {
-        "motion": "623",
-        "button": "HP"
-      },
-      "startup": 3,
-      "active": 3,
-      "recovery": 5,
-      "frames": {
-        "hit": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "hurt": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "push": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "throw": []
-      },
-      "damage": 80,
-      "chip": 20,
-      "hitstun": 12,
-      "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
-      "meterGain": 120,
-      "hitstop": 6,
-      "guard": "high",
-      "unblockable": false
-    },
-    {
-      "id": "ilse_super_test",
-      "name": "Choir of Bells",
-      "sprite": "idle_0",
-      "input": {
-        "motion": "236236",
-        "button": "HP"
-      },
-      "startup": 3,
-      "active": 6,
-      "recovery": 5,
-      "frames": {
-        "hit": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "hurt": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "push": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          },
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "throw": []
-      },
-      "damage": 280,
-      "chip": 70,
-      "hitstun": 12,
-      "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
-      "meterGain": 120,
-      "hitstop": 10,
-      "guard": "mid",
-      "unblockable": false
-    },
-    {
-      "id": "ilse_throw_lp_lk",
-      "name": "Throw",
-      "sprite": "idle_0",
-      "input": {
-        "button": "LP",
-        "stance": "throw"
-      },
-      "startup": 3,
-      "active": 1,
-      "recovery": 5,
-      "frames": {
-        "hit": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "hurt": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "push": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ],
-        "throw": [
-          {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
-          }
-        ]
-      },
-      "damage": 120,
-      "chip": 0,
-      "hitstun": 12,
-      "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
-      "meterGain": 120,
-      "hitstop": 6,
-      "guard": "throw",
-      "unblockable": true
-    },
-    {
       "id": "ilse_norm_lk",
       "name": "Light Kick",
       "sprite": "idle_0",
@@ -1031,6 +545,739 @@
       "hitstop": 6,
       "guard": "mid",
       "unblockable": false
+    },
+    {
+      "id": "sp_prayer_lp",
+      "name": "Prayer Bead",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "236",
+        "button": "LP"
+      },
+      "startup": 10,
+      "active": 3,
+      "recovery": 14,
+      "frames": {
+        "hit": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          }
+        ],
+        "throw": []
+      },
+      "damage": 0,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 0,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 80,
+      "hitstop": 8,
+      "guard": "mid",
+      "unblockable": false,
+      "projectile": {
+        "speed": 768,
+        "lifetime": 70,
+        "hitbox": {
+          "x": -12,
+          "y": -70,
+          "w": 24,
+          "h": 24
+        },
+        "damage": 60,
+        "maxOnScreen": 1,
+        "spawnCount": 1,
+        "hitsAirborne": true
+      }
+    },
+    {
+      "id": "sp_prayer_hp",
+      "name": "Prayer Bead",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "236",
+        "button": "HP"
+      },
+      "startup": 12,
+      "active": 3,
+      "recovery": 16,
+      "frames": {
+        "hit": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          }
+        ],
+        "throw": []
+      },
+      "damage": 0,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 0,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 90,
+      "hitstop": 10,
+      "guard": "mid",
+      "unblockable": false,
+      "projectile": {
+        "speed": 1792,
+        "lifetime": 50,
+        "hitbox": {
+          "x": -12,
+          "y": -70,
+          "w": 24,
+          "h": 24
+        },
+        "damage": 80,
+        "maxOnScreen": 1,
+        "spawnCount": 1,
+        "hitsAirborne": true
+      }
+    },
+    {
+      "id": "sp_vesper_lk",
+      "name": "Vesper Step",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "214",
+        "button": "LK"
+      },
+      "startup": 5,
+      "active": 1,
+      "recovery": 22,
+      "frames": {
+        "hit": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          }
+        ],
+        "throw": []
+      },
+      "damage": 0,
+      "chip": 0,
+      "hitstun": 0,
+      "blockstun": 0,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 40,
+      "hitstop": 8,
+      "guard": "mid",
+      "unblockable": false,
+      "velocities": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 9216,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "sp_vesper_hk",
+      "name": "Vesper Step",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "214",
+        "button": "HK"
+      },
+      "startup": 5,
+      "active": 1,
+      "recovery": 22,
+      "frames": {
+        "hit": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          }
+        ],
+        "throw": []
+      },
+      "damage": 0,
+      "chip": 0,
+      "hitstun": 0,
+      "blockstun": 0,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 40,
+      "hitstop": 8,
+      "guard": "mid",
+      "unblockable": false,
+      "velocities": [
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": -9216,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        }
+      ]
+    },
+    {
+      "id": "super_rosary",
+      "name": "Rosary Storm",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "236236",
+        "button": "P"
+      },
+      "startup": 6,
+      "active": 6,
+      "recovery": 18,
+      "frames": {
+        "hit": [
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          },
+          {
+            "x": 0,
+            "y": 0,
+            "w": 0,
+            "h": 0
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          },
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          }
+        ],
+        "throw": []
+      },
+      "damage": 0,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 0,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 0,
+      "hitstop": 10,
+      "guard": "mid",
+      "unblockable": false,
+      "projectile": {
+        "speed": 1280,
+        "lifetime": 80,
+        "hitbox": {
+          "x": -12,
+          "y": -70,
+          "w": 24,
+          "h": 24
+        },
+        "damage": 45,
+        "maxOnScreen": 4,
+        "spawnCount": 4,
+        "hitsAirborne": true
+      }
+    },
+    {
+      "id": "ilse_throw_lp_lk",
+      "name": "Throw",
+      "sprite": "idle_0",
+      "input": {
+        "button": "LP+LK",
+        "stance": "throw"
+      },
+      "startup": 3,
+      "active": 1,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ]
+      },
+      "damage": 120,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "throw",
+      "unblockable": true
     }
   ]
 }

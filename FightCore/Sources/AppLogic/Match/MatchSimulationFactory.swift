@@ -29,8 +29,10 @@ public enum MatchSimulationFactory {
             playLeftPx: bounds.playLeftPx,
             playRightPx: bounds.playRightPx
         )
+        let p1Commands = try FighterCommandLoader.load(id: p1.id, fromFile: fromFile)
+        let p2Commands = try FighterCommandLoader.load(id: p2.id, fromFile: fromFile)
         let simulation = Simulation(
-            motion: MotionParser(),
+            motion: MotionParser(commands: MoveCommandTable(commands: p1Commands + p2Commands)),
             fighterStep: FighterStepper(definitions: defMap),
             collision: CollisionResolver(context: context),
             matchDirect: RosterMatchDirector(metadataTable: metadataTable)
