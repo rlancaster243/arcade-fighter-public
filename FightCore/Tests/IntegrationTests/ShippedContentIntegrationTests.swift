@@ -36,6 +36,8 @@ final class ShippedContentIntegrationTests: XCTestCase {
         }
     }
 
+    /// Goldens in `expected-hashes.json` are produced by `IntegrationMatchHarness` using
+    /// `MatchSimulationFactory` + `RosterMatchDirector`; re-record that file when the factory changes.
     func testExpectedHashScenarios() throws {
         for scenario in catalog.scenarios {
             let hashes = try IntegrationMatchHarness.tickHashes(for: scenario)

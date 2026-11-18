@@ -6,6 +6,8 @@ public struct GameSnapshot: Sendable, Equatable, Hashable, Codable {
     public var rules: MatchRules
     public var events: [GameEvent]
     public var fighterIDs: [String]
+    /// Max health at round start per fighter slot (from `fighter.json`; default 1000 when unset).
+    public var fighterStartHealth: [Int32]
 
     public init(
         tick: Int32 = 0,
@@ -14,7 +16,8 @@ public struct GameSnapshot: Sendable, Equatable, Hashable, Codable {
         projectiles: [Projectile] = [],
         rules: MatchRules = MatchRules(),
         events: [GameEvent] = [],
-        fighterIDs: [String] = []
+        fighterIDs: [String] = [],
+        fighterStartHealth: [Int32] = []
     ) {
         self.tick = tick
         self.rng = rng
@@ -23,5 +26,6 @@ public struct GameSnapshot: Sendable, Equatable, Hashable, Codable {
         self.rules = rules
         self.events = events
         self.fighterIDs = fighterIDs
+        self.fighterStartHealth = fighterStartHealth
     }
 }

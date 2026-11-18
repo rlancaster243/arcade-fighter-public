@@ -46,7 +46,8 @@ public enum SimulationBootstrap {
             projectiles: [],
             rules: MatchRules(),
             events: [],
-            fighterIDs: ["greybox", "greybox"]
+            fighterIDs: ["greybox", "greybox"],
+            fighterStartHealth: [1000, 1000]
         )
     }
 }

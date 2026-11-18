@@ -17,6 +17,7 @@ enum MatchTestSupport {
         p2Rounds: Int32 = 0
     ) -> GameSnapshot {
         var snap = SimulationBootstrap.greyboxMatch()
+        snap.fighterStartHealth = [p1Health, p2Health]
         snap.fighters[0].health = p1Health
         snap.fighters[1].health = p2Health
         snap.rules.roundTick = roundTick

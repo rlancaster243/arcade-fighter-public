@@ -13,6 +13,8 @@ final class HUDTests: XCTestCase {
         snap.rules.roundTick = 120
 
         let model = HUDLayout.model(from: snap)
+        XCTAssertEqual(model.p1HealthCap, 1000)
+        XCTAssertEqual(model.p2HealthCap, 1000)
         XCTAssertEqual(model.p1Health, 750)
         XCTAssertEqual(model.p2Health, 250)
         XCTAssertEqual(model.p1Meter, 400)

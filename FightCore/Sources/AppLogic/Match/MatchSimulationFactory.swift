@@ -34,6 +34,7 @@ public enum MatchSimulationFactory {
     ) -> GameSnapshot {
         var snap = SimulationBootstrap.greyboxMatch(seed: seed)
         snap.fighterIDs = fighterIDs
+        snap.fighterStartHealth = [p1.health, p2.health]
         snap.fighters[0].health = p1.health
         snap.fighters[1].health = p2.health
         return snap

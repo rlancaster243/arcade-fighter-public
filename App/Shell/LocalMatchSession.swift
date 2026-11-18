@@ -20,29 +20,17 @@ final class LocalMatchSession: ObservableObject {
     var isRunning: Bool { setup != nil && snapshot != nil }
     var isPaused: Bool { paused && isRunning }
 
-    func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) {
+    func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) throws {
         let p1 = MatchSimulationFactory.loadFighter(id: setup.p1.id)
         let p2 = MatchSimulationFactory.loadFighter(id: setup.p2.id)
-        let defs = [p1, p2]
         let stageId = StageBoundsLoader.stageID(forSetupIndex: setup.stageIndex)
-        metadataTable = MoveMetadataTable(fighterDefs: defs)
-
-        do {
-            let built = try MatchSimulationFactory.make(p1: p1, p2: p2, stageId: stageId)
-            simulation = built.simulation
-            metadataTable = built.metadata
-        } catch {
-            let context = CollisionMatchContext(fighterDefs: defs)
-            simulation = Simulation(
-                motion: MotionParser(),
-                fighterStep: FighterStepper(definitions: FighterDefinitionMap.keyedByFighterID(p1: p1, p2: p2)),
-                collision: CollisionResolver(context: context),
-                matchDirect: RosterMatchDirector(metadataTable: metadataTable)
-            )
-        }
+        let built = try MatchSimulationFactory.make(p1: p1, p2: p2, stageId: stageId)
+        simulation = built.simulation
+        metadataTable = built.metadata
 
         var snap = initialSnapshot
         snap.fighterIDs = [setup.p1.id, setup.p2.id]
+        snap.fighterStartHealth = [p1.health, p2.health]
         snap.fighters[0].health = p1.health
         snap.fighters[1].health = p2.health
         snapshot = snap

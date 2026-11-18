@@ -5,7 +5,8 @@ public struct HUDModel: Sendable, Equatable, Hashable {
     public var p2Health: Int32
     public var p1Meter: Int32
     public var p2Meter: Int32
-    public var healthCap: Int32
+    public var p1HealthCap: Int32
+    public var p2HealthCap: Int32
     public var meterCap: Int32
     public var timerSeconds: Int32
     public var roundNumber: Int32
@@ -17,7 +18,8 @@ public struct HUDModel: Sendable, Equatable, Hashable {
         p2Health: Int32,
         p1Meter: Int32,
         p2Meter: Int32,
-        healthCap: Int32 = 1000,
+        p1HealthCap: Int32,
+        p2HealthCap: Int32,
         meterCap: Int32 = MatchRules.meterCap,
         timerSeconds: Int32,
         roundNumber: Int32,
@@ -28,7 +30,8 @@ public struct HUDModel: Sendable, Equatable, Hashable {
         self.p2Health = p2Health
         self.p1Meter = p1Meter
         self.p2Meter = p2Meter
-        self.healthCap = healthCap
+        self.p1HealthCap = p1HealthCap
+        self.p2HealthCap = p2HealthCap
         self.meterCap = meterCap
         self.timerSeconds = timerSeconds
         self.roundNumber = roundNumber
@@ -48,11 +51,14 @@ public enum HUDLayout: Sendable {
         let fighters = snapshot.fighters
         let p1 = fighters.indices.contains(0) ? fighters[0] : FighterState()
         let p2 = fighters.indices.contains(1) ? fighters[1] : FighterState()
+        let caps = RosterStartHealth.caps(for: snapshot)
         return HUDModel(
             p1Health: p1.health,
             p2Health: p2.health,
             p1Meter: p1.meter,
             p2Meter: p2.meter,
+            p1HealthCap: caps.p1,
+            p2HealthCap: caps.p2,
             timerSeconds: snapshot.rules.displaySeconds,
             roundNumber: snapshot.rules.roundNumber,
             p1RoundsWon: snapshot.rules.p1RoundsWon,
@@ -96,7 +102,7 @@ public enum HUDLayout: Sendable {
         )
     }
 
-  public static func filledWidth(current: Int32, cap: Int32, barWidth: Int32) -> Int32 {
+    public static func filledWidth(current: Int32, cap: Int32, barWidth: Int32) -> Int32 {
         if cap <= 0 { return 0 }
         let clamped = max(0, min(current, cap))
         return (clamped * barWidth) / cap

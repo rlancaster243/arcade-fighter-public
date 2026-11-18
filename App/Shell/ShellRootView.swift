@@ -77,6 +77,14 @@ public struct ShellRootView: View {
         #endif
     }
 
+    private func tryStartMatch(setup: MatchSetup, snap: GameSnapshot) {
+        do {
+            try matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+        } catch {
+            fputs("LocalMatchSession failed to start (stage bounds required): \(error)\n", stderr)
+        }
+    }
+
     private func syncMatchSessionIfNeeded() {
         switch model.state.screen {
         case .inMatch(let setup):
@@ -84,12 +92,12 @@ public struct ShellRootView: View {
                 matchSession.resume()
             } else if !matchSession.isRunning {
                 let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
-                matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+                tryStartMatch(setup: setup, snap: snap)
             }
         case .matchPaused(let setup):
             if !matchSession.isRunning {
                 let snap = model.matchSnapshot ?? MatchBootstrap.snapshot(for: setup)
-                matchSession.start(setup: setup, initialSnapshot: snap, model: model)
+                tryStartMatch(setup: setup, snap: snap)
             }
             matchSession.pause()
         default:
