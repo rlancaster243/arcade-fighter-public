@@ -154,7 +154,7 @@ All supers: **3 + 6 + 5 = 14** frames, **meter cost 1000** (global, not per-move
 | Rook | 120 | 9 | 120 |
 | Greybox | 120 | 9 | 120 |
 
-Bruno’s throw is **+30** over the 120 baseline and **+30** over Kestrel—consistent with brawler damage bias. Frame data is identical across the roster.
+Bruno’s throw is **+40** over the 120 baseline and **+30** over Kestrel—consistent with brawler damage bias. Frame data is identical across the roster.
 
 ---
 
