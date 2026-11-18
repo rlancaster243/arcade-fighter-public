@@ -39,11 +39,11 @@ final class ShippedContentIntegrationTests: XCTestCase {
     func testExpectedHashScenarios() throws {
         for scenario in catalog.scenarios {
             let hashes = try IntegrationMatchHarness.tickHashes(for: scenario)
-            if hashes != scenario.tickHashes {
-                XCTFail(
-                    "\(scenario.id): tickHashes mismatch. \(hashDiag(actual: hashes, expected: scenario.tickHashes, scenario: scenario.id)) RECORD=\(hashes)"
-                )
-            }
+            XCTAssertEqual(
+                hashes,
+                scenario.tickHashes,
+                hashDiag(actual: hashes, expected: scenario.tickHashes, scenario: scenario.id)
+            )
         }
     }
 }
