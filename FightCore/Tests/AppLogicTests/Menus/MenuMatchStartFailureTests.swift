@@ -2,7 +2,6 @@ import AppLogic
 import XCTest
 
 final class MenuMatchStartFailureTests: XCTestCase {
-  @MainActor
     func testAbortFailedMatchStartSurfacesAlertAndLeavesMatch() {
         var next = MenuShellState(screen: .inMatch(MatchSetup(
             mode: .versus,
