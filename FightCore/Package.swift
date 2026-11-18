@@ -31,6 +31,7 @@ let package = Package(
             name: "FightCoreTests",
             dependencies: ["FightCore"],
             path: "Tests/FightCoreTests",
+            exclude: ["Contracts/expected-hashes.json"],
             resources: [
                 .copy("Resources"),
             ]

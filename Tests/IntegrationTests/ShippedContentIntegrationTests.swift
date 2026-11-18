@@ -55,7 +55,7 @@ final class ShippedContentIntegrationTests: XCTestCase {
         }
     }
 
-    func testKestrelVsBruno ScriptedSteps() throws {
+    func testKestrelVsBrunoScriptedSteps() throws {
         let p1 = try IntegrationMatchHarness.loadFighter("kestrel")
         let p2 = try IntegrationMatchHarness.loadFighter("bruno")
         var sim = IntegrationMatchHarness.simulation(p1: p1, p2: p2)
