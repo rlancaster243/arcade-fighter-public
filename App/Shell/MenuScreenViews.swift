@@ -114,6 +114,7 @@ struct CharacterSelectView: View {
 struct SettingsView: View {
     let preferences: AppPreferences
     let cursor: Int
+    var onKeyTest: (() -> Void)?
 
     var body: some View {
         MenuBackground(title: "SETTINGS") {
@@ -137,6 +138,11 @@ struct SettingsView: View {
                     label: "Back",
                     selected: cursor == MenuShellState.SettingsRow.back.rawValue
                 )
+                if let onKeyTest {
+                    Button("Key test…", action: onKeyTest)
+                        .buttonStyle(.borderedProminent)
+                        .padding(.top, 8)
+                }
             }
             MenuHintBar(text: "↑↓ row · ←→ change · Enter back row")
         }
@@ -175,15 +181,29 @@ struct MatchResultView: View {
 
 struct MatchPausedView: View {
     let setup: MatchSetup
+    @ObservedObject var input: InputCoordinator
 
     var body: some View {
-        MenuBackground(title: "PAUSED") {
-            VStack(alignment: .leading, spacing: 8) {
+        ZStack(alignment: .topTrailing) {
+            VStack(spacing: 10) {
+                Text("PAUSED")
+                    .font(.title.bold())
+                    .foregroundStyle(.white)
                 Text("\(setup.p1.id) vs \(setup.p2.id)")
-                Text("P or Esc — resume fight")
+                    .foregroundStyle(.white.opacity(0.9))
+                Text("P or Esc — resume")
+                    .font(.footnote)
+                    .foregroundStyle(.white.opacity(0.85))
             }
-            .foregroundStyle(.white)
+            .padding(.vertical, 28)
+            .padding(.horizontal, 36)
+            .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 10))
+            InputSettingsOverlay(input: input)
+                .padding(12)
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(Color.black.opacity(0.35))
+        .allowsHitTesting(true)
     }
 }
 

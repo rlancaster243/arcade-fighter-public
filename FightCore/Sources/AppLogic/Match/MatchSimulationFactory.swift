@@ -3,14 +3,26 @@ import FightCore
 /// Builds the playable match simulation stack (stage bounds, roster metadata, fighters).
 public enum MatchSimulationFactory {
     public static func make(
+        p1PickID: String,
         p1: FighterDef,
+        p2PickID: String,
         p2: FighterDef,
         stageId: String,
         fromFile: String = #filePath
     ) throws -> (simulation: Simulation, metadata: MoveMetadataTable) {
         let bounds = try StageBoundsLoader.playBounds(stageId: stageId, fromFile: fromFile)
-        let defs = [p1, p2]
-        let defMap = FighterDefinitionMap.keyedByFighterID(p1: p1, p2: p2)
+        let defs = FighterDefinitionMap.rosterOrdered(
+            p1PickID: p1PickID,
+            p1: p1,
+            p2PickID: p2PickID,
+            p2: p2
+        )
+        let defMap = FighterDefinitionMap.keyedByRosterPick(
+            p1PickID: p1PickID,
+            p1: p1,
+            p2PickID: p2PickID,
+            p2: p2
+        )
         let metadataTable = MoveMetadataTable(fighterDefs: defs)
         let context = CollisionMatchContext(
             fighterDefs: defs,

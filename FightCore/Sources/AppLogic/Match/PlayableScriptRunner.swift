@@ -10,7 +10,14 @@ public enum PlayableScriptRunner {
         frames: [[InputFrame]],
         fromFile: String = #filePath
     ) throws -> [UInt64] {
-        var (simulation, _) = try MatchSimulationFactory.make(p1: p1, p2: p2, stageId: stageId, fromFile: fromFile)
+        var (simulation, _) = try MatchSimulationFactory.make(
+            p1PickID: p1.id,
+            p1: p1,
+            p2PickID: p2.id,
+            p2: p2,
+            stageId: stageId,
+            fromFile: fromFile
+        )
         var snap = MatchSimulationFactory.matchSnapshot(
             seed: seed,
             p1: p1,

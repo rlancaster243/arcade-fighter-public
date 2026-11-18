@@ -13,7 +13,7 @@ Snapshot of playable fighter content on `main` as of schema version 1. All numbe
 | Term | Meaning |
 |------|---------|
 | **Total** | `startup + active + recovery` for the move (attack animation length in ticks). |
-| **Chip** | Block damage on specials/supers only (content field; engine applies 25% rules on block). |
+| **Chip** | Block damage on specials/supers only: values in this report are authored `chip` from JSON. On block, the engine uses that field when non-zero; if `chip` is 0 on a special or super, it falls back to **`damage / 4`** (normals never chip). |
 | **Meter gain** | `meterGain` on the move (attacker on hit; half on block per match rules). |
 | **Super cost** | Not stored in `fighter.json`. Every super (`236236` + button) spends **1000** meter at startup (`MatchRules.superMeterCost`). |
 
@@ -156,7 +156,7 @@ All supers: **3 + 6 + 5 = 14** frames, **meter cost 1000** (global, not per-move
 | Rook | 120 | 9 | 120 |
 | Greybox | 120 | 9 | 120 |
 
-Bruno’s throw is **+30** over the 120 baseline and **+30** over Kestrel—consistent with brawler damage bias. Frame data is identical across the roster.
+Bruno’s throw is **+40** over the 120 baseline and **+30** over Kestrel—consistent with brawler damage bias. Frame data is identical across the roster.
 
 ---
 
@@ -167,8 +167,8 @@ Bruno’s throw is **+30** over the 120 baseline and **+30** over Kestrel—cons
 | Value | Moves |
 |-------|--------|
 | **130** | Kestrel LP only |
-| **120** | Every fighter’s **stand HP**; all specials, supers, throws; **Rook** stand LK/HK (Ilse stand HP is here—Ilse HK is not) |
-| **110** | Bruno LP; **Ilse** stand LP, LK, and HK |
+| **120** | Every fighter’s **stand HP**; **Rook** and **Greybox** stand LP; all specials, supers, throws; **Rook** stand LK/HK (Ilse stand HP is here—Ilse HK is not) |
+| **110** | **Bruno** stand LP; **Ilse** stand LP, LK, and HK |
 
 Kestrel’s LP is the fastest meter-positive light in the roster. Ilse and Bruno gain less meter on lights and (for Ilse) on kicks than Rook on the same kick shells—Ilse stand HP still earns 120.
 
@@ -176,7 +176,7 @@ Kestrel’s LP is the fastest meter-positive light in the roster. Ilse and Bruno
 
 - **Spend:** 1000 per super activation (not authored in JSON).
 - **Earn:** Primarily `meterGain` on confirmed hits; defender gains meter from damage taken (sim rule, not in fighter JSON).
-- **Rough lights-to-super (attacker, all hits):** at 110–130 per LP, ~8–10 clean lights before a super—faster for Kestrel LP, slower for 110-gain lights.
+- **Rough lights-to-super (attacker, all hits):** at 110–130 per LP (Rook/Greybox LP at 120; Kestrel 130; Bruno/Ilse 110), ~8–10 clean lights before a super—faster for Kestrel LP, slower for 110-gain lights.
 
 No fighter defines a cheaper or more expensive super in content; balance differences are damage/chip and how quickly each kit builds meter via normals.
 
@@ -189,8 +189,8 @@ No fighter defines a cheaper or more expensive super in content; balance differe
 3. **Rushdown tax is subtle:** Kestrel trades LP damage for speed and extra LP meter; supers are not stronger than Ilse’s—mobility is the main perk.
 4. **Ilse zoner hints:** Strong QCF (110) and high DP; lows are not in this JSON slice—QCB is standard mid 80.
 5. **Rook anomalies:** Slowest HP (15f), strongest single special (Castle Slam 130), low super chip, nonstandard special buttons, only low-guard QCB in the roster.
-6. **Greybox flat 80:** Useful baseline; every production fighter diverges on at least one axis (health, walks, or move damage).
-7. **Stun parity:** Identical 12/8 hit and block stun on almost all moves—balance is damage, chip, frames, and walks—not stun shapes.
+6. **Greybox flat 80:** Useful baseline for strike damage (normals, specials, super all 80); **throw is 120** like the rest of the roster. Every production fighter diverges on at least one axis (health, walks, or move damage).
+7. **Stun parity:** All **39** roster moves use **12** hitstun and **8** blockstun—balance is damage, chip, frames, and walks—not stun shapes.
 8. **Content gaps vs full buttons:** Kestrel/Bruno lack LK/HK move entries; comparing full button coverage to Ilse/Rook is asymmetric until L9 kits are extended.
 
 ---

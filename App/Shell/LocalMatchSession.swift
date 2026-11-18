@@ -20,11 +20,19 @@ final class LocalMatchSession: ObservableObject {
     var isRunning: Bool { setup != nil && snapshot != nil }
     var isPaused: Bool { paused && isRunning }
 
-    func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) throws {
-        let p1 = MatchSimulationFactory.loadFighter(id: setup.p1.id)
-        let p2 = MatchSimulationFactory.loadFighter(id: setup.p2.id)
+    @discardableResult
+    func start(setup: MatchSetup, initialSnapshot: GameSnapshot, model: MenuShellModel) throws -> [String] {
+        var notices: [String] = []
+        let p1 = loadFighter(id: setup.p1.id, label: "P1", notices: &notices)
+        let p2 = loadFighter(id: setup.p2.id, label: "P2", notices: &notices)
         let stageId = StageBoundsLoader.stageID(forSetupIndex: setup.stageIndex)
-        let built = try MatchSimulationFactory.make(p1: p1, p2: p2, stageId: stageId)
+        let built = try MatchSimulationFactory.make(
+            p1PickID: setup.p1.id,
+            p1: p1,
+            p2PickID: setup.p2.id,
+            p2: p2,
+            stageId: stageId
+        )
         simulation = built.simulation
         metadataTable = built.metadata
 
@@ -42,6 +50,10 @@ final class LocalMatchSession: ObservableObject {
         accumulator = 0
         paused = false
         model.matchSnapshot = snap
+        if !notices.isEmpty {
+            model.appendContentLoadNotices(notices)
+        }
+        return notices
     }
 
     func pause() {
@@ -107,5 +119,29 @@ final class LocalMatchSession: ObservableObject {
                 return
             }
         }
+    }
+
+    private func loadFighter(id: String, label: String, notices: inout [String]) -> FighterDef {
+        let directory = ContentPaths.fighterDirectory(id, fromFile: #filePath)
+        do {
+            return try FighterLoader.loadFighter(from: directory)
+        } catch {
+            let greybox = ContentPaths.greyboxDirectory(fromFile: #filePath)
+            if let fallback = try? FighterLoader.loadFighter(from: greybox) {
+                notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using greybox as “\(id)”.")
+                var relabeled = fallback
+                relabeled.id = id
+                return relabeled
+            }
+            notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using built-in fallback.")
+            return FighterDef(id: id, displayName: "Fallback", gamePlan: "fallback")
+        }
+    }
+
+    private func describe(_ error: Error) -> String {
+        if let loadError = error as? FighterLoadError {
+            return String(describing: loadError)
+        }
+        return error.localizedDescription
     }
 }

@@ -31,7 +31,14 @@ enum IntegrationMatchHarness {
         stageId: String,
         fromFile file: String = #filePath
     ) throws -> Simulation {
-        try MatchSimulationFactory.make(p1: p1, p2: p2, stageId: stageId, fromFile: file).simulation
+        try MatchSimulationFactory.make(
+            p1PickID: p1.id,
+            p1: p1,
+            p2PickID: p2.id,
+            p2: p2,
+            stageId: stageId,
+            fromFile: file
+        ).simulation
     }
 
     static func snapshot(seed: UInt64, p1: FighterDef, p2: FighterDef) -> GameSnapshot {
