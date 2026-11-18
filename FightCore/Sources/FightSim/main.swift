@@ -1,15 +1,22 @@
+import Foundation
 import FightCore
 
 @main
 struct FightSimMain {
     static func main() {
-        var sim = Simulation()
-        var snap = SimulationBootstrap.greyboxMatch(seed: 0xBADA55)
-        let ticks = 120
-        var frames = [InputFrame(), InputFrame()]
-        frames[0].direction = .right
-        for _ in 0..<ticks {
-            sim.step(inputs: frames, snapshot: &snap)
+        let args = Array(CommandLine.arguments.dropFirst())
+        guard let options = FightSimCLI.parseArguments(args) else {
+            if !args.isEmpty {
+                fputs("Invalid arguments.\n", stderr)
+            }
+            FightSimCLI.printUsage()
+            exit(args.isEmpty ? 0 : 2)
+        }
+        do {
+            try FightSimCLI.run(options: options)
+        } catch {
+            fputs("FightSim error: \(error)\n", stderr)
+            exit(1)
         }
     }
 }
