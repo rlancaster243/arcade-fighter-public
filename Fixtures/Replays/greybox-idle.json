@@ -1,0 +1,11 @@
+{
+  "seed": 4097,
+  "fighters": ["greybox", "greybox"],
+  "inputs": [
+    { "p1": { "direction": 0, "buttons": 0 }, "p2": { "direction": 0, "buttons": 0 } },
+    { "p1": { "direction": 6, "buttons": 0 }, "p2": { "direction": 4, "buttons": 0 } },
+    { "p1": { "direction": 6, "buttons": 1 }, "p2": { "direction": 0, "buttons": 0 } },
+    { "p1": { "direction": 0, "buttons": 0 }, "p2": { "direction": 4, "buttons": 4 } },
+    { "p1": { "direction": 2, "buttons": 0 }, "p2": { "direction": 0, "buttons": 0 } }
+  ]
+}

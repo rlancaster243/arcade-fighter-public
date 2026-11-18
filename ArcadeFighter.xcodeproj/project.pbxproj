@@ -1,0 +1,258 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1E7E458ADA67423193300CFB /* ArcadeFighter.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArcadeFighter.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		EAD2191773EA471D879F4079 /* App */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = App;
+			sourceTree = "<group>";
+		};
+		E92F9EB316054CBEBC9CAD48 /* Content */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Content;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A1458BA6249141C7AFC2EB43 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		C277EAB4E5A049A6B963132E = {
+			isa = PBXGroup;
+			children = (
+				EAD2191773EA471D879F4079 /* App */,
+				E92F9EB316054CBEBC9CAD48 /* Content */,
+				B860FF23E7C14AF289F7A73A /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		B860FF23E7C14AF289F7A73A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E7E458ADA67423193300CFB /* ArcadeFighter.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8ED50FFB38F04559A4019B41 /* ArcadeFighter */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = CAC99CD40B514EC194E9AD14 /* Build configuration list for PBXNativeTarget "ArcadeFighter" */;
+			buildPhases = (
+				D0BFAE527D2449EB8B18E199 /* Sources */,
+				A1458BA6249141C7AFC2EB43 /* Frameworks */,
+				594503BFC0A0432DA76002FE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				EAD2191773EA471D879F4079 /* App */,
+				E92F9EB316054CBEBC9CAD48 /* Content */,
+			);
+			name = ArcadeFighter;
+			packageProductDependencies = (
+				865EB1ACC19F43A6817AA4EE /* FightCore */,
+				210028CC3AB64DF1A7152453 /* AppLogic */,
+			);
+			productName = ArcadeFighter;
+			productReference = 1E7E458ADA67423193300CFB /* ArcadeFighter.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		99735DF81FDA46AB914E0EA9 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1640;
+				LastUpgradeCheck = 1640;
+				TargetAttributes = {
+					8ED50FFB38F04559A4019B41 = {
+						CreatedOnToolsVersion = 16.4;
+					};
+				};
+			};
+			buildConfigurationList = F3D61A757A20435B87F81022 /* Build configuration list for PBXProject "ArcadeFighter" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = C277EAB4E5A049A6B963132E;
+			packageReferences = (
+				32B02F889C824701B8658504 /* XCLocalSwiftPackageReference "FightCore" */,
+			);
+			productRefGroup = B860FF23E7C14AF289F7A73A /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				8ED50FFB38F04559A4019B41 /* ArcadeFighter */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		594503BFC0A0432DA76002FE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		D0BFAE527D2449EB8B18E199 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		5036BDD5212244758E7FAE04 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_TESTABILITY = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		3C9191FBA9F9446F80CF4404 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		A0277EF7A9C448E48BF9B8B1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = App/ArcadeFighter.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.arcadefighter.app;
+				PRODUCT_NAME = ArcadeFighter;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		D2C584C214E54108A4127D3D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = App/ArcadeFighter.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = App/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.arcadefighter.app;
+				PRODUCT_NAME = ArcadeFighter;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F3D61A757A20435B87F81022 /* Build configuration list for PBXProject "ArcadeFighter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				5036BDD5212244758E7FAE04 /* Debug */,
+				3C9191FBA9F9446F80CF4404 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		CAC99CD40B514EC194E9AD14 /* Build configuration list for PBXNativeTarget "ArcadeFighter" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A0277EF7A9C448E48BF9B8B1 /* Debug */,
+				D2C584C214E54108A4127D3D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		32B02F889C824701B8658504 /* XCLocalSwiftPackageReference "FightCore" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = FightCore;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		865EB1ACC19F43A6817AA4EE /* FightCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = FightCore;
+			package = 32B02F889C824701B8658504 /* XCLocalSwiftPackageReference "FightCore" */;
+		};
+		210028CC3AB64DF1A7152453 /* AppLogic */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = AppLogic;
+			package = 32B02F889C824701B8658504 /* XCLocalSwiftPackageReference "FightCore" */;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 99735DF81FDA46AB914E0EA9 /* Project object */;
+}

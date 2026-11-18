@@ -1,0 +1,878 @@
+{
+  "schemaVersion": 1,
+  "id": "greybox",
+  "displayName": "Greybox",
+  "archetype": "test",
+  "gamePlan": "Phase 0 validation dummy with every hurtbox state and one move per motion family.",
+  "health": 1000,
+  "walkForward": 3,
+  "walkBack": 2,
+  "jump": {
+    "velocityY": -3584,
+    "gravity": 256
+  },
+  "pushbox": {
+    "x": -20,
+    "y": -90,
+    "w": 40,
+    "h": 90
+  },
+  "hurtboxes": [
+    {
+      "state": "idle",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "walkForward",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "walkBack",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "crouch",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "jumpStartup",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "airborne",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "landing",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "attackStartup",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "attackActive",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "attackRecovery",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "hitstun",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "blockstunStand",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "blockstunCrouch",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "knockdown",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "getup",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "throwStartup",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "throwing",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "beingThrown",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "ko",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "win",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    }
+  ],
+  "spriteSheet": "greybox.png",
+  "sheetMeta": "sheet.json",
+  "moves": [
+    {
+      "id": "norm_lp",
+      "name": "Light Punch",
+      "sprite": "idle_0",
+      "input": {
+        "button": "LP",
+        "stance": "stand"
+      },
+      "startup": 3,
+      "active": 2,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -20,
+            "y": -90,
+            "w": 40,
+            "h": 90
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 80,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "norm_hp",
+      "name": "Heavy Punch",
+      "sprite": "idle_0",
+      "input": {
+        "button": "HP",
+        "stance": "stand"
+      },
+      "startup": 3,
+      "active": 3,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 80,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "sp_qcf",
+      "name": "QCF Special",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "236",
+        "button": "LP"
+      },
+      "startup": 3,
+      "active": 4,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 80,
+      "chip": 20,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "sp_qcb",
+      "name": "QCB Special",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "214",
+        "button": "LK"
+      },
+      "startup": 3,
+      "active": 4,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 80,
+      "chip": 20,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "sp_dp",
+      "name": "DP Special",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "623",
+        "button": "HP"
+      },
+      "startup": 3,
+      "active": 3,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 80,
+      "chip": 20,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "super_test",
+      "name": "Super",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "236236",
+        "button": "HP"
+      },
+      "startup": 3,
+      "active": 6,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 80,
+      "chip": 20,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "throw_lp_lk",
+      "name": "Throw",
+      "sprite": "idle_0",
+      "input": {
+        "button": "LP",
+        "stance": "throw"
+      },
+      "startup": 3,
+      "active": 1,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ]
+      },
+      "damage": 120,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "throw",
+      "unblockable": true
+    }
+  ]
+}
