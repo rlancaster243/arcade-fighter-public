@@ -2,14 +2,14 @@ import FightCore
 
 /// `MatchDirector` with per-slot move metadata resolution (same stack as playable `LocalMatchSession`).
 public struct RosterMatchDirector: MatchDirecting {
-    public var metadataTable: MoveMetadataTable
+    public var resolver: MatchMoveMetadataResolver
 
     public init(metadataTable: MoveMetadataTable) {
-        self.metadataTable = metadataTable
+        resolver = metadataTable.resolver
     }
 
     public mutating func applyRules(snapshot: inout GameSnapshot) {
-        var director = MatchDirector(moveMetadata: metadataTable.directorMap(for: snapshot))
+        var director = MatchDirector(metadata: resolver)
         director.applyRules(snapshot: &snapshot)
     }
 }
