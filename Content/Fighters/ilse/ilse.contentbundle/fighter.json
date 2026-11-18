@@ -323,22 +323,22 @@
       "frames": {
         "hit": [
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 14,
+            "y": -72,
+            "w": 116,
+            "h": 46
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 14,
+            "y": -72,
+            "w": 116,
+            "h": 46
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 14,
+            "y": -72,
+            "w": 116,
+            "h": 46
           }
         ],
         "hurt": [
@@ -383,16 +383,66 @@
         ],
         "throw": []
       },
-      "damage": 95,
+      "damage": 96,
       "chip": 0,
-      "hitstun": 12,
+      "hitstun": 18,
       "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
+      "pushbackHit": 86,
+      "pushbackBlock": 46,
       "meterGain": 120,
       "hitstop": 7,
       "guard": "mid",
-      "unblockable": false
+      "unblockable": false,
+      "velocities": [
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        }
+      ]
     },
     {
       "id": "ilse_norm_lk",
@@ -408,16 +458,16 @@
       "frames": {
         "hit": [
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 10,
+            "y": -48,
+            "w": 96,
+            "h": 32
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 10,
+            "y": -48,
+            "w": 96,
+            "h": 32
           }
         ],
         "hurt": [
@@ -450,16 +500,58 @@
         ],
         "throw": []
       },
-      "damage": 65,
+      "damage": 50,
       "chip": 0,
-      "hitstun": 12,
+      "hitstun": 18,
       "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
+      "pushbackHit": 56,
+      "pushbackBlock": 36,
       "meterGain": 110,
       "hitstop": 6,
       "guard": "mid",
-      "unblockable": false
+      "unblockable": false,
+      "velocities": [
+        {
+          "x": -1280,
+          "y": 0
+        },
+        {
+          "x": -1280,
+          "y": 0
+        },
+        {
+          "x": -1280,
+          "y": 0
+        },
+        {
+          "x": -1280,
+          "y": 0
+        },
+        {
+          "x": -1280,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        }
+      ]
     },
     {
       "id": "ilse_norm_hk",
@@ -475,22 +567,22 @@
       "frames": {
         "hit": [
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 12,
+            "y": -56,
+            "w": 110,
+            "h": 40
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 12,
+            "y": -56,
+            "w": 110,
+            "h": 40
           },
           {
-            "x": -25,
-            "y": -95,
-            "w": 50,
-            "h": 95
+            "x": 12,
+            "y": -56,
+            "w": 110,
+            "h": 40
           }
         ],
         "hurt": [
@@ -535,16 +627,70 @@
         ],
         "throw": []
       },
-      "damage": 100,
+      "damage": 90,
       "chip": 0,
-      "hitstun": 12,
+      "hitstun": 18,
       "blockstun": 8,
-      "pushbackHit": 4,
-      "pushbackBlock": 2,
+      "pushbackHit": 86,
+      "pushbackBlock": 46,
       "meterGain": 110,
       "hitstop": 6,
       "guard": "mid",
-      "unblockable": false
+      "unblockable": false,
+      "velocities": [
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": -1024,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        },
+        {
+          "x": 0,
+          "y": 0
+        }
+      ]
     },
     {
       "id": "sp_prayer_lp",
@@ -639,7 +785,7 @@
           "w": 24,
           "h": 24
         },
-        "damage": 60,
+        "damage": 108,
         "maxOnScreen": 1,
         "spawnCount": 1,
         "hitsAirborne": true
@@ -738,7 +884,7 @@
           "w": 24,
           "h": 24
         },
-        "damage": 80,
+        "damage": 132,
         "maxOnScreen": 1,
         "spawnCount": 1,
         "hitsAirborne": true
