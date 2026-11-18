@@ -1,4 +1,5 @@
 import AppLogic
+import FightCore
 import GameController
 
 /// `GCController` adapter: 0.5 stick deadzone, 8-way direction, X/Y/A/B face map.
@@ -54,13 +55,13 @@ final class GameControllerInputAdapter {
 
     private func emitSample(from gamepad: GCExtendedGamepad) {
         let stickDirection = GamepadDirectionSampler.direction(
-            horizontal: gamepad.leftThumbstick.xAxis.value,
-            vertical: gamepad.leftThumbstick.yAxis.value,
+            horizontal: Double(gamepad.leftThumbstick.xAxis.value),
+            vertical: Double(gamepad.leftThumbstick.yAxis.value),
             deadzone: deadzone
         )
         let dpadDirection = GamepadDirectionSampler.direction(
-            horizontal: gamepad.dpad.xAxis.value,
-            vertical: gamepad.dpad.yAxis.value,
+            horizontal: Double(gamepad.dpad.xAxis.value),
+            vertical: Double(gamepad.dpad.yAxis.value),
             deadzone: deadzone
         )
         let merged = dpadDirection != .neutral ? dpadDirection : stickDirection
