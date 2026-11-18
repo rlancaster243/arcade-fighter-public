@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "description": "Synthesized offline SFX catalog (L10).",
+  "sampleRate": 44100,
+  "clips": [
+    { "id": "hit_light", "file": "hit_light.wav", "gainQ8": 230 },
+    { "id": "hit_heavy", "file": "hit_heavy.wav", "gainQ8": 256 },
+    { "id": "block", "file": "block.wav", "gainQ8": 200 },
+    { "id": "special", "file": "special.wav", "gainQ8": 240 },
+    { "id": "super", "file": "super.wav", "gainQ8": 256 },
+    { "id": "throw", "file": "throw.wav", "gainQ8": 220 },
+    { "id": "ko", "file": "ko.wav", "gainQ8": 256 },
+    { "id": "round_start", "file": "round_start.wav", "gainQ8": 230 },
+    { "id": "ambient_bells", "file": "ambient_bells.wav", "gainQ8": 128, "loop": true }
+  ]
+}

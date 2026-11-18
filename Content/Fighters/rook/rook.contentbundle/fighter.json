@@ -1,0 +1,1036 @@
+{
+  "schemaVersion": 1,
+  "id": "rook",
+  "displayName": "Rook",
+  "archetype": "rook",
+  "gamePlan": "Stonework guardian: slow march, heavy blows, castle slam (236 HP), bulwark spin (214 LP), upward baton DP, super Rook Checkmate.",
+  "health": 1050,
+  "walkForward": 2,
+  "walkBack": 2,
+  "jump": {
+    "velocityY": -3584,
+    "gravity": 256
+  },
+  "pushbox": {
+    "x": -20,
+    "y": -90,
+    "w": 40,
+    "h": 90
+  },
+  "hurtboxes": [
+    {
+      "state": "idle",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "walkForward",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "walkBack",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "crouch",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "jumpStartup",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "airborne",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "landing",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "attackStartup",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "attackActive",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "attackRecovery",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "hitstun",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "blockstunStand",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "blockstunCrouch",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "knockdown",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "getup",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "throwStartup",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "throwing",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "beingThrown",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "ko",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    },
+    {
+      "state": "win",
+      "boxes": [
+        {
+          "x": -25,
+          "y": -95,
+          "w": 50,
+          "h": 95
+        }
+      ]
+    }
+  ],
+  "spriteSheet": "rook.png",
+  "sheetMeta": "sheet.json",
+  "moves": [
+    {
+      "id": "rook_norm_lp",
+      "name": "Light Punch",
+      "sprite": "idle_0",
+      "input": {
+        "button": "LP",
+        "stance": "stand"
+      },
+      "startup": 3,
+      "active": 2,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 75,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "rook_norm_hp",
+      "name": "Heavy Punch",
+      "sprite": "idle_0",
+      "input": {
+        "button": "HP",
+        "stance": "stand"
+      },
+      "startup": 5,
+      "active": 3,
+      "recovery": 7,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 120,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 9,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "rook_sp_qcf",
+      "name": "Castle Slam",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "236",
+        "button": "HP"
+      },
+      "startup": 3,
+      "active": 4,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 130,
+      "chip": 20,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "rook_sp_qcb",
+      "name": "Bulwark Spin",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "214",
+        "button": "LP"
+      },
+      "startup": 3,
+      "active": 4,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 80,
+      "chip": 20,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "low",
+      "unblockable": false
+    },
+    {
+      "id": "rook_sp_dp",
+      "name": "Upward Baton",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "623",
+        "button": "LK"
+      },
+      "startup": 3,
+      "active": 3,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 80,
+      "chip": 20,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "rook_super_test",
+      "name": "Rook Checkmate",
+      "sprite": "idle_0",
+      "input": {
+        "motion": "236236",
+        "button": "HP"
+      },
+      "startup": 3,
+      "active": 6,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 300,
+      "chip": 20,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 8,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "rook_throw_lp_lk",
+      "name": "Throw",
+      "sprite": "idle_0",
+      "input": {
+        "button": "LP",
+        "stance": "throw"
+      },
+      "startup": 3,
+      "active": 1,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ]
+      },
+      "damage": 120,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "throw",
+      "unblockable": true
+    },
+    {
+      "id": "rook_norm_lk",
+      "name": "Light Kick",
+      "sprite": "idle_0",
+      "input": {
+        "button": "LK",
+        "stance": "stand"
+      },
+      "startup": 3,
+      "active": 2,
+      "recovery": 5,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 65,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    },
+    {
+      "id": "rook_norm_hk",
+      "name": "Heavy Kick",
+      "sprite": "idle_0",
+      "input": {
+        "button": "HK",
+        "stance": "stand"
+      },
+      "startup": 4,
+      "active": 3,
+      "recovery": 6,
+      "frames": {
+        "hit": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "hurt": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "push": [
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          },
+          {
+            "x": -25,
+            "y": -95,
+            "w": 50,
+            "h": 95
+          }
+        ],
+        "throw": []
+      },
+      "damage": 100,
+      "chip": 0,
+      "hitstun": 12,
+      "blockstun": 8,
+      "pushbackHit": 4,
+      "pushbackBlock": 2,
+      "meterGain": 120,
+      "hitstop": 6,
+      "guard": "mid",
+      "unblockable": false
+    }
+  ]
+}

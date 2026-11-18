@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "id": "stage1",
+  "displayName": "Glacier Forge Quarry",
+  "background": "background.png",
+  "floorY": 180,
+  "leftBound": 20,
+  "rightBound": 364,
+  "description": "Open quarry floor with glacier walls and a distant forge glow."
+}

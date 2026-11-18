@@ -1,0 +1,33 @@
+{
+  "schemaVersion": 1,
+  "id": "stage2",
+  "displayName": "Bell Tower Cloister",
+  "width": 384,
+  "height": 216,
+  "floorY": 32,
+  "cameraBounds": {
+    "left": 0,
+    "right": 384
+  },
+  "layers": [
+    {
+      "id": "sky",
+      "image": "cloister_sky.png",
+      "parallaxQ8": 26,
+      "zOrder": 0
+    },
+    {
+      "id": "bells",
+      "image": "cloister_bells.png",
+      "parallaxQ8": 77,
+      "zOrder": 1
+    },
+    {
+      "id": "floor",
+      "image": "cloister_floor.png",
+      "parallaxQ8": 256,
+      "zOrder": 2
+    }
+  ],
+  "ambientLoop": "ambient_bells"
+}
