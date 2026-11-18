@@ -14,7 +14,13 @@ public enum StageBoundsLoader {
 
     public static func loadStageJSON(_ id: String, fromFile file: String = #filePath) throws -> [String: Any] {
         let dir = ContentPaths.stageDirectory(id, fromFile: file)
-        let data = try Data(contentsOf: dir.appendingPathComponent("stage.json"))
+        let jsonURL = dir.appendingPathComponent("stage.json")
+        let data: Data
+        do {
+            data = try Data(contentsOf: jsonURL)
+        } catch {
+            throw StageBoundsError.stageFileUnreadable(id, underlying: error)
+        }
         guard let json = try JSONSerialization.jsonObject(with: data) as? [String: Any] else {
             throw StageBoundsError.invalidStageJSON(id)
         }
@@ -35,16 +41,22 @@ public enum StageBoundsLoader {
         {
             return (Int32(left) - arenaCenterPx, Int32(right) - arenaCenterPx)
         }
-        return (StageBounds.playLeftPx, StageBounds.playRightPx)
+        throw StageBoundsError.missingPlayBounds(stageId)
     }
 
     public enum StageBoundsError: Error, CustomStringConvertible {
+        case stageFileUnreadable(String, underlying: Error)
         case invalidStageJSON(String)
+        case missingPlayBounds(String)
 
         public var description: String {
             switch self {
+            case .stageFileUnreadable(let id, let underlying):
+                return "could not read stage.json for \(id): \(underlying)"
             case .invalidStageJSON(let id):
                 return "invalid stage.json for \(id)"
+            case .missingPlayBounds(let id):
+                return "stage \(id) has no leftBound/rightBound or cameraBounds play space"
             }
         }
     }

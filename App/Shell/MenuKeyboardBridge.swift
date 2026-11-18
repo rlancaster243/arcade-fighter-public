@@ -5,30 +5,49 @@ import SwiftUI
 import AppKit
 
 struct MenuKeyboardBridge: NSViewRepresentable {
+    let isActive: Bool
     let onCommand: (MenuCommand) -> Void
 
     func makeNSView(context: Context) -> MenuKeyCatcherView {
         let view = MenuKeyCatcherView()
         view.onCommand = onCommand
+        view.isActive = isActive
         return view
     }
 
     func updateNSView(_ nsView: MenuKeyCatcherView, context: Context) {
         nsView.onCommand = onCommand
+        nsView.isActive = isActive
     }
 }
 
 final class MenuKeyCatcherView: NSView {
     var onCommand: ((MenuCommand) -> Void)?
+    var isActive = true {
+        didSet { updateFirstResponder() }
+    }
 
-    override var acceptsFirstResponder: Bool { true }
+    override var acceptsFirstResponder: Bool { isActive }
 
     override func viewDidMoveToWindow() {
         super.viewDidMoveToWindow()
-        window?.makeFirstResponder(self)
+        updateFirstResponder()
+    }
+
+    private func updateFirstResponder() {
+        guard let window else { return }
+        if isActive {
+            window.makeFirstResponder(self)
+        } else if window.firstResponder === self {
+            window.makeFirstResponder(nil)
+        }
     }
 
     override func keyDown(with event: NSEvent) {
+        guard isActive else {
+            super.keyDown(with: event)
+            return
+        }
         if event.isARepeat { return }
         if let command = map(event) {
             onCommand?(command)

@@ -29,6 +29,26 @@ public struct ShellRootView: View {
         }
     }
 
+    /// Input settings / key test are menu-only; never during live or paused matches (fight bindings stay on `InputCoordinator`).
+    private var allowsInputSettingsOverlay: Bool {
+        switch model.state.screen {
+        case .inMatch, .matchPaused:
+            return false
+        default:
+            return true
+        }
+    }
+
+    /// Menu navigation keys — disabled during active rounds so fight input is not stolen; enabled while paused.
+    private var menuKeyboardActive: Bool {
+        switch model.state.screen {
+        case .inMatch:
+            return false
+        default:
+            return true
+        }
+    }
+
     public var body: some View {
         ZStack {
             menuLayer
@@ -43,8 +63,8 @@ public struct ShellRootView: View {
         .frame(minWidth: 384, minHeight: 216)
         .windowPreferences(model.state.preferences)
         .overlay(alignment: .topTrailing) {
-            if !isFighting && !showsMatchView {
-                InputSettingsOverlay(input: input, canOpenKeyTest: !showsMatchView)
+            if allowsInputSettingsOverlay {
+                InputSettingsOverlay(input: input, canOpenKeyTest: allowsInputSettingsOverlay)
                     .padding(12)
             }
         }
@@ -63,14 +83,14 @@ public struct ShellRootView: View {
         }
         .sheet(
             isPresented: Binding(
-                get: { input.showKeyTest && !showsMatchView },
+                get: { input.showKeyTest && allowsInputSettingsOverlay },
                 set: { input.showKeyTest = $0 }
             )
         ) {
             KeyTestScreen(input: input)
         }
         #if os(macOS)
-        .background(MenuKeyboardBridge { model.send($0) })
+        .background(MenuKeyboardBridge(isActive: menuKeyboardActive) { model.send($0) })
         .onChange(of: model.state.requestedQuit) { _, quit in
             if quit { NSApplication.shared.terminate(nil) }
         }
@@ -81,7 +101,9 @@ public struct ShellRootView: View {
         do {
             try matchSession.start(setup: setup, initialSnapshot: snap, model: model)
         } catch {
-            fputs("LocalMatchSession failed to start (stage bounds required): \(error)\n", stderr)
+            fputs("LocalMatchSession failed to start: \(error)\n", stderr)
+            matchSession.stop()
+            model.handleMatchStartFailure(error)
         }
     }
 
@@ -113,7 +135,7 @@ public struct ShellRootView: View {
         case .title:
             TitleScreenView { model.send(.confirm) }
         case .mainMenu:
-            MainMenuView(cursor: model.state.cursor)
+            MainMenuView(cursor: model.state.cursor, alertMessage: model.state.alertMessage)
         case .arcadeLadder:
             ArcadeLadderView()
         case .versusSetup:

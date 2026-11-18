@@ -20,10 +20,18 @@ struct TitleScreenView: View {
 
 struct MainMenuView: View {
     let cursor: Int
+    var alertMessage: String?
 
     var body: some View {
         MenuBackground(title: "MAIN MENU") {
             VStack(alignment: .leading, spacing: 4) {
+                if let alertMessage {
+                    Text(alertMessage)
+                        .font(.caption)
+                        .foregroundStyle(.orange)
+                        .fixedSize(horizontal: false, vertical: true)
+                        .padding(.bottom, 6)
+                }
                 ForEach(MenuShellState.MainMenuItem.allCases, id: \.rawValue) { item in
                     MenuListRow(label: item.label, selected: item.rawValue == cursor)
                 }
