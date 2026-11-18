@@ -31,6 +31,7 @@ let package = Package(
             name: "FightCoreTests",
             dependencies: ["FightCore"],
             path: "Tests/FightCoreTests",
+            exclude: ["Contracts/expected-hashes.json"],
             resources: [
                 .copy("Resources"),
             ]
@@ -45,6 +46,11 @@ let package = Package(
             name: "ContentTests",
             dependencies: ["FightCore"],
             path: "Tests/ContentTests"
+        ),
+        .testTarget(
+            name: "IntegrationTests",
+            dependencies: ["FightCore"],
+            path: "Tests/IntegrationTests"
         ),
     ]
 )
