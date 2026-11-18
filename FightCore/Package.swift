@@ -49,7 +49,7 @@ let package = Package(
         .testTarget(
             name: "IntegrationTests",
             dependencies: ["FightCore"],
-            path: "../Tests/IntegrationTests"
+            path: "Tests/IntegrationTests"
         ),
     ]
 )
