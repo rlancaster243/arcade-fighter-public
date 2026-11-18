@@ -21,13 +21,15 @@ public struct FighterStepper: FighterStepping, Sendable {
             guard let def = definitions[defID] ?? definitions.values.first else { continue }
 
             var fighter = snapshot.fighters[idx]
+            var slotRuntime = runtime[idx]
             stepOneFighter(
                 fighter: &fighter,
-                runtime: &runtime[idx],
+                runtime: &slotRuntime,
                 def: def,
                 slot: slot,
                 snapshot: &snapshot
             )
+            runtime[idx] = slotRuntime
             snapshot.fighters[idx] = fighter
         }
 
@@ -66,7 +68,7 @@ public struct FighterStepper: FighterStepping, Sendable {
         }
     }
 
-    private mutating func stepOneFighter(
+    private func stepOneFighter(
         fighter: inout FighterState,
         runtime: inout FighterRuntimeSlot,
         def: FighterDef,
@@ -107,7 +109,7 @@ public struct FighterStepper: FighterStepping, Sendable {
         FighterStateMachine.integratePosition(fighter: &fighter, gravity: def.gravity)
     }
 
-    private mutating func captureQueuedCommands(
+    private func captureQueuedCommands(
         fighter: inout FighterState,
         runtime: inout FighterRuntimeSlot
     ) {
@@ -134,7 +136,7 @@ public struct FighterStepper: FighterStepping, Sendable {
         fighter.activeMoveID = ""
     }
 
-    private mutating func tryStartQueued(
+    private func tryStartQueued(
         fighter: inout FighterState,
         runtime: inout FighterRuntimeSlot,
         def: FighterDef
@@ -156,7 +158,7 @@ public struct FighterStepper: FighterStepping, Sendable {
         }
     }
 
-    private mutating func tryCancel(
+    private func tryCancel(
         fighter: inout FighterState,
         runtime: inout FighterRuntimeSlot,
         def: FighterDef,
@@ -193,7 +195,7 @@ public struct FighterStepper: FighterStepping, Sendable {
         snapshot.projectiles.append(projectile)
     }
 
-    private mutating func handleThrowResolution(snapshot: inout GameSnapshot) {
+    private func handleThrowResolution(snapshot: inout GameSnapshot) {
         guard snapshot.fighters.count >= 2 else { return }
         for attackerSlot in PlayerSlot.allCases {
             let aIdx = Int(attackerSlot.rawValue)
