@@ -1,0 +1,161 @@
+enum FighterStateMachine {
+    static func canStartMove(kind: FighterStateKind) -> Bool {
+        switch kind {
+        case .idle, .walkForward, .walkBack, .crouch:
+            return true
+        case .attackRecovery:
+            return true
+        default:
+            return false
+        }
+    }
+
+    static func isGrounded(_ kind: FighterStateKind) -> Bool {
+        switch kind {
+        case .airborne, .jumpStartup:
+            return false
+        default:
+            return true
+        }
+    }
+
+    static func isAttackState(_ kind: FighterStateKind) -> Bool {
+        switch kind {
+        case .attackStartup, .attackActive, .attackRecovery:
+            return true
+        default:
+            return false
+        }
+    }
+
+    static func isHitstunLike(_ kind: FighterStateKind) -> Bool {
+        switch kind {
+        case .hitstun, .blockstunStand, .blockstunCrouch, .knockdown, .beingThrown:
+            return true
+        default:
+            return false
+        }
+    }
+
+    static func applyWalkVelocity(
+        fighter: inout FighterState,
+        walkForward: Int32,
+        walkBack: Int32
+    ) {
+        switch fighter.kind {
+        case .walkForward:
+            let px = fighter.facingRight ? walkForward : -walkForward
+            fighter.velocity = Vec2(x: Fixed(pixels: px), y: .zero)
+        case .walkBack:
+            let px = fighter.facingRight ? -walkBack : walkBack
+            fighter.velocity = Vec2(x: Fixed(pixels: px), y: .zero)
+        default:
+            if isGrounded(fighter.kind) {
+                fighter.velocity = Vec2(x: .zero, y: fighter.velocity.y)
+            }
+        }
+    }
+
+    static func integratePosition(fighter: inout FighterState, gravity: Int32) {
+        let vx = fighter.velocity.x.raw
+        var vy = fighter.velocity.y.raw
+
+        if !isGrounded(fighter.kind) {
+            vy += gravity
+            fighter.velocity.y = Fixed(raw: vy)
+        }
+
+        fighter.position = Vec2(
+            x: Fixed(raw: fighter.position.x.raw + vx),
+            y: Fixed(raw: fighter.position.y.raw + vy)
+        )
+
+        if fighter.position.y.raw > FighterConstants.groundY {
+            fighter.position.y = Fixed(raw: FighterConstants.groundY)
+            fighter.velocity.y = .zero
+            if fighter.kind == .airborne {
+                fighter.kind = .landing
+                fighter.timer = 0
+                fighter.stateTick = 0
+            }
+        }
+    }
+
+    static func beginAttack(fighter: inout FighterState, moveID: String, runtime: inout FighterRuntimeSlot, move: MoveDef) {
+        fighter.kind = .attackStartup
+        fighter.activeMoveID = moveID
+        fighter.stateTick = 0
+        fighter.timer = 0
+        runtime.executingMoveID = moveID
+        runtime.armorHitsRemaining = MovePhaseMath.armorHits(for: move)
+        runtime.queuedMoveID = ""
+    }
+
+    static func advanceAttack(
+        fighter: inout FighterState,
+        runtime: inout FighterRuntimeSlot,
+        move: MoveDef
+    ) {
+        fighter.stateTick &+= 1
+        guard let phase = MovePhaseMath.attackPhase(for: fighter.stateTick, move: move) else {
+            fighter.kind = .idle
+            fighter.activeMoveID = ""
+            fighter.stateTick = 0
+            fighter.timer = 0
+            runtime.executingMoveID = ""
+            return
+        }
+        fighter.kind = MovePhaseMath.attackKind(for: phase)
+    }
+
+    static func advanceJump(fighter: inout FighterState, jumpVelocityY: Int32) {
+        switch fighter.kind {
+        case .jumpStartup:
+            fighter.timer &+= 1
+            if fighter.timer >= FighterConstants.jumpStartupTicks {
+                fighter.kind = .airborne
+                fighter.velocity.y = Fixed(raw: jumpVelocityY)
+                fighter.timer = 0
+            }
+        case .landing:
+            fighter.timer &+= 1
+            if fighter.timer >= FighterConstants.landingTicks {
+                fighter.kind = .idle
+                fighter.timer = 0
+                fighter.stateTick = 0
+            }
+        default:
+            break
+        }
+    }
+
+    static func advanceTimerStates(fighter: inout FighterState) {
+        switch fighter.kind {
+        case .hitstun, .blockstunStand, .blockstunCrouch, .knockdown, .beingThrown, .getup:
+            guard fighter.timer > 0 else {
+                fighter.kind = .idle
+                fighter.timer = 0
+                fighter.activeMoveID = ""
+                return
+            }
+            fighter.timer &-= 1
+            if fighter.timer == 0 {
+                if fighter.kind == .knockdown {
+                    fighter.kind = .getup
+                    fighter.timer = FighterConstants.defaultGetupTicks
+                } else {
+                    fighter.kind = .idle
+                    fighter.activeMoveID = ""
+                }
+            }
+        case .throwing:
+            fighter.timer &-= 1
+            if fighter.timer <= 0 {
+                fighter.kind = .idle
+                fighter.activeMoveID = ""
+            }
+        default:
+            break
+        }
+    }
+}
