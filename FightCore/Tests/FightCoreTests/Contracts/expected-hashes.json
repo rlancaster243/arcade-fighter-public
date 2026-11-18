@@ -3,23 +3,23 @@
   "scenarios": [
     {
       "id": "replay-greybox-idle",
-      "finalHash": 0
+      "finalHash": 8782780902704125185
     },
     {
       "id": "replay-greybox-short",
-      "finalHash": 0
+      "finalHash": 11029084304615100007
     },
     {
       "id": "script-kestrel-bruno-5t",
-      "finalHash": 0
+      "finalHash": 8530034009201952160
     },
     {
       "id": "cpu-greybox-normal-hard-180t",
-      "finalHash": 0
+      "finalHash": 3586471278278273826
     },
     {
       "id": "cpu-ilse-rook-easy-normal-240t",
-      "finalHash": 0
+      "finalHash": 13613689456164374622
     }
   ]
 }
