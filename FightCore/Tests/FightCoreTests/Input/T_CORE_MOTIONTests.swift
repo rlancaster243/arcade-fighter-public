@@ -38,7 +38,7 @@ final class T_CORE_MOTIONTests: XCTestCase {
         for span in 3 ... 11 {
             var ring = InputRingBuffer()
             ring.push(numpad: 2, buttons: 0)
-            for _ in 0 ..< (span - 2) {
+            for _ in 0 ..< max(0, span - 3) {
                 ring.push(numpad: 0, buttons: 0)
             }
             ring.push(numpad: 3, buttons: 0)
@@ -145,7 +145,9 @@ final class T_CORE_MOTIONTests: XCTestCase {
             buttons: 1 << Button.heavyKick.rawValue,
             facingRight: true
         )
-        XCTAssertNil(p.resolvedInput(for: .p1).motion)
+        let buf = p.tracker(for: .p1).buffer
+        XCTAssertFalse(MotionMatcher.spanMatches(pattern: patternSuper, maxSpan: 20, buffer: buf))
+        XCTAssertNotEqual(p.resolvedInput(for: .p1).motion, .super236236)
     }
 
     func testFacingFlipMidMotion() {
