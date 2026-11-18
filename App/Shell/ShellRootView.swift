@@ -39,13 +39,13 @@ public struct ShellRootView: View {
         }
     }
 
-    /// Menu navigation keys — disabled during active rounds so fight input is not stolen; enabled while paused.
-    private var menuKeyboardActive: Bool {
+    /// Full menu navigation is off during an active round; P/Esc still pause via `matchPauseHotkeysOnly`.
+    private var menuKeyboardMode: MenuKeyboardMode {
         switch model.state.screen {
         case .inMatch:
-            return false
+            return .matchPauseHotkeysOnly
         default:
-            return true
+            return .fullNavigation
         }
     }
 
@@ -90,7 +90,7 @@ public struct ShellRootView: View {
             KeyTestScreen(input: input)
         }
         #if os(macOS)
-        .background(MenuKeyboardBridge(isActive: menuKeyboardActive) { model.send($0) })
+        .background(MenuKeyboardBridge(mode: menuKeyboardMode) { model.send($0) })
         .onChange(of: model.state.requestedQuit) { _, quit in
             if quit { NSApplication.shared.terminate(nil) }
         }
