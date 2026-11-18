@@ -68,12 +68,12 @@ Bruno’s HP leads on damage (140) with the same 11-frame shell as Kestrel. Rook
 
 ### Extra normals (Ilse / Rook only)
 
-| Fighter | Move | Total | Damage | Notes |
-|---------|------|-------|--------|-------|
-| Ilse | LK | 10 | 65 | Same cadence as LP |
-| Ilse | HK | **13** | 100 | 4+3+6; slower heavy kick |
-| Rook | LK | 10 | 65 | Mirrors Ilse LK |
-| Rook | HK | **13** | 100 | Same HK profile as Ilse |
+| Fighter | Move | Total | Damage | Meter gain | Notes |
+|---------|------|-------|--------|------------|-------|
+| Ilse | LK | 10 | 65 | 110 | Same cadence and meter as Ilse LP |
+| Ilse | HK | **13** | 100 | **110** | 4+3+6; slower heavy kick—not 120 like stand HP |
+| Rook | LK | 10 | 65 | **120** | Same frames/damage as Ilse LK; +10 meter |
+| Rook | HK | **13** | 100 | **120** | Same HK frame/damage profile as Ilse; +10 meter |
 
 ---
 
@@ -165,10 +165,10 @@ Bruno’s throw is **+30** over the 120 baseline and **+30** over Kestrel—cons
 | Value | Moves |
 |-------|--------|
 | **130** | Kestrel LP only |
-| **120** | Most HP, all specials, supers, throws (Kestrel/Bruno/Ilse/Rook/Greybox bulk) |
-| **110** | Bruno LP; Ilse LP/LK/HK |
+| **120** | Every fighter’s **stand HP**; all specials, supers, throws; **Rook** stand LK/HK (Ilse stand HP is here—Ilse HK is not) |
+| **110** | Bruno LP; **Ilse** stand LP, LK, and HK |
 
-Kestrel’s LP is the fastest meter-positive light in the roster. Ilse and Bruno gain less meter per light than tanks/Rook despite similar frame data.
+Kestrel’s LP is the fastest meter-positive light in the roster. Ilse and Bruno gain less meter on lights and (for Ilse) on kicks than Rook on the same kick shells—Ilse stand HP still earns 120.
 
 ### Super spend and earn
 
