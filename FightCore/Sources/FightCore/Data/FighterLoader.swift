@@ -77,16 +77,43 @@ public enum ContentPaths {
     public static func fighterDirectory(
         _ id: String,
         fromFile file: String = #filePath,
-        repoRoot root: URL? = nil
+        repoRoot root: URL? = nil,
+        resourcesURL: URL? = nil
     ) -> URL {
+        if root == nil, let bundled = bundledContentRoot(resourcesURL: resourcesURL) {
+            return bundled.appendingPathComponent(
+                "Fighters/\(id)/\(id).contentbundle",
+                isDirectory: true
+            )
+        }
         let root = root ?? repoRoot(fromFile: file)
         return root
             .appendingPathComponent("Content/Fighters/\(id)/\(id).contentbundle", isDirectory: true)
     }
 
-    public static func stageDirectory(_ id: String, fromFile file: String = #filePath) -> URL {
-        repoRoot(fromFile: file)
-            .appendingPathComponent("Content/Stages/\(id)/\(id).contentbundle", isDirectory: true)
+    public static func stageDirectory(
+        _ id: String,
+        fromFile file: String = #filePath,
+        resourcesURL: URL? = nil
+    ) -> URL {
+        let content = bundledContentRoot(resourcesURL: resourcesURL)
+            ?? repoRoot(fromFile: file).appendingPathComponent("Content", isDirectory: true)
+        return content.appendingPathComponent(
+            "Stages/\(id)/\(id).contentbundle",
+            isDirectory: true
+        )
+    }
+
+    /// Resources/Content, only when the shipped greybox marker is actually there.
+    /// `resourcesURL` nil uses `Bundle.main`. An explicit `repoRoot` still walks the source tree.
+    private static func bundledContentRoot(resourcesURL: URL? = nil) -> URL? {
+        guard let resources = resourcesURL ?? Bundle.main.resourceURL else { return nil }
+        let content = resources.appendingPathComponent("Content", isDirectory: true)
+        let marker = content.appendingPathComponent(
+            "Fighters/greybox/greybox.contentbundle/fighter.json"
+        )
+        guard FileManager.default.fileExists(atPath: marker.path) else { return nil }
+        return content
     }
 
     public static func greyboxDirectory(fromFile file: String = #filePath) -> URL {
