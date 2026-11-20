@@ -77,9 +77,10 @@ public enum ContentPaths {
     public static func fighterDirectory(
         _ id: String,
         fromFile file: String = #filePath,
-        repoRoot root: URL? = nil
+        repoRoot root: URL? = nil,
+        resourcesURL: URL? = nil
     ) -> URL {
-        if root == nil, let bundled = bundledContentRoot() {
+        if root == nil, let bundled = bundledContentRoot(resourcesURL: resourcesURL) {
             return bundled.appendingPathComponent(
                 "Fighters/\(id)/\(id).contentbundle",
                 isDirectory: true
@@ -90,8 +91,12 @@ public enum ContentPaths {
             .appendingPathComponent("Content/Fighters/\(id)/\(id).contentbundle", isDirectory: true)
     }
 
-    public static func stageDirectory(_ id: String, fromFile file: String = #filePath) -> URL {
-        let content = bundledContentRoot()
+    public static func stageDirectory(
+        _ id: String,
+        fromFile file: String = #filePath,
+        resourcesURL: URL? = nil
+    ) -> URL {
+        let content = bundledContentRoot(resourcesURL: resourcesURL)
             ?? repoRoot(fromFile: file).appendingPathComponent("Content", isDirectory: true)
         return content.appendingPathComponent(
             "Stages/\(id)/\(id).contentbundle",
@@ -99,10 +104,10 @@ public enum ContentPaths {
         )
     }
 
-    /// `Bundle.main` Resources/Content, only when the shipped greybox marker is actually inside the app.
-    /// An explicit `repoRoot` still walks the source tree so `repoRoot(fromFile:)` can keep searching.
-    private static func bundledContentRoot() -> URL? {
-        guard let resources = Bundle.main.resourceURL else { return nil }
+    /// Resources/Content, only when the shipped greybox marker is actually there.
+    /// `resourcesURL` nil uses `Bundle.main`. An explicit `repoRoot` still walks the source tree.
+    private static func bundledContentRoot(resourcesURL: URL? = nil) -> URL? {
+        guard let resources = resourcesURL ?? Bundle.main.resourceURL else { return nil }
         let content = resources.appendingPathComponent("Content", isDirectory: true)
         let marker = content.appendingPathComponent(
             "Fighters/greybox/greybox.contentbundle/fighter.json"
