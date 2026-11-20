@@ -79,14 +79,36 @@ public enum ContentPaths {
         fromFile file: String = #filePath,
         repoRoot root: URL? = nil
     ) -> URL {
+        if root == nil, let bundled = bundledContentRoot() {
+            return bundled.appendingPathComponent(
+                "Fighters/\(id)/\(id).contentbundle",
+                isDirectory: true
+            )
+        }
         let root = root ?? repoRoot(fromFile: file)
         return root
             .appendingPathComponent("Content/Fighters/\(id)/\(id).contentbundle", isDirectory: true)
     }
 
     public static func stageDirectory(_ id: String, fromFile file: String = #filePath) -> URL {
-        repoRoot(fromFile: file)
-            .appendingPathComponent("Content/Stages/\(id)/\(id).contentbundle", isDirectory: true)
+        let content = bundledContentRoot()
+            ?? repoRoot(fromFile: file).appendingPathComponent("Content", isDirectory: true)
+        return content.appendingPathComponent(
+            "Stages/\(id)/\(id).contentbundle",
+            isDirectory: true
+        )
+    }
+
+    /// `Bundle.main` Resources/Content, only when the shipped greybox marker is actually inside the app.
+    /// An explicit `repoRoot` still walks the source tree so `repoRoot(fromFile:)` can keep searching.
+    private static func bundledContentRoot() -> URL? {
+        guard let resources = Bundle.main.resourceURL else { return nil }
+        let content = resources.appendingPathComponent("Content", isDirectory: true)
+        let marker = content.appendingPathComponent(
+            "Fighters/greybox/greybox.contentbundle/fighter.json"
+        )
+        guard FileManager.default.fileExists(atPath: marker.path) else { return nil }
+        return content
     }
 
     public static func greyboxDirectory(fromFile file: String = #filePath) -> URL {
