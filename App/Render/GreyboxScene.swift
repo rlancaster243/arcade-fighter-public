@@ -81,9 +81,8 @@ final class GreyboxScene: SKScene {
     private func syncAtlasesIfNeeded() {
         let ids = Set(snapshot.fighterIDs)
         guard ids != loadedAtlasIDs else { return }
-        let root = ContentPaths.repoRoot(fromFile: #filePath)
         for id in ids where !loadedAtlasIDs.contains(id) {
-            let dir = ContentPaths.fighterDirectory(id, repoRoot: root)
+            let dir = ContentPaths.fighterDirectory(id, fromFile: #filePath)
             let png = dir.appendingPathComponent("\(id).png")
             let json = dir.appendingPathComponent("sheet.json")
             do {
