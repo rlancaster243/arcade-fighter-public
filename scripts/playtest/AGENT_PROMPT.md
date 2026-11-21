@@ -61,9 +61,9 @@ Then open **every** screenshot it lists with the Read tool and describe what eac
 | 01 | Title screen |
 | 02–03 | Main menu: Arcade / Versus / Settings / Quit, with Versus highlighted in 03 |
 | 04 | Versus setup |
-| 05–06 | P1 character select. **Does pressing right change the fighter?** |
+| 05–06 | P1 character select: kestrel highlighted, then bruno after pressing right |
 | 07 | P2 select |
-| 08 | Match: two fighters standing **on** the floor line, HUD with health bars and timer |
+| 08 | Match: bruno vs bruno (the cursor carries over from the P1 pick), each one sprite frame standing **on** the floor line, HUD with health bars and timer |
 | 09–14 | P1 walks forward, light punch, heavy punch, quarter-circle-forward + LP special, crouch, jump |
 | 15–16 | P2 walks forward, light punch |
 | 17–18 | Pause overlay appears, then the match resumes |
@@ -97,7 +97,10 @@ After anything surprising, take a `shot:`, run `scripts/playtest/logs.sh`, and r
 
 ## Known items to confirm or refute first
 
-- **[INFERRED] Only greybox is selectable.** `FightCore/Sources/AppLogic/Menus/FighterRoster.swift` hard-codes `entries = ["greybox"]` ("until L9 content lands"), yet kestrel, bruno, ilse and rook ship in `Content/Fighters`. Confirm with shots 05/06, then trace which code would need to change. Check the menu tests and arcade-ladder opponent order before proposing the change.
+- **[OPEN] Roster.** `FighterRoster` used to be `["greybox"]` only. It is now kestrel, bruno, ilse and rook, in that order.
+  - Shots 05/06 should show the cursor moving from kestrel to bruno.
+  - Play at least one match with each fighter.
+  - In arcade mode, opponents come in roster order (kestrel, bruno, ilse), so picking kestrel gives a mirror match first. Report whether that reads as a bug.
 - **[OPEN] Sprites:** PR #24 fixed frames rendering as squashed whole sheets below the floor. Confirm each fighter shows a single frame standing on the floor line.
 - **[OPEN] Fallback notices** read correctly and the match starts (see fault injection).
 

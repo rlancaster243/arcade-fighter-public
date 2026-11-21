@@ -1,6 +1,14 @@
-/// Built-in roster entries available before lane L9 content lands.
+/// Selectable fighters, in character-select order. Index 0 is the default pick, and the arcade
+/// ladder takes its opponents in this order.
+///
+/// Every id must have a bundle at `Content/Fighters/<id>/<id>.contentbundle`. Greybox stays out of
+/// the roster: it is the load fallback and test fighter, not a shipped character.
+/// `FighterRosterTests` fails if a shipped fighter bundle is missing from this list.
 public enum FighterRoster: Sendable, Equatable {
-    public static let entries: [String] = ["greybox"]
+    public static let entries: [String] = ["kestrel", "bruno", "ilse", "rook"]
+
+    /// Bundles under `Content/Fighters` that are deliberately not selectable.
+    public static let nonSelectableContentIDs: Set<String> = ["greybox"]
 
     public static var count: Int { entries.count }
 
