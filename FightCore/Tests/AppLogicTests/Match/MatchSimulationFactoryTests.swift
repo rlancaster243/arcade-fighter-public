@@ -28,4 +28,38 @@ final class MatchSimulationFactoryTests: XCTestCase {
         XCTAssertFalse(parser.commands.commands.contains { $0.fighterID == "greybox" })
         XCTAssertTrue(parser.commands.commands.contains { $0.fighterID == "bruno" })
     }
+
+    /// Regression: when greybox also fails, the built-in fighter must start a match (with no
+    /// moves) instead of making the factory read the missing bundle and throw.
+    func testBuiltInFallbackStartsAndRunsWithoutCommands() throws {
+        let bruno = try FighterLoader.loadFighter(
+            from: ContentPaths.fighterDirectory("bruno", fromFile: #filePath)
+        )
+        let fallback = MatchSimulationFactory.builtInFallbackFighter()
+
+        var built = try MatchSimulationFactory.make(
+            p1PickID: "missing_pick",
+            p1: fallback,
+            p2PickID: "bruno",
+            p2: bruno,
+            stageId: "stage1",
+            fromFile: #filePath
+        )
+
+        let parser = try XCTUnwrap(built.simulation.motion as? MotionParser)
+        XCTAssertFalse(parser.commands.commands.contains { $0.fighterID == "missing_pick" })
+        XCTAssertTrue(parser.commands.commands.contains { $0.fighterID == "bruno" })
+
+        var snap = MatchSimulationFactory.matchSnapshot(
+            seed: 1,
+            p1: fallback,
+            p2: bruno,
+            fighterIDs: ["missing_pick", "bruno"]
+        )
+        let lightPunch = InputFrame(direction: .neutral, buttons: MoveCommandTable.bit(.lightPunch))
+        for _ in 0..<120 {
+            built.simulation.step(inputs: [lightPunch, InputFrame()], snapshot: &snap)
+        }
+        XCTAssertEqual(snap.tick, 120)
+    }
 }

@@ -43,8 +43,18 @@ public enum MatchSimulationFactory {
         return (simulation, metadataTable)
     }
 
+    /// Content id for the in-code, moveless fighter used when neither the pick nor greybox loads.
+    /// It has no bundle on disk, so the factory gives it no commands instead of reading one.
+    public static let builtInFallbackContentID = "builtin_fallback"
+
+    /// Last resort when no bundle loads: default stats, no moves, keyed by the roster pick.
+    public static func builtInFallbackFighter() -> FighterDef {
+        FighterDef(id: builtInFallbackContentID, displayName: "Fallback", gamePlan: "fallback")
+    }
+
     private static func commands(contentID: String, pickID: String, fromFile: String) throws -> [MoveCommand] {
-        try FighterCommandLoader.load(id: contentID, fromFile: fromFile).map { command in
+        guard contentID != builtInFallbackContentID else { return [] }
+        return try FighterCommandLoader.load(id: contentID, fromFile: fromFile).map { command in
             var keyed = command
             keyed.fighterID = pickID
             return keyed
@@ -71,7 +81,6 @@ public enum MatchSimulationFactory {
             return def
         }
         let greybox = ContentPaths.greyboxDirectory(fromFile: fromFile)
-        return (try? FighterLoader.loadFighter(from: greybox))
-            ?? FighterDef(id: "greybox", displayName: "Greybox", gamePlan: "fallback")
+        return (try? FighterLoader.loadFighter(from: greybox)) ?? builtInFallbackFighter()
     }
 }

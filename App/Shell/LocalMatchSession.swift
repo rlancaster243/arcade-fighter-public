@@ -134,8 +134,8 @@ final class LocalMatchSession: ObservableObject {
                 // re-read the broken bundle and abort the match.
                 return fallback
             }
-            notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using built-in fallback.")
-            return FighterDef(id: id, displayName: "Fallback", gamePlan: "fallback")
+            notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using built-in fallback (no attacks).")
+            return MatchSimulationFactory.builtInFallbackFighter()
         }
     }
 
