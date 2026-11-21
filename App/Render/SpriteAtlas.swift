@@ -21,11 +21,18 @@ final class SpriteAtlas {
 
     func spriteNode(named name: String) -> SKSpriteNode? {
         guard let frame = frames[name] else { return nil }
+        // SKTexture(rect:in:) takes unit coordinates with a bottom-left origin; sheet.json is
+        // top-left pixels. See SpriteSheetFrame.spriteKitGeometry.
+        let sheetSize = texture.size()
+        let geometry = frame.spriteKitGeometry(
+            sheetWidth: Double(sheetSize.width),
+            sheetHeight: Double(sheetSize.height)
+        )
         let rect = CGRect(
-            x: CGFloat(frame.x),
-            y: CGFloat(frame.y),
-            width: CGFloat(frame.w),
-            height: CGFloat(frame.h)
+            x: geometry.textureX,
+            y: geometry.textureY,
+            width: geometry.textureWidth,
+            height: geometry.textureHeight
         )
         let sub = SKTexture(rect: rect, in: texture)
         sub.filteringMode = .nearest
@@ -33,10 +40,7 @@ final class SpriteAtlas {
             texture: sub,
             size: CGSize(width: CGFloat(frame.w), height: CGFloat(frame.h))
         )
-        node.anchorPoint = CGPoint(
-            x: CGFloat(frame.anchorX) / CGFloat(frame.w),
-            y: CGFloat(frame.anchorY) / CGFloat(frame.h)
-        )
+        node.anchorPoint = CGPoint(x: geometry.anchorX, y: geometry.anchorY)
         return node
     }
 }
