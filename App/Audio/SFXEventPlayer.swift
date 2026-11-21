@@ -24,6 +24,7 @@ final class SFXEventPlayer: ObservableObject {
         do {
             let manifest = try SFXContent.loadManifest(audioDirectory: audioDirectory)
             try player.preload(manifest: manifest)
+            preloadErrorDescription = nil
             loaded = true
         } catch {
             preloadErrorDescription = String(describing: error)
