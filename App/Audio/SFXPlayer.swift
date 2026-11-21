@@ -7,7 +7,7 @@ final class SFXPlayer: NSObject {
     private var players: [String: AVAudioPlayer] = [:]
     private let audioDirectory: URL
 
-    init(audioDirectory: URL = SFXContent.audioDirectory()) {
+    init(audioDirectory: URL) {
         self.audioDirectory = audioDirectory
         super.init()
     }

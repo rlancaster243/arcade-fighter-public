@@ -56,6 +56,16 @@ final class ContentPathsBundleTests: XCTestCase {
             resourcesURL: resources
         )
         XCTAssertEqual(normalized(forcedSource), normalized(sourceFighter))
+
+        let audio = ContentPaths.audioDirectory(resourcesURL: resources)
+        XCTAssertEqual(
+            normalized(audio),
+            normalized(resources.appendingPathComponent("Content/Audio", isDirectory: true))
+        )
+        XCTAssertNotEqual(
+            normalized(audio),
+            normalized(ContentPaths.audioDirectory(fromFile: #filePath))
+        )
     }
 
     func testFighterAndStageDirectoriesFallBackToSourceTreeWhenMarkerIsAbsent() throws {
@@ -75,6 +85,12 @@ final class ContentPathsBundleTests: XCTestCase {
         XCTAssertTrue(stage.path.contains("Content/Stages/stage1/stage1.contentbundle"))
         XCTAssertTrue(FileManager.default.fileExists(atPath: fighter.appendingPathComponent("fighter.json").path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: stage.appendingPathComponent("stage.json").path))
+
+        let audio = ContentPaths.audioDirectory(fromFile: #filePath, resourcesURL: resources)
+        let sourceAudio = ContentPaths.audioDirectory(fromFile: #filePath)
+        XCTAssertEqual(normalized(audio), normalized(sourceAudio))
+        XCTAssertTrue(audio.path.contains("Content/Audio"))
+        XCTAssertTrue(FileManager.default.fileExists(atPath: audio.appendingPathComponent("manifest.json").path))
     }
 
     private func normalized(_ url: URL) -> String {

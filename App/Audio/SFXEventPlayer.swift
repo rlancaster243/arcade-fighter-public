@@ -7,11 +7,14 @@ import Combine
 @MainActor
 final class SFXEventPlayer: ObservableObject {
     private let player: SFXPlayer
+    private let audioDirectory: URL
     private var loaded = false
     private(set) var preloadErrorDescription: String?
 
-    init(player: SFXPlayer? = nil) {
-        self.player = player ?? SFXPlayer(audioDirectory: SFXContent.audioDirectory())
+    init(player: SFXPlayer? = nil, audioDirectory: URL? = nil) {
+        let directory = audioDirectory ?? ContentPaths.audioDirectory(fromFile: #filePath)
+        self.audioDirectory = directory
+        self.player = player ?? SFXPlayer(audioDirectory: directory)
     }
 
     @discardableResult
@@ -19,9 +22,8 @@ final class SFXEventPlayer: ObservableObject {
         guard !loaded else { return [] }
         loaded = true
         var notices: [String] = []
-        let root = ContentPaths.repoRoot(fromFile: #filePath)
         do {
-            let manifest = try SFXContent.loadManifest(repoRoot: root)
+            let manifest = try SFXContent.loadManifest(audioDirectory: audioDirectory)
             try player.preload(manifest: manifest)
         } catch {
             preloadErrorDescription = String(describing: error)
