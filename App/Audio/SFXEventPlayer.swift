@@ -11,20 +11,20 @@ final class SFXEventPlayer: ObservableObject {
     private var loaded = false
     private(set) var preloadErrorDescription: String?
 
-    init(player: SFXPlayer? = nil, audioDirectory: URL? = nil) {
+    init(audioDirectory: URL? = nil) {
         let directory = audioDirectory ?? ContentPaths.audioDirectory(fromFile: #filePath)
         self.audioDirectory = directory
-        self.player = player ?? SFXPlayer(audioDirectory: directory)
+        self.player = SFXPlayer(audioDirectory: directory)
     }
 
     @discardableResult
     func preloadIfNeeded() -> [String] {
         guard !loaded else { return [] }
-        loaded = true
         var notices: [String] = []
         do {
             let manifest = try SFXContent.loadManifest(audioDirectory: audioDirectory)
             try player.preload(manifest: manifest)
+            loaded = true
         } catch {
             preloadErrorDescription = String(describing: error)
             fputs("SFXEventPlayer preload failed: \(error)\n", stderr)
