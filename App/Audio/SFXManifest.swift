@@ -19,19 +19,12 @@ struct SFXManifest: Decodable, Sendable {
 }
 
 enum SFXContent {
-    static func manifestURL(repoRoot: URL? = nil) -> URL {
-        let root = repoRoot ?? Bundle.main.bundleURL.deletingLastPathComponent()
-        return root.appendingPathComponent("Content/Audio/manifest.json")
+    static func manifestURL(audioDirectory: URL) -> URL {
+        audioDirectory.appendingPathComponent("manifest.json")
     }
 
-    static func loadManifest(repoRoot: URL? = nil) throws -> SFXManifest {
-        let url = manifestURL(repoRoot: repoRoot)
-        let data = try Data(contentsOf: url)
+    static func loadManifest(audioDirectory: URL) throws -> SFXManifest {
+        let data = try Data(contentsOf: manifestURL(audioDirectory: audioDirectory))
         return try JSONDecoder().decode(SFXManifest.self, from: data)
-    }
-
-    static func audioDirectory(repoRoot: URL? = nil) -> URL {
-        let root = repoRoot ?? Bundle.main.bundleURL.deletingLastPathComponent()
-        return root.appendingPathComponent("Content/Audio", isDirectory: true)
     }
 }

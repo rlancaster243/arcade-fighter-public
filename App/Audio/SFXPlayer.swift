@@ -7,20 +7,22 @@ final class SFXPlayer: NSObject {
     private var players: [String: AVAudioPlayer] = [:]
     private let audioDirectory: URL
 
-    init(audioDirectory: URL = SFXContent.audioDirectory()) {
+    init(audioDirectory: URL) {
         self.audioDirectory = audioDirectory
         super.init()
     }
 
     func preload(manifest: SFXManifest) throws {
+        var loaded: [String: AVAudioPlayer] = [:]
         for clip in manifest.clips {
             let url = audioDirectory.appendingPathComponent(clip.file)
             let player = try AVAudioPlayer(contentsOf: url)
             player.prepareToPlay()
             player.numberOfLoops = (clip.loop ?? false) ? -1 : 0
             player.volume = Float(clip.gainQ8) / 256.0
-            players[clip.id] = player
+            loaded[clip.id] = player
         }
+        players = loaded
     }
 
     func play(id: String) {

@@ -96,12 +96,25 @@ public enum ContentPaths {
         fromFile file: String = #filePath,
         resourcesURL: URL? = nil
     ) -> URL {
-        let content = bundledContentRoot(resourcesURL: resourcesURL)
+        contentRoot(fromFile: file, resourcesURL: resourcesURL)
+            .appendingPathComponent(
+                "Stages/\(id)/\(id).contentbundle",
+                isDirectory: true
+            )
+    }
+
+    /// `Content/Audio` inside the app bundle when the greybox marker is present, otherwise the checkout.
+    public static func audioDirectory(
+        fromFile file: String = #filePath,
+        resourcesURL: URL? = nil
+    ) -> URL {
+        contentRoot(fromFile: file, resourcesURL: resourcesURL)
+            .appendingPathComponent("Audio", isDirectory: true)
+    }
+
+    private static func contentRoot(fromFile file: String, resourcesURL: URL?) -> URL {
+        bundledContentRoot(resourcesURL: resourcesURL)
             ?? repoRoot(fromFile: file).appendingPathComponent("Content", isDirectory: true)
-        return content.appendingPathComponent(
-            "Stages/\(id)/\(id).contentbundle",
-            isDirectory: true
-        )
     }
 
     /// Resources/Content, only when the shipped greybox marker is actually there.
