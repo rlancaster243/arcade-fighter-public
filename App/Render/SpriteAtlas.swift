@@ -1,21 +1,33 @@
 import AppLogic
+import ImageIO
 import SpriteKit
-#if os(macOS)
-import AppKit
-#endif
 
 /// Platform adapter: builds SK textures from a sprite sheet and JSON frames.
 final class SpriteAtlas {
     let texture: SKTexture
     let frames: [String: SpriteSheetFrame]
+    /// Sheet size in pixels, the space `sheet.json` rects are written in.
+    private let sheetPixelWidth: Double
+    private let sheetPixelHeight: Double
 
     init(sheetPNG: URL, sheetJSON: URL) throws {
         let loaded = try SpriteSheetLoader.loadFrames(fromSheetJSON: sheetJSON)
         frames = SpriteSheetLoader.indexByName(loaded)
-        guard let image = NSImage(contentsOf: sheetPNG) else {
-            throw NSError(domain: "SpriteAtlas", code: 1)
+        // Decode to a CGImage rather than NSImage: NSImage sizes in points from the PNG's DPI
+        // metadata, so a 144-dpi sheet would report half its pixel size and every frame rect
+        // would land in the wrong place.
+        guard let source = CGImageSourceCreateWithURL(sheetPNG as CFURL, nil),
+              let image = CGImageSourceCreateImageAtIndex(source, 0, nil)
+        else {
+            throw NSError(
+                domain: "SpriteAtlas",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "could not decode \(sheetPNG.lastPathComponent)"]
+            )
         }
-        texture = SKTexture(image: image)
+        sheetPixelWidth = Double(image.width)
+        sheetPixelHeight = Double(image.height)
+        texture = SKTexture(cgImage: image)
         texture.filteringMode = .nearest
     }
 
@@ -23,10 +35,9 @@ final class SpriteAtlas {
         guard let frame = frames[name] else { return nil }
         // SKTexture(rect:in:) takes unit coordinates with a bottom-left origin; sheet.json is
         // top-left pixels. See SpriteSheetFrame.spriteKitGeometry.
-        let sheetSize = texture.size()
         let geometry = frame.spriteKitGeometry(
-            sheetWidth: Double(sheetSize.width),
-            sheetHeight: Double(sheetSize.height)
+            sheetWidth: sheetPixelWidth,
+            sheetHeight: sheetPixelHeight
         )
         let rect = CGRect(
             x: geometry.textureX,
