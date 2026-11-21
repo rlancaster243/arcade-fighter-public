@@ -6,6 +6,8 @@ import Foundation
 final class MenuShellModel: ObservableObject {
     @Published private(set) var state: MenuShellState
     @Published var matchSnapshot: GameSnapshot?
+    /// Content bundle each slot actually loaded (differs from the pick after a load fallback).
+    @Published var matchContentIDs: [String] = []
     @Published var contentLoadNotices: [String] = []
 
     init(state: MenuShellState = .initial) {
@@ -24,6 +26,7 @@ final class MenuShellModel: ObservableObject {
 
     func handleMatchStartFailure(_ error: Error) {
         matchSnapshot = nil
+        matchContentIDs = []
         var next = state
         let message = (error as? CustomStringConvertible)?.description ?? String(describing: error)
         MenuReducer.abortFailedMatchStart(state: &next, message: message)
@@ -41,11 +44,13 @@ final class MenuShellModel: ObservableObject {
         case .inMatch(let setup):
             if shouldBootstrapMatch(from: old.screen, to: new.screen) {
                 matchSnapshot = MatchBootstrap.snapshot(for: setup)
+                matchContentIDs = []
             }
         case .matchPaused, .result:
             break
         case .title, .mainMenu, .arcadeLadder, .versusSetup, .characterSelect, .settings, .rematchPrompt:
             matchSnapshot = nil
+            matchContentIDs = []
         }
     }
 

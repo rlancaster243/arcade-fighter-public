@@ -49,6 +49,7 @@ final class LocalMatchSession: ObservableObject {
         lastTickTime = nil
         accumulator = 0
         paused = false
+        model.matchContentIDs = [p1.id, p2.id]
         model.matchSnapshot = snap
         if !notices.isEmpty {
             model.appendContentLoadNotices(notices)
@@ -129,12 +130,13 @@ final class LocalMatchSession: ObservableObject {
             let greybox = ContentPaths.greyboxDirectory(fromFile: #filePath)
             if let fallback = try? FighterLoader.loadFighter(from: greybox) {
                 notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using greybox as “\(id)”.")
-                var relabeled = fallback
-                relabeled.id = id
-                return relabeled
+                // Keep id "greybox": MatchSimulationFactory loads commands from this id and
+                // re-keys them (and the def) to the roster pick. Relabeling here made it
+                // re-read the broken bundle and abort the match.
+                return fallback
             }
-            notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using built-in fallback.")
-            return FighterDef(id: id, displayName: "Fallback", gamePlan: "fallback")
+            notices.append("\(label) fighter “\(id)” failed to load (\(describe(error))). Using built-in fallback (no attacks).")
+            return MatchSimulationFactory.builtInFallbackFighter()
         }
     }
 

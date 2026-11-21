@@ -6,6 +6,8 @@ import SwiftUI
 /// Letterboxed greybox preview during menu in-match state (kept small for Swift type-checker).
 struct MatchPreviewView: View {
     let snapshot: GameSnapshot
+    /// Bundle each slot actually loaded; drives which sprite sheet the scene draws.
+    let contentIDs: [String]
     let viewWidth: Int
     let viewHeight: Int
     let wantsFullscreen: Bool
@@ -13,7 +15,7 @@ struct MatchPreviewView: View {
     var onAtlasLoadNotice: ((String) -> Void)?
 
     @State private var scene = GreyboxScene(size: CGSize(width: 384, height: 216))
-    @State private var atlasRosterIDs: [String] = []
+    @State private var atlasSlotIDs: [String?] = []
 
     var body: some View {
         let forcedScale = wantsFullscreen ? nil : windowIntegerScale
@@ -35,18 +37,30 @@ struct MatchPreviewView: View {
             .onAppear {
                 scene.scaleMode = .resizeFill
                 scene.onAtlasLoadNotice = onAtlasLoadNotice
-                atlasRosterIDs = snapshot.fighterIDs
+                scene.contentIDs = contentIDs
+                atlasSlotIDs = slotIDs(fighterIDs: snapshot.fighterIDs, contentIDs: contentIDs)
                 scene.snapshot = snapshot
                 scene.revalidateAtlases()
             }
             .onChange(of: snapshot) { _, newValue in
                 scene.onAtlasLoadNotice = onAtlasLoadNotice
                 scene.snapshot = newValue
-                let rosterChanged = newValue.fighterIDs != atlasRosterIDs
-                if rosterChanged {
-                    atlasRosterIDs = newValue.fighterIDs
-                    scene.revalidateAtlases()
-                }
+                revalidateIfSlotsChanged(fighterIDs: newValue.fighterIDs, contentIDs: contentIDs)
             }
+            .onChange(of: contentIDs) { _, newValue in
+                scene.contentIDs = newValue
+                revalidateIfSlotsChanged(fighterIDs: snapshot.fighterIDs, contentIDs: newValue)
+            }
+    }
+
+    private func slotIDs(fighterIDs: [String], contentIDs: [String]) -> [String?] {
+        FighterAtlasRouting.atlasIDs(fighterIDs: fighterIDs, contentIDs: contentIDs)
+    }
+
+    private func revalidateIfSlotsChanged(fighterIDs: [String], contentIDs: [String]) {
+        let slots = slotIDs(fighterIDs: fighterIDs, contentIDs: contentIDs)
+        guard slots != atlasSlotIDs else { return }
+        atlasSlotIDs = slots
+        scene.revalidateAtlases()
     }
 }
