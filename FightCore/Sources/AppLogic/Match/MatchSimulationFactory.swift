@@ -29,8 +29,11 @@ public enum MatchSimulationFactory {
             playLeftPx: bounds.playLeftPx,
             playRightPx: bounds.playRightPx
         )
-        let p1Commands = try FighterCommandLoader.load(id: p1.id, fromFile: fromFile)
-        let p2Commands = try FighterCommandLoader.load(id: p2.id, fromFile: fromFile)
+        // Commands come from the bundle that actually loaded (`p1.id`, e.g. "greybox" after a
+        // fallback) but are keyed by the roster pick, because `MotionParser` matches against
+        // `GameSnapshot.fighterIDs`, which holds pick ids.
+        let p1Commands = try commands(contentID: p1.id, pickID: p1PickID, fromFile: fromFile)
+        let p2Commands = try commands(contentID: p2.id, pickID: p2PickID, fromFile: fromFile)
         let simulation = Simulation(
             motion: MotionParser(commands: MoveCommandTable(commands: p1Commands + p2Commands)),
             fighterStep: FighterStepper(definitions: defMap),
@@ -38,6 +41,14 @@ public enum MatchSimulationFactory {
             matchDirect: RosterMatchDirector(metadataTable: metadataTable)
         )
         return (simulation, metadataTable)
+    }
+
+    private static func commands(contentID: String, pickID: String, fromFile: String) throws -> [MoveCommand] {
+        try FighterCommandLoader.load(id: contentID, fromFile: fromFile).map { command in
+            var keyed = command
+            keyed.fighterID = pickID
+            return keyed
+        }
     }
 
     public static func matchSnapshot(
