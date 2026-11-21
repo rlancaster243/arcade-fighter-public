@@ -49,6 +49,7 @@ final class LocalMatchSession: ObservableObject {
         lastTickTime = nil
         accumulator = 0
         paused = false
+        model.matchContentIDs = [p1.id, p2.id]
         model.matchSnapshot = snap
         if !notices.isEmpty {
             model.appendContentLoadNotices(notices)

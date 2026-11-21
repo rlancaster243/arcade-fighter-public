@@ -25,6 +25,12 @@ final class GreyboxScene: SKScene {
     private var renderTick: Int32 = 0
     private var contentOffset = CGPoint.zero
     var onAtlasLoadNotice: ((String) -> Void)?
+    /// Bundle each slot actually loaded (see `FighterAtlasRouting`); empty until a match starts.
+    var contentIDs: [String] = []
+
+    private var slotAtlasIDs: [String?] {
+        FighterAtlasRouting.atlasIDs(fighterIDs: snapshot.fighterIDs, contentIDs: contentIDs)
+    }
 
     override init(size: CGSize) {
         super.init(size: size)
@@ -79,7 +85,7 @@ final class GreyboxScene: SKScene {
     }
 
     private func syncAtlasesIfNeeded() {
-        let ids = Set(snapshot.fighterIDs)
+        let ids = Set(slotAtlasIDs.compactMap { $0 })
         guard ids != loadedAtlasIDs else { return }
         for id in ids where !loadedAtlasIDs.contains(id) {
             let dir = ContentPaths.fighterDirectory(id, fromFile: #filePath)
@@ -115,13 +121,14 @@ final class GreyboxScene: SKScene {
         ground.size = CGSize(width: CGFloat(SceneConstants.width), height: 4)
         ground.position = CGPoint(x: 0, y: 32)
 
+        let slots = slotAtlasIDs
         for (index, fighter) in snapshot.fighters.enumerated() {
             let container = fighterNodes[index]
             container.removeAllChildren()
-            let fighterID = snapshot.fighterIDs.indices.contains(index) ? snapshot.fighterIDs[index] : "greybox"
+            let atlasID: String? = slots.indices.contains(index) ? slots[index] : "greybox"
             let frameName = SpriteSelection.frameName(for: fighter)
             let sprite: SKNode
-            if let atlas = atlases[fighterID], let node = atlas.spriteNode(named: frameName) ?? atlas.spriteNode(named: "idle_0") {
+            if let atlasID, let atlas = atlases[atlasID], let node = atlas.spriteNode(named: frameName) ?? atlas.spriteNode(named: "idle_0") {
                 sprite = node
             } else {
                 let fallback = SKSpriteNode(color: index == 0 ? .cyan : .magenta, size: CGSize(width: 40, height: 90))

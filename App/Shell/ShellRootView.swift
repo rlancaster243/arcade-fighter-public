@@ -190,6 +190,7 @@ public struct ShellRootView: View {
         return GeometryReader { geo in
             MatchPreviewView(
                 snapshot: snapshot,
+                contentIDs: model.matchContentIDs,
                 viewWidth: Int(geo.size.width.rounded(.down)),
                 viewHeight: Int(geo.size.height.rounded(.down)),
                 wantsFullscreen: display.wantsFullscreen,

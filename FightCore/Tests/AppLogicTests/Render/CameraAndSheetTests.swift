@@ -61,6 +61,29 @@ final class CameraAndSheetTests: XCTestCase {
         }
     }
 
+    func testAtlasRoutingDrawsTheBundleThatLoaded() {
+        let builtIn = MatchSimulationFactory.builtInFallbackContentID
+        // Before a match starts (no content ids yet) each slot draws its pick.
+        XCTAssertEqual(
+            FighterAtlasRouting.atlasIDs(fighterIDs: ["kestrel", "bruno"], contentIDs: []),
+            ["kestrel", "bruno"]
+        )
+        // Greybox fallback draws greybox; the built-in fallback has no sheet.
+        XCTAssertEqual(
+            FighterAtlasRouting.atlasIDs(fighterIDs: ["kestrel", "bruno"], contentIDs: ["greybox", builtIn]),
+            ["greybox", nil]
+        )
+        // Short or empty entries fall back to the pick.
+        XCTAssertEqual(
+            FighterAtlasRouting.atlasIDs(fighterIDs: ["kestrel", "bruno"], contentIDs: ["", "bruno"]),
+            ["kestrel", "bruno"]
+        )
+        XCTAssertEqual(
+            FighterAtlasRouting.atlasIDs(fighterIDs: ["kestrel", "bruno"], contentIDs: ["greybox"]),
+            ["greybox", "bruno"]
+        )
+    }
+
     private func pngSize(_ url: URL) throws -> (Int, Int) {
         let bytes = [UInt8](try Data(contentsOf: url).prefix(24))
         XCTAssertEqual(bytes.count, 24)
