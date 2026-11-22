@@ -47,3 +47,56 @@ final class HUDTests: XCTestCase {
                              "label stays in the HUD band, not down in the arena")
     }
 }
+
+final class HUDDamageTrailTests: XCTestCase {
+    func testNoDamageMeansNoTrail() {
+        var trail = HUDDamageTrail()
+        XCTAssertEqual(trail.update(current: 1000, tick: 0), 1000)
+        XCTAssertEqual(trail.update(current: 1000, tick: 1), 1000)
+    }
+
+    func testTrailHoldsThenDrainsToCurrentWithinHalfASecond() {
+        var trail = HUDDamageTrail()
+        _ = trail.update(current: 1000, tick: 10)
+        XCTAssertEqual(trail.update(current: 700, tick: 11), 1000, "holds at the pre-hit value")
+        XCTAssertEqual(trail.update(current: 700, tick: 10 + 1 + HUDDamageTrail.holdTicks), 1000)
+        let mid = trail.update(current: 700, tick: 11 + HUDDamageTrail.holdTicks + HUDDamageTrail.drainTicks / 2)
+        XCTAssertLessThan(mid, 1000)
+        XCTAssertGreaterThan(mid, 700)
+        let end = trail.update(current: 700, tick: 11 + HUDDamageTrail.holdTicks + HUDDamageTrail.drainTicks)
+        XCTAssertEqual(end, 700)
+        XCTAssertLessThanOrEqual(HUDDamageTrail.holdTicks + HUDDamageTrail.drainTicks, 30)
+    }
+
+    func testTrailIsMonotonicAndNeverBelowCurrent() {
+        var trail = HUDDamageTrail()
+        _ = trail.update(current: 900, tick: 0)
+        var last: Int32 = 900
+        for tick in Int32(1)...60 {
+            let v = trail.update(current: 400, tick: tick)
+            XCTAssertLessThanOrEqual(v, last)
+            XCTAssertGreaterThanOrEqual(v, 400)
+            last = v
+        }
+        XCTAssertEqual(last, 400)
+    }
+
+    func testSecondHitMidDrainKeepsTrailFromCurrentPosition() {
+        var trail = HUDDamageTrail()
+        _ = trail.update(current: 1000, tick: 0)
+        _ = trail.update(current: 800, tick: 1)
+        let before = trail.update(current: 800, tick: 20)
+        let after = trail.update(current: 600, tick: 21)
+        XCTAssertEqual(after, before, "a new hit restarts the hold without jumping")
+        XCTAssertGreaterThan(after, 600)
+    }
+
+    func testHealOrTickRewindSnapsWithoutTrail() {
+        var trail = HUDDamageTrail()
+        _ = trail.update(current: 1000, tick: 0)
+        _ = trail.update(current: 500, tick: 1)
+        XCTAssertEqual(trail.update(current: 1000, tick: 2), 1000, "round reset refills instantly")
+        _ = trail.update(current: 400, tick: 3)
+        XCTAssertEqual(trail.update(current: 400, tick: 0), 400, "tick rewind (new match) snaps")
+    }
+}
