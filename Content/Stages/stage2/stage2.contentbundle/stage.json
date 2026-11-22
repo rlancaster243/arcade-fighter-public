@@ -4,6 +4,7 @@
   "displayName": "Bell Tower Cloister",
   "width": 384,
   "height": 216,
+  "texelScale": 2,
   "floorY": 32,
   "cameraBounds": {
     "left": 0,
