@@ -90,7 +90,7 @@ final class GreyboxScene: SKScene {
         let scale = CGFloat(layout.scale)
         letterboxNode.setScale(scale)
         letterboxNode.position = contentOffset
-        view.layer?.magnificationFilter = .nearest
+        view.layer?.magnificationFilter = .linear
     }
 
     private func loadStageLayers() {
@@ -105,8 +105,14 @@ final class GreyboxScene: SKScene {
                     continue
                 }
                 let texture = SKTexture(cgImage: image)
-                texture.filteringMode = .nearest
-                let node = SKSpriteNode(texture: texture)
+                texture.filteringMode = .linear
+                texture.usesMipmaps = true
+                let logical = StageArt.logicalSize(
+                    pixelWidth: image.width, pixelHeight: image.height, texelScale: spec.texelScale)
+                let node = SKSpriteNode(
+                    texture: texture,
+                    size: CGSize(width: CGFloat(logical.width), height: CGFloat(logical.height))
+                )
                 node.anchorPoint = .zero
                 node.zPosition = CGFloat(spec.zOrder)
                 stageNode.addChild(node)
