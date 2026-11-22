@@ -50,6 +50,7 @@ final class LocalMatchSession: ObservableObject {
         accumulator = 0
         paused = false
         model.matchContentIDs = [p1.id, p2.id]
+        model.matchStageID = stageId
         model.matchSnapshot = snap
         if !notices.isEmpty {
             model.appendContentLoadNotices(notices)

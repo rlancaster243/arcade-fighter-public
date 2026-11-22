@@ -10,3 +10,12 @@ public enum WorldToScene: Sendable {
         (x: simX / Fixed.scale + SceneConstants.width / 2, y: floorY - simY / Fixed.scale)
     }
 }
+
+extension WorldToScene {
+    /// Scene-space centre of a projectile's hitbox (hitbox is in pixels, relative, y-down).
+    public static func projectileCentre(_ p: Projectile) -> (x: Int32, y: Int32) {
+        let cx = p.position.x.raw + (p.hitbox.x + p.hitbox.w / 2) * Fixed.scale
+        let cy = p.position.y.raw + (p.hitbox.y + p.hitbox.h / 2) * Fixed.scale
+        return point(simX: cx, simY: cy)
+    }
+}

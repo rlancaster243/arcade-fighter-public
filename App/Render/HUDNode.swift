@@ -4,6 +4,7 @@ import FightCore
 import SpriteKit
 
 final class HUDNode: SKNode {
+    private var borders: [ObjectIdentifier: SKSpriteNode] = [:]
     private let p1HealthBack = SKSpriteNode(color: .darkGray, size: .zero)
     private let p1HealthFill = SKSpriteNode(color: .green, size: .zero)
     private let p2HealthBack = SKSpriteNode(color: .darkGray, size: .zero)
@@ -58,7 +59,7 @@ final class HUDNode: SKNode {
             frame: HUDLayout.p1HealthBarFrame(),
             current: model.p1Health,
             cap: model.p1HealthCap,
-            fillColor: .green,
+            fillColor: HUDPalette.health,
             alignLeft: true
         )
         placeBarPair(
@@ -67,7 +68,7 @@ final class HUDNode: SKNode {
             frame: HUDLayout.p2HealthBarFrame(),
             current: model.p2Health,
             cap: model.p2HealthCap,
-            fillColor: .green,
+            fillColor: HUDPalette.health,
             alignLeft: false
         )
         placeBarPair(
@@ -76,7 +77,7 @@ final class HUDNode: SKNode {
             frame: HUDLayout.p1MeterBarFrame(),
             current: model.p1Meter,
             cap: model.meterCap,
-            fillColor: .cyan,
+            fillColor: HUDPalette.meter,
             alignLeft: true
         )
         placeBarPair(
@@ -85,7 +86,7 @@ final class HUDNode: SKNode {
             frame: HUDLayout.p2MeterBarFrame(),
             current: model.p2Meter,
             cap: model.meterCap,
-            fillColor: .yellow,
+            fillColor: HUDPalette.meter,
             alignLeft: false
         )
     }
@@ -103,8 +104,19 @@ final class HUDNode: SKNode {
         let h = CGFloat(frame.h)
         let x = CGFloat(frame.x)
         let y = CGFloat(frame.y)
-        back.color = .darkGray
+        // PS1-style bar: dark frame, red "damage" track, gold or blue fill.
+        back.color = fillColor == HUDPalette.health ? HUDPalette.healthTrack : HUDPalette.meterTrack
         back.size = CGSize(width: w, height: h)
+        let border = borders[ObjectIdentifier(back)] ?? {
+            let b = SKSpriteNode(color: HUDPalette.frame, size: .zero)
+            b.zPosition = back.zPosition - 1
+            addChild(b)
+            borders[ObjectIdentifier(back)] = b
+            return b
+        }()
+        border.size = CGSize(width: w + 2, height: h + 2)
+        border.anchorPoint = alignLeft ? CGPoint(x: 0, y: 0) : CGPoint(x: 1, y: 0)
+        border.position = alignLeft ? CGPoint(x: x - 1, y: y - 1) : CGPoint(x: x + w + 1, y: y - 1)
         back.anchorPoint = alignLeft ? CGPoint(x: 0, y: 0) : CGPoint(x: 1, y: 0)
         back.position = alignLeft ? CGPoint(x: x, y: y) : CGPoint(x: x + w, y: y)
 
@@ -115,4 +127,13 @@ final class HUDNode: SKNode {
         fill.anchorPoint = alignLeft ? CGPoint(x: 0, y: 0) : CGPoint(x: 1, y: 0)
         fill.position = back.position
     }
+}
+
+/// HUD colours in the style of late-90s 2D fighters.
+enum HUDPalette {
+    static let health = NSColor(srgbRed: 1.0, green: 0.80, blue: 0.16, alpha: 1)
+    static let healthTrack = NSColor(srgbRed: 0.62, green: 0.08, blue: 0.08, alpha: 1)
+    static let meter = NSColor(srgbRed: 0.20, green: 0.55, blue: 1.0, alpha: 1)
+    static let meterTrack = NSColor(srgbRed: 0.06, green: 0.08, blue: 0.20, alpha: 1)
+    static let frame = NSColor(srgbRed: 0.04, green: 0.03, blue: 0.08, alpha: 1)
 }

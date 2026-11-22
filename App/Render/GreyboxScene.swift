@@ -1,5 +1,6 @@
 import AppLogic
 import FightCore
+import ImageIO
 import SpriteKit
 
 /// Reads one immutable `GameSnapshot` per frame; does not mutate core state.
@@ -14,6 +15,7 @@ final class GreyboxScene: SKScene {
     private let arenaNode = SKNode()
     private let hud = HUDNode()
     private let ground = SKSpriteNode(color: .darkGray, size: .zero)
+    private let projectileLayer = SKNode()
     private var atlases: [String: SpriteAtlas] = [:]
     private var loadedAtlasIDs: Set<String> = []
     private var atlasFailureNotified: Set<String> = []
@@ -25,6 +27,12 @@ final class GreyboxScene: SKScene {
     private var renderTick: Int32 = 0
     private var contentOffset = CGPoint.zero
     var onAtlasLoadNotice: ((String) -> Void)?
+    /// Stage whose background layers draw behind the arena; empty draws none.
+    var stageID: String = "" {
+        didSet { if stageID != oldValue { loadStageLayers() } }
+    }
+    private let stageNode = SKNode()
+    private var stageLayers: [(node: SKSpriteNode, parallaxQ8: Int32)] = []
     /// Bundle each slot actually loaded (see `FighterAtlasRouting`); empty until a match starts.
     var contentIDs: [String] = []
 
@@ -50,6 +58,10 @@ final class GreyboxScene: SKScene {
         ground.anchorPoint = CGPoint(x: 0, y: 0)
         ground.zPosition = -10
         arenaNode.addChild(ground)
+        projectileLayer.zPosition = 40
+        arenaNode.addChild(projectileLayer)
+        stageNode.zPosition = -100
+        letterboxNode.addChild(stageNode)
         letterboxNode.addChild(arenaNode)
         letterboxNode.addChild(hud)
         addChild(letterboxNode)
@@ -77,6 +89,32 @@ final class GreyboxScene: SKScene {
         letterboxNode.setScale(scale)
         letterboxNode.position = contentOffset
         view.layer?.magnificationFilter = .nearest
+    }
+
+    private func loadStageLayers() {
+        stageNode.removeAllChildren()
+        stageLayers = []
+        guard !stageID.isEmpty else { ground.isHidden = false; return }
+        do {
+            for spec in try StageArt.layers(stageID: stageID, fromFile: #filePath) {
+                guard let source = CGImageSourceCreateWithURL(spec.imageURL as CFURL, nil),
+                      let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+                    onAtlasLoadNotice?("Stage layer \(spec.id) for \(stageID) failed to decode")
+                    continue
+                }
+                let texture = SKTexture(cgImage: image)
+                texture.filteringMode = .nearest
+                let node = SKSpriteNode(texture: texture)
+                node.anchorPoint = .zero
+                node.zPosition = CGFloat(spec.zOrder)
+                stageNode.addChild(node)
+                stageLayers.append((node, spec.parallaxQ8))
+            }
+        } catch {
+            onAtlasLoadNotice?("Stage \(stageID) art failed: \(error.localizedDescription)")
+        }
+        // The painted floor replaces the debug floor line.
+        ground.isHidden = !stageLayers.isEmpty
     }
 
     /// Re-run atlas loads after `onAtlasLoadNotice` is attached (e.g. post-`didMove`).
@@ -108,6 +146,7 @@ final class GreyboxScene: SKScene {
     override func update(_: TimeInterval) {
         renderTick &+= 1
         syncFighters()
+        syncProjectiles()
         hud.apply(snapshot: snapshot)
         spawnCombatFXIfNeeded()
         applyCameraAndShake()
@@ -134,9 +173,10 @@ final class GreyboxScene: SKScene {
             let container = fighterNodes[index]
             container.removeAllChildren()
             let atlasID: String? = slots.indices.contains(index) ? slots[index] : "greybox"
-            let frameName = SpriteSelection.frameName(for: fighter)
+            let candidates = SpriteSelection.frameCandidates(for: fighter, tick: snapshot.tick)
             let sprite: SKNode
-            if let atlasID, let atlas = atlases[atlasID], let node = atlas.spriteNode(named: frameName) ?? atlas.spriteNode(named: "idle_0") {
+            if let atlasID, let atlas = atlases[atlasID],
+               let node = candidates.lazy.compactMap({ atlas.spriteNode(named: $0) }).first {
                 sprite = node
             } else {
                 let fallback = SKSpriteNode(color: index == 0 ? .cyan : .magenta, size: CGSize(width: 40, height: 90))
@@ -147,6 +187,26 @@ final class GreyboxScene: SKScene {
             container.position = CGPoint(x: CGFloat(p.x), y: CGFloat(p.y))
             sprite.xScale = fighter.facingRight ? 1 : -1
             container.addChild(sprite)
+        }
+    }
+
+    private func syncProjectiles() {
+        projectileLayer.removeAllChildren()
+        let slots = slotAtlasIDs
+        for p in snapshot.projectiles where p.active {
+            let index = Int(p.owner.rawValue)
+            let atlasID = slots.indices.contains(index) ? slots[index] : nil
+            let frame = "proj_\((max(snapshot.tick, 0) / 4) % 2)"
+            let node: SKNode
+            if let atlasID, let atlas = atlases[atlasID], let sprite = atlas.spriteNode(named: frame) {
+                sprite.xScale = p.velocity.x.raw >= 0 ? 1 : -1
+                node = sprite
+            } else {
+                node = SKSpriteNode(color: .orange, size: CGSize(width: CGFloat(p.hitbox.w), height: CGFloat(p.hitbox.h)))
+            }
+            let c = WorldToScene.projectileCentre(p)
+            node.position = CGPoint(x: CGFloat(c.x), y: CGFloat(c.y))
+            projectileLayer.addChild(node)
         }
     }
 
@@ -169,13 +229,19 @@ final class GreyboxScene: SKScene {
 
     private func applyCameraAndShake() {
         let cam = FightCameraMath.compute(snapshot: snapshot)
-        var offset = CGPoint(x: CGFloat(-cam.scrollX), y: 0)
+        var offset = CGPoint(x: CGFloat(-cam.scrollX), y: CGFloat(-cam.scrollY))
         if shakeTicks > 0 {
             let shake = ShakeState.offset(tick: renderTick, amplitude: shakeAmp)
             offset = CGPoint(x: offset.x + shake.x, y: offset.y + shake.y)
             shakeTicks -= 1
         }
         arenaNode.position = offset
+        for layer in stageLayers {
+            let x = StageArt.layerOffsetX(scrollX: cam.scrollX, parallaxQ8: layer.parallaxQ8)
+            let y = -(cam.scrollY * layer.parallaxQ8) / 256
+            layer.node.position = CGPoint(x: CGFloat(x) + (offset.x + CGFloat(cam.scrollX)),
+                                          y: CGFloat(y) + (offset.y + CGFloat(cam.scrollY)))
+        }
         hud.position = .zero
     }
 }

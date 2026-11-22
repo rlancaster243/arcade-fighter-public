@@ -28,4 +28,25 @@ final class WorldToSceneTests: XCTestCase {
         XCTAssertEqual(spark.worldX, defender.x)
         XCTAssertGreaterThan(spark.worldY, defender.y, "spark sits at chest height above the feet")
     }
+
+    func testProjectileCentreSitsOnItsHitboxAboveTheFloor() {
+        let p = Projectile(
+            id: 1, owner: .p1, position: Vec2(x: Fixed(pixels: 10), y: .zero),
+            velocity: Vec2(x: Fixed(raw: 1024), y: .zero),
+            hitbox: Hitbox(x: -16, y: -28, w: 32, h: 24), damage: 100, lifetimeTicks: 50
+        )
+        let c = WorldToScene.projectileCentre(p)
+        XCTAssertEqual(c.x, SceneConstants.width / 2 + 10)
+        XCTAssertEqual(c.y, WorldToScene.floorY + 16, "hitbox spans 4..28 px above the floor")
+    }
+
+    func testCameraScrollsUpOnlyWhenAJumpWouldLeaveTheScreen() {
+        var snap = SimulationBootstrap.greyboxMatch()
+        XCTAssertEqual(FightCameraMath.compute(snapshot: snap).scrollY, 0, "grounded: no vertical scroll")
+        snap.fighters[0].position = Vec2(x: snap.fighters[0].position.x, y: Fixed(raw: -98 * Fixed.scale))
+        let cam = FightCameraMath.compute(snapshot: snap)
+        let top = WorldToScene.floorY + 98 + FightCamera.fighterHeadroom
+        XCTAssertEqual(cam.scrollY, top - SceneConstants.height)
+        XCTAssertGreaterThan(cam.scrollY, 0)
+    }
 }
