@@ -70,7 +70,9 @@ final class GreyboxScene: SKScene {
             viewportHeight: Int32(view.bounds.height)
         )
         contentOffset = CGPoint(x: CGFloat(layout.contentOffsetX), y: CGFloat(layout.contentOffsetY))
-        size = CGSize(width: CGFloat(layout.viewportWidth), height: CGFloat(layout.viewportHeight))
+        // Don't assign `size` here. Under `.resizeFill` SpriteKit keeps it equal to the view's
+        // bounds; writing the Int32-truncated size makes SpriteKit snap it back on fractional
+        // bounds, re-entering didChangeSize until the stack overflows.
         let scale = CGFloat(layout.scale)
         letterboxNode.setScale(scale)
         letterboxNode.position = contentOffset
@@ -109,7 +111,13 @@ final class GreyboxScene: SKScene {
         hud.apply(snapshot: snapshot)
         spawnCombatFXIfNeeded()
         applyCameraAndShake()
-        activeSparks = activeSparks.filter { $0.tick() }
+        activeSparks = activeSparks.filter { spark in
+            guard spark.tick() else {
+                spark.removeFromParent() // finished bursts otherwise pile up in arenaNode
+                return false
+            }
+            return true
+        }
     }
 
     private func syncFighters() {
@@ -119,7 +127,7 @@ final class GreyboxScene: SKScene {
             fighterNodes.append(placeholder)
         }
         ground.size = CGSize(width: CGFloat(SceneConstants.width), height: 4)
-        ground.position = CGPoint(x: 0, y: 32)
+        ground.position = CGPoint(x: 0, y: CGFloat(WorldToScene.floorY))
 
         let slots = slotAtlasIDs
         for (index, fighter) in snapshot.fighters.enumerated() {
@@ -135,9 +143,8 @@ final class GreyboxScene: SKScene {
                 fallback.anchorPoint = CGPoint(x: 0.5, y: 0)
                 sprite = fallback
             }
-            let px = CGFloat(fighter.position.x.raw) / CGFloat(Fixed.scale) + CGFloat(SceneConstants.width / 2)
-            let py = CGFloat(fighter.position.y.raw) / CGFloat(Fixed.scale) + 32
-            container.position = CGPoint(x: px, y: py)
+            let p = WorldToScene.point(simX: fighter.position.x.raw, simY: fighter.position.y.raw)
+            container.position = CGPoint(x: CGFloat(p.x), y: CGFloat(p.y))
             sprite.xScale = fighter.facingRight ? 1 : -1
             container.addChild(sprite)
         }

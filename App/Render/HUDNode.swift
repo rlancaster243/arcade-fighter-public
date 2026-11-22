@@ -47,7 +47,7 @@ final class HUDNode: SKNode {
         roundLabel.text = "R\(model.roundNumber) \(model.p1RoundsWon)-\(model.p2RoundsWon)"
         roundLabel.position = CGPoint(
             x: CGFloat(SceneConstants.width / 2),
-            y: CGFloat(SceneConstants.height - 4)
+            y: CGFloat(HUDLayout.roundLabelTopY())
         )
     }
 

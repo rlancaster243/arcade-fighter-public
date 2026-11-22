@@ -190,7 +190,12 @@ private extension CollisionResolver {
             if delta != 0 {
                 snapshot.fighters[i].position.x.raw += delta
             }
-            snapshot.fighters[i].position.y.raw = StageBounds.floorPx * BoxMath.scale
+            // Sim is y-down: only stop fighters sinking below the floor. Pinning y every tick
+            // kept jumps on the ground (see JumpThroughResolverTests).
+            let floorRaw = StageBounds.floorPx * BoxMath.scale
+            if snapshot.fighters[i].position.y.raw > floorRaw {
+                snapshot.fighters[i].position.y.raw = floorRaw
+            }
         }
     }
 

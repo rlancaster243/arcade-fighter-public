@@ -28,8 +28,9 @@ public enum CombatPresentation: Sendable {
             let defenderIndex = event.defender == .p1 ? 0 : 1
             guard fighters.indices.contains(defenderIndex) else { continue }
             let f = fighters[defenderIndex]
-            let x = f.position.x.raw / Fixed.scale
-            let y = f.position.y.raw / Fixed.scale + 56
+            let feet = WorldToScene.point(simX: f.position.x.raw, simY: f.position.y.raw)
+            let x = feet.x
+            let y = feet.y + 56
             switch event.kind {
             case .hit:
                 out.append(SparkRequest(kind: .hit, worldX: x, worldY: y))

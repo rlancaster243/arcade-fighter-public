@@ -35,4 +35,15 @@ final class HUDTests: XCTestCase {
         let timer = HUDLayout.timerFrame()
         XCTAssertEqual(timer.x + timer.w / 2, SceneConstants.width / 2)
     }
+
+    /// Regression: the round label was top-aligned at the top edge, inside the timer's band,
+    /// so "R1 0-0" and the seconds rendered on top of each other.
+    func testRoundLabelSitsBelowTheTimer() {
+        let timer = HUDLayout.timerFrame()
+        let timerFontHalfHeight: Int32 = 6 // 12 pt centred on the timer box
+        let timerBottom = timer.y + timer.h / 2 - timerFontHalfHeight
+        XCTAssertLessThanOrEqual(HUDLayout.roundLabelTopY(), timerBottom)
+        XCTAssertGreaterThan(HUDLayout.roundLabelTopY() - 8, HUDLayout.p1MeterBarFrame().y - 20,
+                             "label stays in the HUD band, not down in the arena")
+    }
 }
