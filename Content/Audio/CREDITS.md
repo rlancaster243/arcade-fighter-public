@@ -15,6 +15,10 @@ attribution; credit is given here anyway.
 The license shown on both OpenGameArt pages is CC0 1.0 (https://creativecommons.org/publicdomain/zero/1.0/).
 The towel pack's bundled `*-info.txt` carries a generic multi-license header (MIT/zlib/BSD);
 the OpenGameArt page, which lists CC0, is treated as authoritative.
+To stay safe under either reading, its notice is retained here: wet towel sounds
+Copyright 2009 Iwan Gabovitch (http://qubodup.net), distributed via OpenGameArt; also offered
+under the MIT, zlib and new-BSD licenses, which permit use, modification and redistribution
+provided this notice is kept.
 
 Processing is reproducible with `scripts/audio/build_cc0_sfx.py` (macOS `afconvert` plus the
 Python standard library): FLAC to 44.1 kHz mono 16-bit WAV, leading silence trimmed, tail faded,
