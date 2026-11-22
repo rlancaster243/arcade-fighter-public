@@ -111,6 +111,34 @@ DESIGNS = {
         pants="secondary", boots="primary", belt="accent", hair="helmet",
     ),
 }
+# Alternate costumes (P2 in a mirror match): palette slot overrides, same layout as the main
+# sheet. Skin slots 2-4 and the outline slot 1 are never touched; hue and value shift clearly.
+ALTS = {
+    "kestrel": dict(
+        rim=(255, 170, 130),
+        slots={5: (110, 24, 36), 6: (206, 56, 66), 7: (252, 150, 142),         # crimson jacket
+               8: (44, 34, 30), 9: (78, 62, 54), 10: (118, 98, 88),            # warm charcoal pants
+               11: (196, 124, 12), 12: (255, 206, 80),                         # amber accent
+               13: (28, 30, 50), 14: (82, 90, 126), 15: (255, 240, 205)}),     # midnight hair
+    "bruno": dict(
+        rim=(110, 190, 255),
+        slots={5: (14, 52, 54), 6: (34, 104, 100), 7: (100, 172, 160),         # teal apron
+               8: (24, 30, 60), 9: (50, 62, 108), 10: (86, 102, 156),          # navy pants
+               11: (26, 112, 196), 12: (126, 214, 255),                        # arc-blue accent
+               13: (84, 86, 94), 14: (196, 198, 210), 15: (220, 245, 255)}),   # grey beard
+    "ilse": dict(
+        rim=(180, 200, 255),
+        slots={5: (28, 32, 104), 6: (62, 74, 184), 7: (136, 154, 242),         # royal-blue habit
+               8: (36, 36, 52), 9: (68, 70, 92), 10: (112, 116, 142),          # slate boots
+               11: (128, 138, 160), 12: (226, 232, 246),                       # silver trim
+               13: (58, 58, 96), 14: (128, 128, 178), 15: (236, 240, 255)}),   # dusk veil
+    "rook": dict(
+        rim=(255, 190, 120),
+        slots={5: (112, 78, 20), 6: (212, 160, 48), 7: (255, 232, 148),        # gilded plate
+               8: (60, 14, 22), 9: (110, 28, 40), 10: (164, 62, 70),           # crimson suit
+               11: (14, 142, 190), 12: (120, 240, 255),                        # cyan visor
+               13: (112, 80, 28), 14: (244, 204, 104), 15: (220, 255, 255)}),  # gold helmet
+}
 MATERIAL_SLOTS = {"skin": [2, 3, 4], "primary": [5, 6, 7], "secondary": [8, 9, 10],
                   "accent": [11, 12, 12], "hair": [13, 14, 14], "glow": [15, 15, 15]}
 FIGHTERS = ("kestrel", "bruno", "ilse", "rook")
@@ -1010,12 +1038,36 @@ def render_frame(name, fig, design, mats):
     return render(fig, design, mats, outlined=not name.startswith("proj_"))
 
 
+def alt_design(fid):
+    """The alternate-costume variant of a fighter's design (same geometry, new colours)."""
+    design = dict(DESIGNS[fid])
+    pal = list(design["palette"])
+    for slot, colour in ALTS[fid]["slots"].items():
+        assert slot not in (0, 1, 2, 3, 4), (fid, slot)
+        pal[slot] = colour
+    design["palette"] = pal
+    design["rim"] = ALTS[fid]["rim"]
+    return design
+
+
 def generate(root, fid):
+    """Writes the main sheet, the `<id>_alt.png` costume, and sheet.json; returns PNG sizes."""
     bundle = bundle_dir(root, fid)
     fighter = json.load(open(os.path.join(bundle, "fighter.json")))
-    design = dict(DESIGNS[fid])
+    sheet_name = fighter["spriteSheet"]
+    alt_name = sheet_name[:-4] + "_alt.png"
+    size = 0
+    for design, name in ((dict(DESIGNS[fid]), sheet_name), (alt_design(fid), alt_name)):
+        n, W, Hh, png_len, meta = _generate_sheet(bundle, fighter, design, name)
+        size += png_len
+    with open(os.path.join(bundle, fighter["sheetMeta"]), "w") as f:
+        f.write(json.dumps({"texelScale": K, "frames": meta}, indent=2) + "\n")
+    return fid, n, W, Hh, size
+
+
+def _generate_sheet(bundle, fighter, design, png_name):
     for key in ("torso", "sleeve", "forearm", "glove", "pants", "boots", "belt"):
-        assert design[key] in MATERIAL_SLOTS, (fid, key)
+        assert design[key] in MATERIAL_SLOTS, key
     mats = build_materials(design)
     frames = frames_for(design, fighter)
     rows_n = (len(frames) + COLS - 1) // COLS
@@ -1035,17 +1087,15 @@ def generate(root, fid):
         meta.append(dict(name=name, x=ox, y=oy, w=CELL, h=CELL, anchorX=ANCHOR_X, anchorY=anchor_y))
     rows = [sheet[y * W * 4:(y + 1) * W * 4] for y in range(Hh)]
     png = png_bytes(W, Hh, rows, 6)
-    with open(os.path.join(bundle, fighter["spriteSheet"]), "wb") as f:
+    with open(os.path.join(bundle, png_name), "wb") as f:
         f.write(png)
-    with open(os.path.join(bundle, fighter["sheetMeta"]), "w") as f:
-        f.write(json.dumps({"texelScale": K, "frames": meta}, indent=2) + "\n")
-    return fid, len(frames), W, Hh, len(png)
+    return len(frames), W, Hh, len(png), meta
 
 
 def preview(root, fid, names, out, half=False):
     """Debug: composite chosen frames over a dusk backdrop into an RGB PNG (not shipped)."""
     fighter = json.load(open(os.path.join(bundle_dir(root, fid), "fighter.json")))
-    design = DESIGNS[fid]
+    design = alt_design(fid) if "alt" in os.environ.get("GF_PREVIEW", "") else DESIGNS[fid]
     mats = build_materials(design)
     frames = dict(frames_for(design, fighter))
     f = 2 if half else 1

@@ -40,7 +40,8 @@ final class GreyboxScene: SKScene {
     var contentIDs: [String] = []
 
     private var slotAtlasIDs: [String?] {
-        FighterAtlasRouting.atlasIDs(fighterIDs: snapshot.fighterIDs, contentIDs: contentIDs)
+        FighterSkin.sheetNames(
+            atlasIDs: FighterAtlasRouting.atlasIDs(fighterIDs: snapshot.fighterIDs, contentIDs: contentIDs))
     }
 
     override init(size: CGSize) {
@@ -137,8 +138,12 @@ final class GreyboxScene: SKScene {
         let ids = Set(slotAtlasIDs.compactMap { $0 })
         guard ids != loadedAtlasIDs else { return }
         for id in ids where !loadedAtlasIDs.contains(id) {
-            let dir = ContentPaths.fighterDirectory(id, fromFile: #filePath)
-            let png = dir.appendingPathComponent("\(id).png")
+            let bundleID = FighterSkin.bundleID(ofSheet: id)
+            let dir = ContentPaths.fighterDirectory(bundleID, fromFile: #filePath)
+            var png = dir.appendingPathComponent("\(id).png")
+            if !FileManager.default.fileExists(atPath: png.path) { // no alt costume shipped: normal sheet
+                png = dir.appendingPathComponent("\(bundleID).png")
+            }
             let json = dir.appendingPathComponent("sheet.json")
             do {
                 let atlas = try SpriteAtlas(sheetPNG: png, sheetJSON: json)
