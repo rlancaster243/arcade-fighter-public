@@ -78,17 +78,6 @@ final class MenuReducerTests: XCTestCase {
         XCTAssertEqual(state.cursor, MenuShellState.MainMenuItem.settings.rawValue)
     }
 
-    func testSettingsConfirmOnScaleRowStepsForwardNotBack() {
-        var state = MenuShellState(
-            screen: .settings(.display),
-            cursor: MenuShellState.SettingsRow.windowScale.rawValue
-        )
-        let before = state.preferences.display.windowIntegerScale
-        MenuReducer.reduce(state: &state, command: .confirm)
-        XCTAssertEqual(state.preferences.display.windowIntegerScale, min(6, before + 1))
-        XCTAssertEqual(state.screen, .settings(.display))
-    }
-
     func testResultRematch() {
         let setup = MatchSetup(
             mode: .versus,
@@ -169,5 +158,16 @@ final class MenuReducerTests: XCTestCase {
             return XCTFail("expected resume")
         }
         XCTAssertEqual(resumed, setup)
+    }
+
+    func testSettingsConfirmOnScaleRowStepsForwardNotBack() {
+        var state = MenuShellState(
+            screen: .settings(.display),
+            cursor: MenuShellState.SettingsRow.windowScale.rawValue
+        )
+        let before = state.preferences.display.windowIntegerScale
+        MenuReducer.reduce(state: &state, command: .confirm)
+        XCTAssertEqual(state.preferences.display.windowIntegerScale, min(6, before + 1))
+        XCTAssertEqual(state.screen, .settings(.display))
     }
 }

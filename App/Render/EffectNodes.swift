@@ -35,8 +35,9 @@ final class SparkBurst: SKNode {
     func apply(tick: Int32) -> Bool {
         guard let state = SparkLife.state(ageTicks: tick - spawnTick) else { return false }
         alpha = CGFloat(state.alpha)
+        let radius = CGFloat(state.radius) // explicit CGFloat: CI's toolchain finds cos(CGFloat) * Double ambiguous
         for (node, angle) in pieces {
-            node.position = CGPoint(x: cos(angle) * state.radius, y: sin(angle) * state.radius)
+            node.position = CGPoint(x: cos(angle) * radius, y: sin(angle) * radius)
         }
         return true
     }
