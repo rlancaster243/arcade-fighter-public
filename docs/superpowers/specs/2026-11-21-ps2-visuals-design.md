@@ -72,6 +72,16 @@ disturb it.
 - Release build; live playtest via scripts/playtest: screenshots of select, a match on each stage,
   hit/block sparks, KO. Compare against the PS1 screenshots in build/playtest.
 
+## Update 2026-11-22: anime cel fighters
+The fighter look described above (256-colour sheets, multi-step gradient shading, baked rim light) was
+replaced by the user-approved anime designs: flat cel tones with one shadow tone per material, a
+tinted indigo outline and 3/4 faces, drawn per fighter in `scripts/art/fighter_designs.py`. Everything
+else here still holds for fighters: 224×224 cells, anchor (112, 220), 8 columns, `texelScale` 2,
+unchanged frame names and `sheet.json`, stdlib-only deterministic generator, bilinear filtering.
+Sheets are RGBA truecolour. Fighter PNGs total 8,399,008 bytes (7,699,802 before) and all Content
+PNGs 10,143,997, which is over the ~8 MB aim under Constraints; the Release app is 13,193,190 bytes
+against CI's 15,000,000 cap.
+
 ## Data contracts (fixed before parallel work)
 - `sheet.json`: `{"texelScale": 2, "frames": [ {name,x,y,w,h,anchorX,anchorY}, ... ]}`; rects and anchors
   in sheet pixels. Legacy bare array = texelScale 1. `SpriteSheetLoader` exposes the scale.
