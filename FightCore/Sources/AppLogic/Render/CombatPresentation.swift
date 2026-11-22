@@ -116,7 +116,7 @@ public enum HitFlashLife: Sendable {
     /// Colour-blend factor toward white for a flash `age` ticks old, or nil once finished.
     public static func blend(ageTicks age: Int32) -> Double? {
         guard age >= 0, age < ticks else { return nil }
-        return 0.85 - 0.25 * Double(age)
+        return 1.0 - 0.15 * Double(age)
     }
 }
 

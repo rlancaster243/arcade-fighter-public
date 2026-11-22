@@ -16,6 +16,14 @@ final class HitFlashTests: XCTestCase {
         XCTAssertNil(HitFlashLife.blend(ageTicks: -1))
     }
 
+    /// A 3-tick flash sampled at any of its frames must still read as a white pop, not a grey wash.
+    func testEveryFlashFrameIsStrongAndFirstIsPureWhite() {
+        XCTAssertEqual(HitFlashLife.blend(ageTicks: 0), 1.0)
+        for age in 0..<HitFlashLife.ticks {
+            XCTAssertGreaterThanOrEqual(HitFlashLife.blend(ageTicks: age)!, 0.7, "age \(age)")
+        }
+    }
+
     func testTrackerFlashesOnlyTheStruckSlot() {
         var tracker = HitFlashTracker()
         tracker.trigger(slot: 1, tick: 100)
