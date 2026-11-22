@@ -24,7 +24,7 @@ final class MenuReducerTests: XCTestCase {
             return XCTFail("expected in-match")
         }
         XCTAssertEqual(setup.mode, .arcade)
-        XCTAssertEqual(setup.p1.id, "greybox")
+        XCTAssertEqual(setup.p1.id, "kestrel")
     }
 
     func testVersusTwoStepCharacterSelect() {
