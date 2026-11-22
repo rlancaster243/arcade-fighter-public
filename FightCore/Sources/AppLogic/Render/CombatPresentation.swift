@@ -9,11 +9,51 @@ public struct SparkRequest: Sendable, Equatable, Hashable {
     public var kind: SparkKind
     public var worldX: Int32
     public var worldY: Int32
+    /// Hit with damage >= `CombatPresentation.heavyDamageThreshold`: bigger spark plus a struck-fighter flash.
+    public var heavy: Bool
+    /// Index into `snapshot.fighters` of the fighter that was struck or blocked.
+    public var defenderIndex: Int
 
-    public init(kind: SparkKind, worldX: Int32, worldY: Int32) {
+    public init(kind: SparkKind, worldX: Int32, worldY: Int32, heavy: Bool = false, defenderIndex: Int = 0) {
         self.kind = kind
         self.worldX = worldX
         self.worldY = worldY
+        self.heavy = heavy
+        self.defenderIndex = defenderIndex
+    }
+
+    /// Uniform scale applied to the whole spark node: block smaller, heavy bigger.
+    public var scale: Double {
+        if kind == .block { return 0.7 }
+        return heavy ? 1.6 : 1.0
+    }
+
+    /// Short radiating streak lines (6...10).
+    public var streakCount: Int {
+        if kind == .block { return 6 }
+        return heavy ? 10 : 8
+    }
+}
+
+/// Deterministic streak layout so a spark looks the same on every run (and is testable).
+public enum SparkShape: Sendable {
+    /// `count` angles in [0, 2π): evenly spaced rays rotated by `seed`, each nudged by a bounded jitter.
+    public static func streakAngles(count: Int, seed: Int32) -> [Double] {
+        guard count > 0 else { return [] }
+        let step = 2.0 * Double.pi / Double(count)
+        var h = UInt32(bitPattern: seed) &* 2_654_435_761 &+ 0x9E37_79B9
+        func next() -> Double {
+            h ^= h << 13
+            h ^= h >> 17
+            h ^= h << 5
+            return Double(h % 1000) / 1000.0
+        }
+        let start = next() * step
+        return (0..<count).map { i in
+            let jitter = (next() - 0.5) * step * 0.4
+            let a = (start + Double(i) * step + jitter).truncatingRemainder(dividingBy: 2.0 * Double.pi)
+            return a < 0 ? a + 2.0 * Double.pi : a
+        }
     }
 }
 
@@ -33,9 +73,12 @@ public enum CombatPresentation: Sendable {
             let y = feet.y + 56
             switch event.kind {
             case .hit:
-                out.append(SparkRequest(kind: .hit, worldX: x, worldY: y))
+                out.append(SparkRequest(
+                    kind: .hit, worldX: x, worldY: y,
+                    heavy: event.damage >= heavyDamageThreshold, defenderIndex: defenderIndex
+                ))
             case .block:
-                out.append(SparkRequest(kind: .block, worldX: x, worldY: y))
+                out.append(SparkRequest(kind: .block, worldX: x, worldY: y, defenderIndex: defenderIndex))
             case .none, .chip, .throwHit, .knockdown, .roundStart, .roundEnd, .matchWin, .timeOver, .whiff:
                 break
             }
@@ -62,6 +105,35 @@ public enum SparkLife: Sendable {
         guard age >= 0, age < ticks else { return nil }
         let t = Double(age) / Double(ticks)
         return (alpha: 1.0 - t * t, radius: 5.0 + 11.0 * t)
+    }
+}
+
+/// White flash on the struck fighter's sprite after a heavy hit. ~3 sim ticks (50 ms), single pulse,
+/// never full-screen: photosensitivity.
+public enum HitFlashLife: Sendable {
+    public static let ticks: Int32 = 3
+
+    /// Colour-blend factor toward white for a flash `age` ticks old, or nil once finished.
+    public static func blend(ageTicks age: Int32) -> Double? {
+        guard age >= 0, age < ticks else { return nil }
+        return 0.85 - 0.25 * Double(age)
+    }
+}
+
+/// Per-fighter flash start ticks. Pure state the renderer owns; no clock of its own.
+public struct HitFlashTracker: Sendable, Equatable {
+    private var startTick: [Int: Int32] = [:]
+
+    public init() {}
+
+    public mutating func trigger(slot: Int, tick: Int32) {
+        startTick[slot] = tick
+    }
+
+    /// 0 when `slot` isn't flashing at `tick` (including a rewound tick after a new match).
+    public func blend(slot: Int, tick: Int32) -> Double {
+        guard let start = startTick[slot] else { return 0 }
+        return HitFlashLife.blend(ageTicks: tick - start) ?? 0
     }
 }
 

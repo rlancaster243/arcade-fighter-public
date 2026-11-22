@@ -24,6 +24,7 @@ final class GreyboxScene: SKScene {
     private var atlasFailureNotified: Set<String> = []
     private var fighterNodes: [SKNode] = []
     private var activeSparks: [SparkBurst] = []
+    private var hitFlash = HitFlashTracker()
     private var shakeTicks: Int32 = 0
     private var shakeAmp: Int32 = 0
     private var renderTick: Int32 = 0
@@ -153,10 +154,10 @@ final class GreyboxScene: SKScene {
 
     override func update(_: TimeInterval) {
         renderTick &+= 1
+        spawnCombatFXIfNeeded() // before syncFighters so a heavy-hit flash shows on the hit's own frame
         syncFighters()
         syncProjectiles()
         hud.apply(snapshot: snapshot)
-        spawnCombatFXIfNeeded()
         applyCameraAndShake()
         activeSparks = activeSparks.filter { spark in
             guard spark.apply(tick: snapshot.tick) else {
@@ -194,6 +195,10 @@ final class GreyboxScene: SKScene {
             let p = WorldToScene.point(simX: fighter.position.x.raw, simY: fighter.position.y.raw)
             container.position = CGPoint(x: CGFloat(p.x), y: CGFloat(p.y))
             sprite.xScale = fighter.facingRight ? 1 : -1
+            let flash = Float(hitFlash.blend(slot: index, tick: snapshot.tick))
+            if flash > 0, let flashed = sprite as? SKSpriteNode { // heavy-hit flash: this fighter only
+                flashed.shader = HitFlashShader.shader(slot: index, blend: flash)
+            }
             container.addChild(sprite)
         }
     }
@@ -229,7 +234,8 @@ final class GreyboxScene: SKScene {
             shakeTicks = 12
         }
         for spark in CombatPresentation.sparks(from: fxSnapshot) {
-            let burst = SparkBurst(kind: spark.kind, spawnTick: snapshot.tick)
+            if spark.heavy { hitFlash.trigger(slot: spark.defenderIndex, tick: snapshot.tick) }
+            let burst = SparkBurst(request: spark, spawnTick: snapshot.tick)
             burst.position = CGPoint(x: CGFloat(spark.worldX), y: CGFloat(spark.worldY))
             burst.zPosition = 50
             arenaNode.addChild(burst)
