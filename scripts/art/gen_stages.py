@@ -699,11 +699,12 @@ def s1_quarry():
     wall = Courses(9, 23, 46, 100, FLOOR, 7)
     rock = Ramp([(0, (22, 20, 32)), (.35, (46, 42, 62)), (.7, (84, 78, 98)), (1, (136, 130, 146))])
     damp = FBM(72, [(150, 70, 0.6), (50, 24, 0.4)])
+    blkgrain = FBM(77, [(6, 5, 0.6), (3, 3, 0.4)])
     frost = FBM(73, [(70, 46, 0.5), (24, 16, 0.5)])
 
     def wfn(y, xa, xb):
         info = wall.row(y, xa, xb)
-        dn, fn_ = damp.row(y), frost.row(y)
+        dn, fn_, gg = damp.row(y), frost.row(y), blkgrain.row(y)
         rs, gs, bs = [], [], []
         ao = 0.62 + 0.38 * smoothstep(0, 40, FLOOR - y)
         for i, x in enumerate(range(xa, xb)):
@@ -714,20 +715,50 @@ def s1_quarry():
             if lt <= -1:
                 c = (14, 12, 22)
             else:
-                base = 0.28 + tone * 0.32 + lt * 0.22 + (dn[x] - 0.5) * 0.32
+                base = 0.2 + tone * 0.5 + lt * 0.3 + (dn[x] - 0.5) * 0.3 + (gg[x] - 0.5) * 0.16
                 c = rock(base)
                 fr = smoothstep(0.62, 0.8, fn_[x]) * (1 - smoothstep(top[x] + 20, top[x] + 70, y)) * 0.55
                 c = lerpc(c, (200, 220, 244), fr)
             rs.append(c[0] * ao), gs.append(c[1] * ao), bs.append(c[2] * ao)
         return rs, gs, bs
     L.draw(0, min(top) - 2, W, FLOOR, cov_below(top), sh_rows(wfn))
-    # buttresses (the snow cap below is drawn over their tops)
+    # pillars: cylindrical shaft, ashlar courses with per-course tone, projecting cap and plinth
+    pgrain = FBM(76, [(18, 12, 0.6), (7, 5, 0.4)])
     for bx in (150, 480, 940, 1400):
         y0 = int(top[bx]) - 8
-        L.draw(bx - 26, y0, bx + 26, FLOOR,
-               cov_rect(bx - 26, y0, bx + 26, FLOOR),
-               sh_px(lambda x, y, bx=bx: lerpc((26, 24, 40), (122, 116, 138),
-                                               clamp(0.5 + (x - bx) / 70.0 + (hash01(x // 3, y // 22, 4) - .5) * .12) ** 1.2)))
+        hw = 30
+        # soft contact shadow on the wall either side
+        L.draw(bx - hw - 8, y0 + 30, bx + hw + 8, FLOOR,
+               lambda y, xa, xb, bx=bx: [0.32 * (1 - smoothstep(hw, hw + 8, abs(x + 0.5 - bx))) for x in range(xa, xb)],
+               sh_flat((10, 9, 20)))
+
+        def pfn(y, xa, xb, bx=bx):
+            gr = pgrain.row(y)
+            k, yy = divmod(FLOOR - 1 - y, 22)
+            tone = hash01(k, bx, 12)
+            rs, gs, bs = [], [], []
+            for x in range(xa, xb):
+                u = (x + 0.5 - bx) / hw
+                shaft = math.sqrt(max(0.0, 1 - u * u))
+                lit = 0.5 + 0.5 * (-u * 0.55 + shaft * 0.6) - 0.1
+                val = 0.3 + 0.62 * clamp(lit) + (tone - 0.5) * 0.14 + (gr[x] - 0.5) * 0.2
+                if yy < 1:
+                    val = 0.02
+                elif yy >= 19:
+                    val += 0.1 * (yy - 18) / 3.0
+                elif yy < 4:
+                    val -= 0.08 * (4 - yy) / 3.0
+                val -= 0.22 * smoothstep(0.82, 1.0, abs(u))
+                c = rock(val)
+                rs.append(c[0]), gs.append(c[1]), bs.append(c[2])
+            return rs, gs, bs
+        L.draw(bx - hw, y0, bx + hw, FLOOR, cov_rect(bx - hw, y0, bx + hw, FLOOR), sh_rows(pfn))
+        # slim shadowed capstone under the snow and a plinth line at the foot
+        cy = int(top[bx]) + 30
+        for (yy0, yy1) in ((cy, cy + 7), (FLOOR - 7, FLOOR)):
+            L.draw(bx - hw - 3, yy0, bx + hw + 3, yy1, cov_rect(bx - hw - 3, yy0, bx + hw + 3, yy1),
+                   sh_px(lambda x, y, bx=bx, yy0=yy0: rock(
+                       0.4 + 0.5 * clamp(0.62 - (x - bx) / (2.0 * hw)) - 0.25 * clamp((y - yy0 - 3) / 4.0))))
     # snow cap with soft shadowed underside
     cap = FBM(74, [(80, 30, 0.6), (26, 12, 0.4)])
     capy = [t + 8 + 22 * c for t, c in zip(top, cap.row(40))]
