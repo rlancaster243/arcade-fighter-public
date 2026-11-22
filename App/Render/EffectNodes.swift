@@ -53,6 +53,29 @@ enum EffectTextures {
     }
 }
 
+/// Heavy-hit flash. `colorBlendFactor` tints multiplicatively, so blending toward white does nothing
+/// to a textured sprite; this shader mixes the (premultiplied) texel toward white instead.
+/// One shader per fighter slot so both can flash with different strength; compiled once.
+enum HitFlashShader {
+    private static let source = """
+    void main() {
+        vec4 c = texture2D(u_texture, v_tex_coord);
+        gl_FragColor = vec4(mix(c.rgb, vec3(c.a), u_flash), c.a) * v_color_mix.a;
+    }
+    """
+    private static let shaders: [SKShader] = (0..<2).map { _ in
+        let shader = SKShader(source: source)
+        shader.uniforms = [SKUniform(name: "u_flash", float: 0)]
+        return shader
+    }
+
+    static func shader(slot: Int, blend: Float) -> SKShader {
+        let shader = shaders[min(max(slot, 0), shaders.count - 1)]
+        shader.uniformNamed("u_flash")?.floatValue = blend
+        return shader
+    }
+}
+
 /// PS2-style spark: additive hot core, soft halo and short radiating streaks. Timed in sim ticks via
 /// `SparkLife`; 12 sprites at most, all sharing two cached textures.
 final class SparkBurst: SKNode {

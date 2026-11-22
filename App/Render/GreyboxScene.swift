@@ -189,10 +189,9 @@ final class GreyboxScene: SKScene {
             let p = WorldToScene.point(simX: fighter.position.x.raw, simY: fighter.position.y.raw)
             container.position = CGPoint(x: CGFloat(p.x), y: CGFloat(p.y))
             sprite.xScale = fighter.facingRight ? 1 : -1
-            let flash = CGFloat(hitFlash.blend(slot: index, tick: snapshot.tick))
+            let flash = Float(hitFlash.blend(slot: index, tick: snapshot.tick))
             if flash > 0, let flashed = sprite as? SKSpriteNode { // heavy-hit flash: this fighter only
-                flashed.color = .white
-                flashed.colorBlendFactor = flash
+                flashed.shader = HitFlashShader.shader(slot: index, blend: flash)
             }
             container.addChild(sprite)
         }
