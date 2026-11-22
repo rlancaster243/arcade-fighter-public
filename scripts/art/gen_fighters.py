@@ -764,7 +764,7 @@ def build_figure(design, pose, ground=None, fit=True):
         ankle = add(knee, vec(ta - kb, shin))
         fig.cap(hp, knee, limb_r * 1.55, limb_r * 1.2, design["pants"], layer, bias)
         fig.cap(knee, ankle, limb_r * 1.2, limb_r * 0.95, design["pants"], layer, bias)
-        toe = add(ankle, vec(ta - kb - 80, 6.5 * s))
+        toe = add(ankle, vec(ta - kb + 80, 6.5 * s))  # toes point forward (sheet faces right, +x)
         fig.cap(ankle, toe, limb_r * 0.95, limb_r * 0.8, design["boots"], layer + 0.5, bias)
 
     # back limbs (far side, darker), torso, head, front limbs
