@@ -36,8 +36,14 @@ done
 
 mkdir -p Content/Audio
 
+# hit_light, hit_heavy, block, throw and ko are recorded CC0 clips (Content/Audio/CREDITS.md,
+# rebuilt by scripts/audio/build_cc0_sfx.py); never overwrite them with sine placeholders.
+RECORDED_SFX="hit_light hit_heavy block throw ko"
+
 synth_wav() {
-  local out="$1" freq="$2" dur="${3:-0.08}"
+  local out="$1" freq="$2" dur="${3:-0.08}" id
+  id="$(basename "$out" .wav)"
+  case " $RECORDED_SFX " in *" $id "*) echo "skip recorded clip: $id"; return 0 ;; esac
   ffmpeg -y -loglevel error -f lavfi -i "sine=frequency=${freq}:duration=${dur}" \
     -ar 44100 -ac 1 "$out"
 }
