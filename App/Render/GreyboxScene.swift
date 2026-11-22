@@ -7,9 +7,12 @@ import SpriteKit
 final class GreyboxScene: SKScene {
     var snapshot: GameSnapshot = SimulationBootstrap.greyboxMatch() {
         didSet {
+            fxInbox.receive(snapshot)
             syncAtlasesIfNeeded()
         }
     }
+    /// Hit/block events from every assigned snapshot (see FXEventInbox).
+    private var fxInbox = FXEventInbox()
 
     private let letterboxNode = SKNode()
     private let arenaNode = SKNode()
@@ -21,7 +24,6 @@ final class GreyboxScene: SKScene {
     private var atlasFailureNotified: Set<String> = []
     private var fighterNodes: [SKNode] = []
     private var activeSparks: [SparkBurst] = []
-    private var lastProcessedTick: Int32 = -1
     private var shakeTicks: Int32 = 0
     private var shakeAmp: Int32 = 0
     private var renderTick: Int32 = 0
@@ -151,7 +153,7 @@ final class GreyboxScene: SKScene {
         spawnCombatFXIfNeeded()
         applyCameraAndShake()
         activeSparks = activeSparks.filter { spark in
-            guard spark.tick() else {
+            guard spark.apply(tick: snapshot.tick) else {
                 spark.removeFromParent() // finished bursts otherwise pile up in arenaNode
                 return false
             }
@@ -211,15 +213,17 @@ final class GreyboxScene: SKScene {
     }
 
     private func spawnCombatFXIfNeeded() {
-        guard snapshot.tick != lastProcessedTick else { return }
-        lastProcessedTick = snapshot.tick
-        let amp = CombatPresentation.shakeAmplitude(for: snapshot)
+        let events = fxInbox.drain()
+        guard !events.isEmpty else { return }
+        var fxSnapshot = snapshot
+        fxSnapshot.events = events
+        let amp = CombatPresentation.shakeAmplitude(for: fxSnapshot)
         if amp > 0 {
             shakeAmp = amp
             shakeTicks = 12
         }
-        for spark in CombatPresentation.sparks(from: snapshot) {
-            let burst = SparkBurst(kind: spark.kind)
+        for spark in CombatPresentation.sparks(from: fxSnapshot) {
+            let burst = SparkBurst(kind: spark.kind, spawnTick: snapshot.tick)
             burst.position = CGPoint(x: CGFloat(spark.worldX), y: CGFloat(spark.worldY))
             burst.zPosition = 50
             arenaNode.addChild(burst)

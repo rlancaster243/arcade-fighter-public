@@ -98,6 +98,10 @@ final class LocalMatchSession: ObservableObject {
         lastTickTime = date
 
         var steps = 0
+        // Events from every step this frame. The scene only sees the last published snapshot per
+        // frame and each step clears `events`, so a 2-step catch-up frame used to drop the first
+        // step's hits/blocks (no spark, no shake). SFX already ran per step.
+        var frameEvents: [GameEvent] = []
         while accumulator >= tickDuration, steps < maxCatchUpSteps {
             steps += 1
             accumulator -= tickDuration
@@ -112,7 +116,10 @@ final class LocalMatchSession: ObservableObject {
 
             simulation.step(inputs: frames, snapshot: &snap)
             snapshot = snap
-            model.matchSnapshot = snap
+            frameEvents.append(contentsOf: snap.events)
+            var published = snap
+            published.events = frameEvents
+            model.matchSnapshot = published
             sfx.handle(events: snap.events, snapshot: snap, metadata: metadataTable)
 
             if snap.rules.matchOver {

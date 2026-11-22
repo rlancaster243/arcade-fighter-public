@@ -52,3 +52,41 @@ public enum CombatPresentation: Sendable {
         return 0
     }
 }
+/// Hit/block spark timing in sim ticks (not render frames: a 120 Hz display halved the old
+/// 8-render-frame life to ~66 ms, too short to read).
+public enum SparkLife: Sendable {
+    public static let ticks: Int32 = 14
+
+    /// Opacity and burst radius (scene px) for a spark `age` ticks old, or nil once finished.
+    public static func state(ageTicks age: Int32) -> (alpha: Double, radius: Double)? {
+        guard age >= 0, age < ticks else { return nil }
+        let t = Double(age) / Double(ticks)
+        return (alpha: 1.0 - t * t, radius: 5.0 + 11.0 * t)
+    }
+}
+
+/// Collects presentation events from every snapshot the renderer is handed, so effects don't
+/// depend on the render loop sampling the one snapshot that carried them. Snapshots may repeat
+/// events (the session publishes a frame's events cumulatively); `tick` de-duplicates them.
+public struct FXEventInbox: Sendable {
+    private var pending: [GameEvent] = []
+    private var lastTick: Int32 = -1
+    private var lastSnapshotTick: Int32 = -1
+
+    public init() {}
+
+    public mutating func receive(_ snapshot: GameSnapshot) {
+        if snapshot.tick < lastSnapshotTick { lastTick = -1 } // new match / round reset
+        lastSnapshotTick = snapshot.tick
+        let fresh = snapshot.events.filter { $0.tick > lastTick }
+        guard let newest = fresh.map(\.tick).max() else { return }
+        pending.append(contentsOf: fresh)
+        lastTick = newest
+    }
+
+    /// Events received since the last drain, oldest first.
+    public mutating func drain() -> [GameEvent] {
+        defer { pending.removeAll(keepingCapacity: true) }
+        return pending
+    }
+}

@@ -61,6 +61,34 @@ final class MenuReducerTests: XCTestCase {
         XCTAssertTrue(state.preferences.display.wantsFullscreen)
     }
 
+    func testSettingsCancelReturnsToMainMenu() {
+        var state = MenuShellState(screen: .settings(.display), cursor: 0)
+        MenuReducer.reduce(state: &state, command: .cancel)
+        XCTAssertEqual(state.screen, .mainMenu)
+        XCTAssertEqual(state.cursor, MenuShellState.MainMenuItem.settings.rawValue)
+    }
+
+    func testSettingsBackRowConfirmReturnsToMainMenu() {
+        var state = MenuShellState(
+            screen: .settings(.display),
+            cursor: MenuShellState.SettingsRow.back.rawValue
+        )
+        MenuReducer.reduce(state: &state, command: .confirm)
+        XCTAssertEqual(state.screen, .mainMenu)
+        XCTAssertEqual(state.cursor, MenuShellState.MainMenuItem.settings.rawValue)
+    }
+
+    func testSettingsConfirmOnScaleRowStepsForwardNotBack() {
+        var state = MenuShellState(
+            screen: .settings(.display),
+            cursor: MenuShellState.SettingsRow.windowScale.rawValue
+        )
+        let before = state.preferences.display.windowIntegerScale
+        MenuReducer.reduce(state: &state, command: .confirm)
+        XCTAssertEqual(state.preferences.display.windowIntegerScale, min(6, before + 1))
+        XCTAssertEqual(state.screen, .settings(.display))
+    }
+
     func testResultRematch() {
         let setup = MatchSetup(
             mode: .versus,
