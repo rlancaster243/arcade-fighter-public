@@ -142,6 +142,11 @@ struct SheetFrameJSON: Decodable {
     let anchorY: Int32
 }
 
+struct ScaledSheetJSON: Decodable {
+    let texelScale: Int32?
+    let frames: [SheetFrameJSON]
+}
+
 func mapBox(_ b: FighterJSON.BoxJSON) -> Hitbox {
     Hitbox(x: b.x, y: b.y, w: b.w, h: b.h)
 }

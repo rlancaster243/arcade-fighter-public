@@ -9,11 +9,13 @@ final class StageArtTests: XCTestCase {
         for l in layers { XCTAssertTrue(FileManager.default.fileExists(atPath: l.imageURL.path), l.id) }
     }
 
-    func testStage1SingleBackgroundIsOneFullParallaxLayer() throws {
+    func testStage1IsThreeParallaxLayersAtDoubleTexelDensity() throws {
         let layers = try StageArt.layers(stageID: "stage1")
-        XCTAssertEqual(layers.count, 1)
-        XCTAssertEqual(layers[0].parallaxQ8, 256)
-        XCTAssertTrue(FileManager.default.fileExists(atPath: layers[0].imageURL.path))
+        XCTAssertEqual(layers.map(\.parallaxQ8), [26, 90, 256])
+        for layer in layers {
+            XCTAssertEqual(layer.texelScale, 2)
+            XCTAssertTrue(FileManager.default.fileExists(atPath: layer.imageURL.path), layer.id)
+        }
     }
 
     func testParallaxOffsets() {

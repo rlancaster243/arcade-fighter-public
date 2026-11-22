@@ -19,7 +19,12 @@ public enum FighterLoader {
         let sheetData = try Data(contentsOf: sheetURL)
         let sheet: [SheetFrameJSON]
         do {
-            sheet = try decoder.decode([SheetFrameJSON].self, from: sheetData)
+            // Bare array (1x sheets) or {"texelScale": N, "frames": [...]} (2x PS2-era sheets).
+            if let bare = try? decoder.decode([SheetFrameJSON].self, from: sheetData) {
+                sheet = bare
+            } else {
+                sheet = try decoder.decode(ScaledSheetJSON.self, from: sheetData).frames
+            }
         } catch {
             throw FighterLoadError.decodeFailed("sheet: \(error)")
         }

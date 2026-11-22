@@ -110,8 +110,13 @@ final class L9ContentTests: XCTestCase {
         XCTAssertEqual(json?["schemaVersion"] as? Int, 1)
         XCTAssertEqual(json?["id"] as? String, "stage1")
         XCTAssertEqual(json?["displayName"] as? String, "Glacier Forge Quarry")
-        let bg = json?["background"] as? String ?? ""
-        XCTAssertTrue(FileManager.default.fileExists(atPath: dir.appendingPathComponent(bg).path))
+        let layers = json?["layers"] as? [[String: Any]] ?? []
+        XCTAssertFalse(layers.isEmpty)
+        for layer in layers {
+            let image = try XCTUnwrap(layer["image"] as? String)
+            XCTAssertFalse(image.isEmpty)
+            XCTAssertTrue(FileManager.default.fileExists(atPath: dir.appendingPathComponent(image).path), image)
+        }
     }
 
     func testFighterSheetsAreIndexedSprites() throws {
