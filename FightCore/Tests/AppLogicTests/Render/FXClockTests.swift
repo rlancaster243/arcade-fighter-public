@@ -49,9 +49,13 @@ final class FXClockTests: XCTestCase {
     /// Stage art is arena-wide (two screens); with the playfield camera at rest the layers must be
     /// drawn from the middle of the painting, not its left edge.
     func testStageLayersAreFramedOnTheMiddleOfTheArt() {
-        XCTAssertEqual(FightCamera.stageCentreScrollX, SceneConstants.width / 2)
-        let floorX = StageArt.layerOffsetX(scrollX: FightCamera.stageCentreScrollX, parallaxQ8: 256)
+        let base = StageArt.centreScrollX(layerWidth: SceneConstants.width * 2)
+        XCTAssertEqual(base, SceneConstants.width / 2)
+        let floorX = StageArt.layerOffsetX(scrollX: base, parallaxQ8: 256)
         XCTAssertEqual(floorX, -SceneConstants.width / 2) // art centre (x = 384) lands on screen centre
+        // Art one screen wide (legacy single background) must not be pushed half off-screen.
+        XCTAssertEqual(StageArt.centreScrollX(layerWidth: SceneConstants.width), 0)
+        XCTAssertEqual(StageArt.centreScrollX(layerWidth: 100), 0)
     }
 
     /// Regression: a block that took chip damage showed no block spark.

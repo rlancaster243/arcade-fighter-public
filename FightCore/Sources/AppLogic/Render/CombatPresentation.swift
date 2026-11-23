@@ -58,8 +58,10 @@ public enum SparkShape: Sendable {
 }
 
 public enum CombatPresentation: Sendable {
-    /// Heavy hits (per design: heavy hitstop 9) use damage at or above this threshold for shake.
-    public static let heavyDamageThreshold: Int32 = 70
+    /// Hits at or above this damage get the shake, white flash and big spark. Shipped light
+    /// normals deal 50...72 and heavies 86 and up; at the old value of 70 nearly every jab
+    /// counted as heavy, so jab strings strobed the flash (photosensitivity).
+    public static let heavyDamageThreshold: Int32 = 85
 
     public static func sparks(from snapshot: GameSnapshot) -> [SparkRequest] {
         var out: [SparkRequest] = []

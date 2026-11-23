@@ -78,4 +78,23 @@ final class AirRecoveryTests: XCTestCase {
         defender.kind = .airborne
         XCTAssertFalse(ThrowLogic.canConnectThrow(attacker: attacker, defender: defender, move: toss))
     }
+
+    func testThrowTechInTheAirDoesNotLeaveTheDefenderIdle() {
+        var attacker = FighterState(position: Vec2(x: .zero, y: Fixed(raw: FighterConstants.groundY)), facingRight: true, health: 1000)
+        var defender = FighterState(position: Vec2(x: .zero, y: Fixed(raw: FighterConstants.groundY - 60 * Fixed.scale)), facingRight: false, health: 1000)
+        defender.kind = .airborne
+        ThrowLogic.techThrow(defender: &defender, attacker: &attacker)
+        XCTAssertEqual(defender.kind, .airborne)
+    }
+
+    func testKnockdownInTheAirDoesNotGetUpBeforeLanding() {
+        var f = FighterState(position: Vec2(x: .zero, y: Fixed(raw: FighterConstants.groundY - 60 * Fixed.scale)), facingRight: true, health: 1000)
+        f.kind = .knockdown
+        f.timer = 1
+        FighterStateMachine.advanceTimerStates(fighter: &f)
+        XCTAssertEqual(f.kind, .knockdown)
+        f.position.y = Fixed(raw: FighterConstants.groundY)
+        FighterStateMachine.advanceTimerStates(fighter: &f)
+        XCTAssertEqual(f.kind, .getup)
+    }
 }

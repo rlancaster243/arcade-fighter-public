@@ -17,10 +17,6 @@ public struct FightCamera: Sendable, Equatable, Hashable {
     /// Scrollable stage is wider than the 384px viewport (fighters use center-origin coords).
     public static let arenaWidth: Int32 = SceneConstants.width * 2
     public static let visibleWidth: Int32 = SceneConstants.width
-    /// Scroll that frames the middle of the arena-wide stage art. Fighters live in a one-screen
-    /// playfield and `scrollX` stays 0 there, so stage layers are drawn at this base scroll;
-    /// without it the view sits on the left half of the painting.
-    public static let stageCentreScrollX: Int32 = (arenaWidth - visibleWidth) / 2
 }
 
 public enum FightCameraMath: Sendable {

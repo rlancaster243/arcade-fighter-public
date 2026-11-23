@@ -170,7 +170,9 @@ enum FighterStateMachine {
             }
             fighter.timer &-= 1
             if fighter.timer == 0 {
-                if fighter.kind == .knockdown {
+                if fighter.kind == .knockdown, fighter.position.y.raw < FighterConstants.groundY {
+                    fighter.timer = 1 // still falling: stay down until the floor, then get up
+                } else if fighter.kind == .knockdown {
                     fighter.kind = .getup
                     fighter.timer = FighterConstants.defaultGetupTicks
                 } else {

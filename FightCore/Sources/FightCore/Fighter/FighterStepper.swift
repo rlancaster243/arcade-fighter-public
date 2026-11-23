@@ -201,6 +201,9 @@ public struct FighterStepper: FighterStepping, Sendable {
         move: MoveDef
     ) -> Bool {
         guard fighter.kind == .attackRecovery else { return false }
+        // No cancels while still above the floor (the tail of a rising special): the next
+        // attack would hang in the air, since attacks take no gravity of their own.
+        guard fighter.position.y.raw >= FighterConstants.groundY else { return false }
         guard !runtime.queuedMoveID.isEmpty else { return false }
         let framesIntoRecovery = fighter.stateTick - move.startup - move.active
         guard framesIntoRecovery >= move.recovery - FighterConstants.normalRecoveryCancelFrames else {

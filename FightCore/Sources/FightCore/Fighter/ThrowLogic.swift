@@ -30,7 +30,7 @@ enum ThrowLogic {
     }
 
     static func techThrow(defender: inout FighterState, attacker: inout FighterState) {
-        defender.kind = .idle
+        defender.kind = FighterStateMachine.recoveredKind(defender)
         defender.timer = 0
         defender.activeMoveID = ""
         attacker.kind = .attackRecovery

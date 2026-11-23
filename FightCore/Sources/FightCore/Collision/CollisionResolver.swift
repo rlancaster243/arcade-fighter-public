@@ -339,6 +339,12 @@ private extension CollisionResolver {
     func applyHit(_ hit: HitResolution, snapshot: inout GameSnapshot) {
         let aIdx = Int(hit.attacker.rawValue)
         let dIdx = Int(hit.defender.rawValue)
+        // Throws are ground grabs (see ThrowLogic.canConnectThrow): a throw box that overlaps
+        // a defender who is off the floor whiffs.
+        if hit.move.guardLevel == .throwAttack,
+           snapshot.fighters[dIdx].position.y.raw < FighterConstants.groundY {
+            return
+        }
         snapshot.fighters[aIdx].attackContact = true
         var defender = snapshot.fighters[dIdx]
 

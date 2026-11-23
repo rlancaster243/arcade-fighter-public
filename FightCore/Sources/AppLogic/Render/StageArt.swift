@@ -54,7 +54,7 @@ public enum StageArt: Sendable {
                 return StageLayerSpec(
                     id: layer["id"] as? String ?? image,
                     imageURL: dir.appendingPathComponent(image),
-                    parallaxQ8: Int32(clamping: layer["parallaxQ8"] as? Int ?? 256),
+                    parallaxQ8: Int32(min(max(layer["parallaxQ8"] as? Int ?? 256, 0), maxParallaxQ8)),
                     zOrder: Int32(clamping: layer["zOrder"] as? Int ?? 0),
                     texelScale: texelScale
                 )
@@ -71,6 +71,15 @@ public enum StageArt: Sendable {
     public static func logicalSize(pixelWidth: Int, pixelHeight: Int, texelScale: Int32) -> StageLayerSize {
         let scale = Double(max(texelScale, 1))
         return StageLayerSize(width: Double(pixelWidth) / scale, height: Double(pixelHeight) / scale)
+    }
+
+    /// Upper bound for a layer's `parallaxQ8` (4x foreground speed), so offsets cannot overflow.
+    public static let maxParallaxQ8 = 1024
+
+    /// Scroll that frames the middle of a layer `layerWidth` scene px wide. Arena-wide art (two
+    /// screens) starts half a screen in; art one screen wide or narrower is not shifted at all.
+    public static func centreScrollX(layerWidth: Int32) -> Int32 {
+        max((layerWidth - SceneConstants.width) / 2, 0)
     }
 
     /// Horizontal layer offset for a camera scroll (scene px).
