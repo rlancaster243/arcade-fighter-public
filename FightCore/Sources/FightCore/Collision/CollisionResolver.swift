@@ -30,6 +30,11 @@ public struct CollisionResolver: CollisionResolving {
             guard let atkDef = context.def(for: attackerSlot, snapshot: snapshot) else { continue }
             guard let move = atkDef.moves.first(where: { $0.id == attacker.activeMoveID }) else { continue }
 
+            // One attack, one hit. A move without per-frame `hits` specs used to connect again on
+            // every active frame (a 108-damage heavy dealt 324), so rounds ended in a few blows.
+            // Multi-hit moves list their hits explicitly and are not limited here.
+            if move.hits.isEmpty, attacker.attackContact { continue }
+
             let activeIndex = activeFrameIndex(for: attacker, move: move)
             guard activeIndex >= 0 else { continue }
 

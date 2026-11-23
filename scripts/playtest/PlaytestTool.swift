@@ -266,7 +266,8 @@ case "window-id":
     print(id)
 case "front-pid":
     guard let pid = frontWindowOwnerPID() else { fail("no frontmost window") }
-    print("window=\(pid) focused=\(focusedAppPID().map(String.init) ?? "none")")
+    print(pid) // stdout stays a bare pid for scripts; the focus detail goes to stderr
+    FileHandle.standardError.write(Data("window=\(pid) focused=\(focusedAppPID().map(String.init) ?? "none")\n".utf8))
 case "activate":
     let pid = pidArg(args, 2)
     guard activate(pid: pid) else { fail("could not bring pid \(pid) to the front; click the game window once and retry") }

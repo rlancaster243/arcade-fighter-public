@@ -27,7 +27,8 @@ final class GreyboxScene: SKScene {
     private var hitFlash = HitFlashTracker()
     private var fxClock = FXClock()
     private var lastUpdateTime: TimeInterval?
-    private var shakeTicks: Int32 = 0
+    /// FX-clock tick at which the current shake ends (timed like sparks and the flash).
+    private var shakeEndTick: Int32 = 0
     private var shakeAmp: Int32 = 0
     private var renderTick: Int32 = 0
     private var contentOffset = CGPoint.zero
@@ -246,7 +247,7 @@ final class GreyboxScene: SKScene {
         let amp = CombatPresentation.shakeAmplitude(for: fxSnapshot)
         if amp > 0 {
             shakeAmp = amp
-            shakeTicks = 12
+            shakeEndTick = fxClock.now + 12
         }
         for spark in CombatPresentation.sparks(from: fxSnapshot) {
             if spark.heavy { hitFlash.trigger(slot: spark.defenderIndex, tick: fxClock.now) }
@@ -261,10 +262,9 @@ final class GreyboxScene: SKScene {
     private func applyCameraAndShake() {
         let cam = FightCameraMath.compute(snapshot: snapshot)
         var offset = CGPoint(x: CGFloat(-cam.scrollX), y: CGFloat(-cam.scrollY))
-        if shakeTicks > 0 {
-            let shake = ShakeState.offset(tick: renderTick, amplitude: shakeAmp)
+        if fxClock.now < shakeEndTick {
+            let shake = ShakeState.offset(tick: fxClock.now, amplitude: shakeAmp)
             offset = CGPoint(x: offset.x + shake.x, y: offset.y + shake.y)
-            shakeTicks -= 1
         }
         arenaNode.position = offset
         // Stage layers are one screen tall and composed to line up at scroll 0 (stage2's bells
