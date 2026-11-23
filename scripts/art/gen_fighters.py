@@ -175,8 +175,12 @@ FIGHTER_TWEAKS = {
               "BLOCK": lambda t, P: dict(t, **LOW_GUARD),
               "BLOCK_C": lambda t, P: dict(t, **LOW_GUARD),
               # he is nearly as long as the cell is wide, so he lies with his knees drawn further up
-              "LYING": lambda t, P: dict(t, fa=(20, 34), fl=(70, 124), bl=(44, 86)),
-              "KO": lambda t, P: dict(t, fl=(60, 104), bl=(42, 80)),
+              # and lies in one line along the ground (see FRAME_CTX): arms beside him, knees up, soles down
+              "LYING": lambda t, P: dict(t, **FLAT_LYING),
+              "KO": lambda t, P: dict(t, head=-24, **FLAT_KO),
+              # rising: far knee down behind him, near foot planted under the chest, the near gauntlet pushing
+              # off the ground out in front, the other trailing at his side
+              "GETUP": lambda t, P: dict(t, lean=50, head=-42, fa=(25, 4), ba=(-62, 12), fl=(96, 120), bl=(-30, 92)),
               "FALL": lambda t, P: dict(t, fa=(72, 56), fl=(68, 80), bl=(34, 84)),
               "THROWN": lambda t, P: dict(t, fl=(66, 96), bl=(34, 76)),
               # heavy kick: the gauntlet comes up to the chest so it does not cover the kicking leg
@@ -186,7 +190,8 @@ FIGHTER_TWEAKS = {
     # Rook's guard is lowered the same way so the visor slit stays visible.
     # In full plate he is also too long for the cell with his legs out, so he falls and lies with them drawn up.
     "rook": {"FALL": lambda t, P: dict(t, fa=(70, 52), fl=(70, 86), bl=(36, 88)),
-             "LYING": lambda t, P: dict(t, fl=(70, 124), bl=(44, 86)),
+             "LYING": lambda t, P: dict(t, **FLAT_LYING),
+             "KO": lambda t, P: dict(t, head=-14, **FLAT_KO),
              "BLOCK": lambda t, P: dict(t, **LOW_GUARD),
              "BLOCK_C": lambda t, P: dict(t, **LOW_GUARD)},
     # Ilse holds her orb up at shoulder height rather than overhead, and wards with her palms held out in
@@ -203,6 +208,13 @@ FIGHTER_TWEAKS = {
 }
 
 LOW_GUARD = dict(fa=(66, 84), ba=(56, 92))
+# The two heavy fighters on their backs: near arm on the ground beside the body with the hand past the hip, far arm
+# behind it, knees raised in an inverted V with the feet flat. Winded, the head and shoulders come up on one forearm.
+FLAT_KO = dict(fa=(-8, 8), ba=(-4, 4), fl=(64, 126), bl=(52, 108))
+FLAT_LYING = dict(lean=14, head=2, fa=(-58, 56), ba=(-30, 30), fl=(62, 124), bl=(40, 90))
+# Extra frame context per fighter: {fighter: {frame name: ctx}}.
+FRAME_CTX = {"bruno": {"down_1": dict(flat=True), "ko_0": dict(flat=True)},
+             "rook": {"down_1": dict(flat=True), "ko_0": dict(flat=True)}}
 
 # How far (1x units) a fighter's hips sink below the shared walk cycle, feet staying where the cycle puts them.
 WALK_SINK = {"bruno": 4}
@@ -258,7 +270,7 @@ def frame_specs(fid, fighter):
     out = []
 
     def frame(name, pose, **ctx):
-        out.append((name, pose, ctx))
+        out.append((name, pose, dict(ctx, **FRAME_CTX.get(fid, {}).get(name, {}))))
 
     for i, p in enumerate(T["IDLE"]):
         frame(f"idle_{i}", p, plant=T["IDLE"][0], sway=i * math.pi / 2)

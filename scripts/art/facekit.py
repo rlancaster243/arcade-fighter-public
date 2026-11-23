@@ -434,6 +434,8 @@ def foot_frame(R, side, scale=1.0, lo=-4.0, hi=38.0):
     low = max(R["ankle_f"][1], R["ankle_b"][1])
     if R["grounded"] and an[1] > low - 9.0 * R["s"]:
         ang = max(lo, min(hi, ang * 0.4))      # planted: nearly flat, trailing heel lifts a little
+    if R["ctx"].get("flat"):
+        ang = 90.0                             # lying with the knees up: soles flat on the ground under the figure
     f = (math.cos(math.radians(ang)), math.sin(math.radians(ang)))
     d = (-f[1], f[0])
     s = R["s"] * scale

@@ -17,6 +17,9 @@ Frame context `ctx` (all optional):
          hangs or trails in the finished frame instead of turning with the body
   trail  cloth trails at least this far back (heading in degrees; 90 down, 180 straight behind): a rising body
   curl   -1..1 how the braid bends along its length (+ whips upward, - arcs back down); default follows lift
+  flat   True for a lying figure seen as one line along the ground: both shoulders and both hips sit on the
+         ground side of the body (so an arm lies beside it instead of across the chest) and the soles are
+         put flat on the ground
   plant  a reference pose: both feet stay where that pose puts them and the legs are re-solved, so
          the hips can bob without the feet sliding (idle breathing)
 """
@@ -33,7 +36,7 @@ CAST_GLOW = ("hand", True)      # pose["glow"] values that light the hands ("foo
 OUTLINE = rs.OUTLINE
 FIGHTERS = ("kestrel", "bruno", "ilse", "rook")
 CTX = dict(flow=0.0, lift=0.0, sway=0.0, spin=0.0, lying=False, expr="neutral", focus=True, plant=None,
-           hang=None, trail=None, curl=None)
+           hang=None, trail=None, curl=None, flat=False)
 
 
 def M(base, shadow, hi=None, **kw):
@@ -205,6 +208,9 @@ def make_rig(ch, pose, ctx):
     ho = ch.get("hip_off", 4.5 * b)
     R["hip_f"] = add(hip, (ho * s, 0))
     R["hip_b"] = add(hip, (-ho * s, 0))
+    if ctx["flat"]:
+        R["sh_f"], R["sh_b"] = tp(0.86, -7.0 * s), tp(0.87, -9.0 * s)
+        R["hip_f"], R["hip_b"] = add(hip, (-3.0 * s, 0)), add(hip, (-5.0 * s, 0))
     for side, sh, spec in (("f", R["sh_f"], pose["fa"]), ("b", R["sh_b"], pose["ba"])):
         elbow = add(sh, rs.vec(spec[0], upper))
         hand = add(elbow, rs.vec(spec[0] + spec[1], fore))
@@ -628,10 +634,16 @@ def bruno_body(fig, R, glow, glow_hi):
     for w0, w1 in ((-4.0, -4.0), (10.6, 4.8)):
         fk.stroke(fig, [T(0.60, w0), T(1.00, w1)], 1.5 * u * 0.5 + 1.6, 1.3 * u * 0.5 + 1.4, fk.olcol(apron), 3.22)
         fk.stroke(fig, [T(0.60, w0), T(1.00, w1)], 1.5 * u * 0.5 + 0.5, 1.3 * u * 0.5 + 0.4, apron.base, 3.23)
-    skirt = fk.smooth([T(0.06, -8.2), T(0.06, 12.8), T(-0.20, 14.6), T(-0.47, 15.4), T(-0.50, -4.2), T(-0.2, -7.4)], 4, True,
-                      corners=(0, 1, 3, 4))
+    if R["ctx"]["flat"]:        # lying: the skirt settles flat on the lap, shorter and lower than it hangs
+        skirt = fk.smooth([T(0.06, -8.2), T(0.06, 10.6), T(-0.16, 10.6), T(-0.34, 9.0), T(-0.38, -6.2), T(-0.2, -8.4)], 4, True,
+                          corners=(0, 1, 3, 4))
+        hem = [T(-0.33, 8.8), T(-0.365, -6.0)]
+    else:
+        skirt = fk.smooth([T(0.06, -8.2), T(0.06, 12.8), T(-0.20, 14.6), T(-0.47, 15.4), T(-0.50, -4.2), T(-0.2, -7.4)], 4, True,
+                          corners=(0, 1, 3, 4))
+        hem = [T(-0.455, 15.0), T(-0.485, -4.0)]
     fk.cel_shape(fig, skirt, apron, AL, ol=INNER, shift=(2.0, 1.2))
-    fk.stroke(fig, [T(-0.455, 15.0), T(-0.485, -4.0)], 0.7, 0.7, apron.hi or apron.base, AL + 0.03)
+    fk.stroke(fig, hem, 0.7, 0.7, apron.hi or apron.base, AL + 0.03)
     # tool pocket
     pk = fk.smooth([T(-0.06, 2.4), T(-0.06, 9.6), T(-0.30, 10.2), T(-0.30, 2.8)], 3, True, corners=(0, 1, 2, 3))
     fk.cel_shape(fig, pk, patch, AL + 0.25, ol=1.0, shift=(1.2, 1.0))
@@ -680,11 +692,14 @@ def bruno_hair(fig, R):
     # braid hanging from the chin onto the chest, gold bead at the tip
     p = H(0.48, 1.36)
     n = 4
+    g = fk.lv((0.0, 1.0))       # the braid hangs with gravity, whichever way he has been tipped
+    gn = (g[1], -g[0])
+    bead = lambda a_, b_: (p[0] + g[0] * a_ + gn[0] * b_, p[1] + g[1] * a_ + gn[1] * b_)
     for i in range(n):
-        c = add(p, (math.sin(i * 2.6) * 0.07 * r + i * 0.02 * r, i * r * 0.30))
+        c = bead(i * r * 0.30, math.sin(i * 2.6) * 0.07 * r + i * 0.02 * r)
         rr = r * (0.26 - i * 0.03)
         fk.cel_shape(fig, fk.circle(c, rr, 12, 1.0, 1.12), hair, 6.6 + i * 0.01, ol=1.1, shift=(0.06 * r, 0.07 * r))
-    fk.cel_shape(fig, fk.circle(add(p, (0.08 * r, n * r * 0.30 - 0.02 * r)), r * 0.13, 10), gold, 6.7, ol=1.1, shift=(0.7, 0.7))
+    fk.cel_shape(fig, fk.circle(bead(n * r * 0.30 - 0.02 * r, 0.08 * r), r * 0.13, 10), gold, 6.7, ol=1.1, shift=(0.7, 0.7))
     # gold earring
     fk.cel_shape(fig, fk.circle(H(-0.50, 0.34), r * 0.09, 10), gold, 4.5, ol=1.0, shift=(0.6, 0.6))
 
@@ -1307,11 +1322,14 @@ def rook_helmet(fig, R, glow):
     H = lambda f, d: fk.head_pt(R, f, d)
     sh = (0.10 * r, 0.11 * r)
     # plume: horsehair crest rising from the crown and sweeping back
-    plume = fk.hpoly(R, [(0.16, -1.12), (-0.02, -1.74), (-0.66, -2.12), (-1.50, -1.96), (-2.12, -1.26), (-2.36, -0.30),
-                         (-1.92, -0.92), (-1.40, -1.26), (-0.84, -1.30), (-0.44, -1.06)], 5, corners=(5,))
+    # (on a helm resting on the ground the crest cannot sweep down past the back of it: it flattens along the floor)
+    sq = (lambda f, d: (-1.25 + (f + 1.25) * 0.25 if f < -1.25 else f, d)) if R["ctx"]["flat"] else (lambda f, d: (f, d))
+    plume = fk.hpoly(R, [sq(*q) for q in [(0.16, -1.12), (-0.02, -1.74), (-0.66, -2.12), (-1.50, -1.96), (-2.12, -1.26),
+                                          (-2.36, -0.30), (-1.92, -0.92), (-1.40, -1.26), (-0.84, -1.30), (-0.44, -1.06)]],
+                     5, corners=(5,))
     fk.cel_shape(fig, plume, cape, 4.4, ol=INNER, shift=sh)
     for pts in ([(-0.20, -1.32), (-0.80, -1.62), (-1.46, -1.50), (-2.00, -0.90)],):
-        fk.stroke(fig, fk.hpoly(R, pts, 4, closed=False), r * 0.035, r * 0.015, cape.shadow, 4.42)
+        fk.stroke(fig, fk.hpoly(R, [sq(*q) for q in pts], 4, closed=False), r * 0.035, r * 0.015, cape.shadow, 4.42)
     # shell
     shell = fk.hpoly(R, [(-0.96, -0.56), (-0.70, -1.00), (-0.14, -1.20), (0.46, -1.12), (0.88, -0.80), (1.02, -0.30),
                          (1.00, 0.26), (0.90, 0.74), (0.62, 1.10), (0.18, 1.04), (-0.46, 0.84), (-1.02, 0.70), (-1.06, 0.02)],
