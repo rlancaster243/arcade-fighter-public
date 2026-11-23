@@ -148,7 +148,8 @@ public struct CollisionResolver: CollisionResolving {
 
         var maxHitstop: Int32 = 0
         for hit in pending {
-            applyHit(hit, snapshot: &snapshot)
+            // A whiffed hit (a throw box against a defender off the floor) must not freeze the game.
+            guard applyHit(hit, snapshot: &snapshot) else { continue }
             if hit.move.hitstop > maxHitstop {
                 maxHitstop = hit.move.hitstop
             }
@@ -336,14 +337,16 @@ private extension CollisionResolver {
         return def.moves.first(where: { $0.id == counter.followUpMoveID })
     }
 
-    func applyHit(_ hit: HitResolution, snapshot: inout GameSnapshot) {
+    /// Applies one hit. Returns false when it whiffed and changed nothing.
+    @discardableResult
+    func applyHit(_ hit: HitResolution, snapshot: inout GameSnapshot) -> Bool {
         let aIdx = Int(hit.attacker.rawValue)
         let dIdx = Int(hit.defender.rawValue)
         // Throws are ground grabs (see ThrowLogic.canConnectThrow): a throw box that overlaps
         // a defender who is off the floor whiffs.
         if hit.move.guardLevel == .throwAttack,
            snapshot.fighters[dIdx].position.y.raw < FighterConstants.groundY {
-            return
+            return false
         }
         snapshot.fighters[aIdx].attackContact = true
         var defender = snapshot.fighters[dIdx]
@@ -368,7 +371,7 @@ private extension CollisionResolver {
                     damage: hit.move.damage
                 )
             )
-            return
+            return true
         }
 
         if hit.blocked {
@@ -400,7 +403,7 @@ private extension CollisionResolver {
                     damage: chipDamage
                 )
             )
-            return
+            return true
         }
 
         defender.health -= hit.move.damage
@@ -424,6 +427,7 @@ private extension CollisionResolver {
                 damage: hit.move.damage
             )
         )
+        return true
     }
 
     func resolveProjectiles(snapshot: inout GameSnapshot, pending: inout [HitResolution]) {

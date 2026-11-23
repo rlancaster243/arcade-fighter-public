@@ -58,6 +58,15 @@ final class FXClockTests: XCTestCase {
         XCTAssertEqual(StageArt.centreScrollX(layerWidth: 100), 0)
     }
 
+    /// Regression: Rook's jab (92 damage) counted as a heavy hit and strobed the flash.
+    func testLightNormalsAreNeverHeavyHits() {
+        let jab = GameEvent(kind: .hit, tick: 1, moveID: "rook_norm_lp", damage: 92)
+        let fierce = GameEvent(kind: .hit, tick: 1, moveID: "rook_norm_hp", damage: 92)
+        XCTAssertFalse(CombatPresentation.isHeavy(jab))
+        XCTAssertTrue(CombatPresentation.isHeavy(fierce))
+        XCTAssertFalse(CombatPresentation.isHeavy(GameEvent(kind: .hit, tick: 1, moveID: "norm_hp", damage: 84)))
+    }
+
     /// Regression: a block that took chip damage showed no block spark.
     func testChipBlockStillShowsABlockSpark() {
         var snap = SimulationBootstrap.greyboxMatch()

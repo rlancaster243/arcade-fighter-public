@@ -63,6 +63,13 @@ public enum CombatPresentation: Sendable {
     /// counted as heavy, so jab strings strobed the flash (photosensitivity).
     public static let heavyDamageThreshold: Int32 = 85
 
+    /// Heavy-hit presentation (shake, flash, big spark). Light normals never qualify whatever
+    /// their damage: Rook's jab deals 92, and a jab string must not strobe the flash.
+    public static func isHeavy(_ event: GameEvent) -> Bool {
+        guard event.kind == .hit, event.damage >= heavyDamageThreshold else { return false }
+        return !(event.moveID.hasSuffix("norm_lp") || event.moveID.hasSuffix("norm_lk"))
+    }
+
     public static func sparks(from snapshot: GameSnapshot) -> [SparkRequest] {
         var out: [SparkRequest] = []
         let fighters = snapshot.fighters
@@ -77,7 +84,7 @@ public enum CombatPresentation: Sendable {
             case .hit:
                 out.append(SparkRequest(
                     kind: .hit, worldX: x, worldY: y,
-                    heavy: event.damage >= heavyDamageThreshold, defenderIndex: defenderIndex
+                    heavy: isHeavy(event), defenderIndex: defenderIndex
                 ))
             case .block, .chip: // a block that takes chip damage is still a block on screen
                 out.append(SparkRequest(kind: .block, worldX: x, worldY: y, defenderIndex: defenderIndex))
@@ -90,7 +97,7 @@ public enum CombatPresentation: Sendable {
 
     public static func shakeAmplitude(for snapshot: GameSnapshot) -> Int32 {
         for event in snapshot.events {
-            if event.kind == .hit, event.damage >= heavyDamageThreshold {
+            if isHeavy(event) {
                 return 4
             }
         }

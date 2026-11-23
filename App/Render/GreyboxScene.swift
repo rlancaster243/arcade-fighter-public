@@ -267,8 +267,8 @@ final class GreyboxScene: SKScene {
             shakeTicks -= 1
         }
         arenaNode.position = offset
-        // Stage layers are one screen tall and frame the middle of their own art. They do
-        // not take the shake: shifting them would uncover bare background along the screen edges.
+        // Stage layers are one screen tall. The camera rests half-way along arena-wide art and
+        // each layer scrolls by its parallax factor from there. They do not take the shake: shifting them would uncover bare background along the screen edges.
         let distinct = Set(stageLayers.map(\.parallaxQ8))
         let farthest = distinct.count > 1 ? distinct.min() : nil
         for layer in stageLayers {
