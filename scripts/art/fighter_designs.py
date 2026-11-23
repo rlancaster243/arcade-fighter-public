@@ -13,6 +13,10 @@ Frame context `ctx` (all optional):
   lying  True for a figure spun onto its back: it rests on its body, and cloth runs along the ground
   expr   "neutral" | "hurt" (eyes shut, mouth open) | "out" (eyes shut)
   focus  False drops held effects (Ilse's orb) for frames where the fighter is not in control
+  hang   screen heading (degrees: 90 = straight down) every piece of cloth takes on a spun figure, so it
+         hangs or trails in the finished frame instead of turning with the body
+  trail  cloth trails at least this far back (heading in degrees; 90 down, 180 straight behind): a rising body
+  curl   -1..1 how the braid bends along its length (+ whips upward, - arcs back down); default follows lift
   plant  a reference pose: both feet stay where that pose puts them and the legs are re-solved, so
          the hips can bob without the feet sliding (idle breathing)
 """
@@ -28,7 +32,8 @@ LIE_GAP = 2 * K                 # a lying figure rests this far above the anchor
 CAST_GLOW = ("hand", True)      # pose["glow"] values that light the hands ("foot" lights the kicking foot)
 OUTLINE = rs.OUTLINE
 FIGHTERS = ("kestrel", "bruno", "ilse", "rook")
-CTX = dict(flow=0.0, lift=0.0, sway=0.0, spin=0.0, lying=False, expr="neutral", focus=True, plant=None)
+CTX = dict(flow=0.0, lift=0.0, sway=0.0, spin=0.0, lying=False, expr="neutral", focus=True, plant=None,
+           hang=None, trail=None, curl=None)
 
 
 def M(base, shadow, hi=None, **kw):
@@ -79,10 +84,12 @@ def ribbon(fig, pts, w0, w1, mat, layer, hi=True):
     n = len(pts) - 1
     wid = [w0 + (w1 - w0) * i / n for i in range(n + 1)]
     chain(fig, pts, w0, w1, None, layer, ol=INNER, flat=m.shadow)
-    lit = [(p[0] - 0.30 * w, p[1] - 0.32 * w) for p, w in zip(pts, wid)]
+    lx, ly = fk.lv((-0.30, -0.32))
+    lit = [(p[0] + lx * w, p[1] + ly * w) for p, w in zip(pts, wid)]
     chain(fig, lit, w0 * 0.64, w1 * 0.64, None, layer + 0.001, ol=0, flat=m.base)
     if hi and m.hi:
-        hl = [(p[0] - 0.46 * w, p[1] - 0.5 * w) for p, w in zip(pts, wid)]
+        hx_, hy_ = fk.lv((-0.46, -0.5))
+        hl = [(p[0] + hx_ * w, p[1] + hy_ * w) for p, w in zip(pts, wid)]
         chain(fig, hl[:-1], w0 * 0.12, w1 * 0.12, None, layer + 0.002, ol=0, flat=m.hi)
 
 
@@ -106,7 +113,12 @@ def cloth_theta(R, rest, flow_gain, lift_gain=50.0, lo=70.0):
     c = R["ctx"]
     if c["lying"]:
         return 95.0
-    return max(lo, min(262.0, rest + c["flow"] * flow_gain + c["lift"] * lift_gain))
+    if c["hang"] is not None:
+        return c["hang"] - c["spin"] + (rest - 104.0) * 0.12
+    th = max(lo, min(262.0, rest + c["flow"] * flow_gain + c["lift"] * lift_gain))
+    if c["trail"] is not None:
+        th = max(th, c["trail"] + (rest - 104.0) * 0.12)
+    return th
 
 
 def settle(R, pts, pad=0.0):
@@ -119,18 +131,25 @@ def settle(R, pts, pad=0.0):
 
 def open_hand(fig, hand, fd, hs, mat, layer, shift, ol=INNER, bend=-58.0):
     """Open palm thrust: the hand bends back at the wrist so the fingers point up and the palm faces forward.
-    Returns the palm centre."""
+    Four separate fingers of uneven length fan out of the palm block and the thumb stands off its lower edge,
+    so the silhouette reads as a hand rather than a mitten. Returns the palm centre."""
     d = fk.rot(fd, bend)
     n = (-d[1], d[0])
     L = lambda a_, b_: (hand[0] + (d[0] * a_ + n[0] * b_) * hs, hand[1] + (d[1] * a_ + n[1] * b_) * hs)
-    thumb = fk.smooth([L(0.4, 1.6), L(2.2, 4.6), L(4.4, 5.6), L(5.0, 4.2), L(3.4, 2.6), L(2.6, 0.8)], 3, True)
-    fk.cel_shape(fig, thumb, mat, layer, ol=ol, shift=shift)
-    palm = fk.smooth([L(-1.4, -2.6), L(1.6, -3.3), L(5.6, -3.2), L(8.8, -2.4), L(9.6, -0.4), L(9.2, 1.6), L(6.4, 2.6),
-                      L(2.8, 3.0), L(-1.2, 2.6)], 4, True)
-    fk.cel_shape(fig, palm, mat, layer + 0.01, ol=ol, shift=shift)
-    for v in (-1.3, 0.2, 1.5):
-        fk.stroke(fig, [L(8.8, v * 0.9), L(5.4, v)], 0.55, 0.4, fk.linec(mat), layer + 0.02)
-    return L(3.4, 0.0)
+    fo = min(ol, 1.1)
+    # thumb: two joints angled away from the palm
+    Th = fk.tube([L(0.2, 1.6), L(1.9, 4.3), L(4.3, 5.5)], [(0, 1.5 * hs), (0.6, 1.25 * hs), (1.0, 0.95 * hs)], n=4)
+    fk.tube_draw(fig, Th, mat, layer, k=0.36, ol=ol)
+    # fingers, far one first; each keeps its own contour so the gaps between them show
+    for i, (b0, b1, tip) in enumerate(((-2.45, -3.5, 8.3), (-0.85, -1.25, 9.9), (0.75, 0.95, 9.6), (2.2, 3.0, 8.0))):
+        F = fk.tube([L(3.6, b0), L(6.4, (b0 + b1) / 2), L(tip, b1)], [(0, 1.0 * hs), (0.7, 0.92 * hs), (1.0, 0.72 * hs)], n=4)
+        fk.tube_draw(fig, F, mat, layer + 0.004 + i * 0.001, k=0.34, ol=fo)
+    palm = fk.smooth([L(-1.4, -2.6), L(1.6, -3.4), L(4.4, -3.5), L(5.2, -1.8), L(5.4, 0.2), L(5.2, 2.0), L(4.4, 3.2),
+                      L(2.0, 3.1), L(-1.2, 2.6)], 4, True)
+    fk.cel_shape(fig, palm, mat, layer + 0.01, ol=fo, shift=shift)
+    # crease under the knuckles
+    fk.stroke(fig, [L(4.5, -2.6), L(4.9, 0.2), L(4.5, 2.6)], 0.5, 0.5, fk.linec(mat), layer + 0.02)
+    return L(2.6, 0.0)
 
 
 # ------------------------------------------------------------------ rig
@@ -194,6 +213,7 @@ def make_rig(ch, pose, ctx):
     if ctx["plant"] is not None:
         ref = make_rig(ch, ctx["plant"], dict(ctx, plant=None))
         legs = {side: solve_leg(R["hip_" + side], ref["ankle_" + side], thigh, shin) for side in "fb"}
+    R["legs"] = legs
     for side, hp, spec in (("f", R["hip_f"], legs["f"]), ("b", R["hip_b"], legs["b"])):
         knee = add(hp, rs.vec(spec[0], thigh))
         ankle = add(knee, rs.vec(spec[0] - spec[1], shin))
@@ -352,7 +372,8 @@ def kestrel_body(fig, R):
     # sleeveless gi top: cropped hem rising toward the back, V neck
     top = fk.smooth([T(0.40, 8.5), T(0.44, 2.0), T(0.50, -7.5), T(1.1, -9), T(1.1, 9)], 4, True, corners=(0, 2, 3, 4))
     fk.fillp(fig, top, gi.shadow, 3.05, clip=tor)
-    fk.fillp(fig, [(x - 2.0, y - 1.6) for x, y in tor], gi.base, 3.051, clip=top)
+    gx, gy = fk.lv((-2.0, -1.6))
+    fk.fillp(fig, [(x + gx, y + gy) for x, y in tor], gi.base, 3.051, clip=top)
     fk.fillp(fig, fk.smooth([T(0.30, 9), T(0.62, 9), T(0.56, 4.6), T(0.46, 3.4), T(0.38, 4.0)], 3, True), gi.shadow, 3.052, clip=top)
     hem = fk.smooth([T(0.41, 6.6), T(0.44, 2.0), T(0.495, -6.2)], 4, False)
     fk.stroke(fig, hem, 1.0, 1.0, sash.base, 3.06)
@@ -499,7 +520,8 @@ def bruno_leg(fig, R, side, layer):
     fk.cel_shape(fig, poly, boot, layer + 0.12, ol=INNER, shift=(1.6, 2.0))
     cap_ = [L(9.0, -1), L(15, -1), L(15, 9), L(8.4, 9), L(8.2, 4.0)]
     fk.fillp(fig, cap_, metal.shadow, layer + 0.123, clip=poly)
-    fk.fillp(fig, [(x - 1.4, y - 1.6) for x, y in poly], metal.base, layer + 0.1235, clip=cap_)
+    tx_, ty_ = fk.lv((-1.4, -1.6))
+    fk.fillp(fig, [(x + tx_, y + ty_) for x, y in poly], metal.base, layer + 0.1235, clip=cap_)
     fk.fillp(fig, [L(-5, 5.6), L(15, 5.6), L(15, 9), L(-5, 9)], sole.base, layer + 0.125, clip=poly)
     fk.fillp(fig, [L(-5, 4.2), L(-0.8, 4.2), L(-0.6, 9), L(-5, 9)], sole.shadow, layer + 0.126, clip=poly)
     fk.ground(R, poly)
@@ -525,7 +547,8 @@ def bruno_arm(fig, R, side, layer, glow, glow_hi, part="all"):
         U = fk.tube([fk.offs(sh, ud, -1.0 * u), el], [(0, 9.2 * u), (0.3, 9.6 * u), (0.72, 7.4 * u), (1.0, 6.6 * u)], n=6)
         if not back and "tor" in R:
             # cast shadow on the chest so the bare arm separates from the bare torso
-            fk.fillp(fig, [(x + 4.2 * u, y + 3.4 * u) for x, y in U["poly"]], fig.mats["skin"].shadow, 3.03, clip=R["tor"])
+            cx_, cy_ = fk.lv((4.2 * u, 3.4 * u))
+            fk.fillp(fig, [(x + cx_, y + cy_) for x, y in U["poly"]], fig.mats["skin"].shadow, 3.03, clip=R["tor"])
             skin = Cel(fk.mixc(skin.base, (255, 236, 214), 0.26), fk.mixc(skin.base, skin.shadow, 0.55), skin.hi)
         fk.outline(fig, U["poly"], layer, 1.7 if back else 2.4, col=OUTLINE)
         fk.tube_draw(fig, U, skin, layer, k=0.36, ol=0)
@@ -641,7 +664,8 @@ def bruno_hair(fig, R):
     # bulb nose
     nose = fk.hpoly(R, [(0.60, 0.04), (0.76, 0.18), (0.88, 0.36), (0.80, 0.50), (0.60, 0.50), (0.52, 0.34)], 4)
     fk.fillp(fig, nose, skin.shadow, 4.4)
-    fk.fillp(fig, [(x - 0.07 * r, y - 0.07 * r) for x, y in nose], skin.base, 4.401, clip=nose)
+    nx_, ny_ = fk.lv((-0.07 * r, -0.07 * r))
+    fk.fillp(fig, [(x + nx_, y + ny_) for x, y in nose], skin.base, 4.401, clip=nose)
     fk.stroke(fig, fk.hpoly(R, [(0.60, 0.04), (0.54, 0.26), (0.56, 0.44)], 3, closed=False), r * 0.02, r * 0.03, skin.shadow, 4.41)
     # full beard hugging the jaw
     beard = fk.hpoly(R, [(-0.34, 0.12), (-0.18, 0.40), (0.10, 0.50), (0.44, 0.52), (0.80, 0.50), (0.93, 0.70), (0.84, 1.06),
@@ -725,7 +749,15 @@ def ilse_tails(fig, R):
         fk.stroke(fig, T["L"] if T["shade_side"] < 0 else T["R"], 1.1, 1.0, gold.base, lay + 0.01)
     # long braid from the nape
     p0 = fk.head_pt(R, -0.82, 0.30)
-    pts = settle(R, wave(p0, cloth_theta(R, 104, -8, 150, lo=92), 86 * s / 2, 8, 7, 1.3, 0.2 + sway), 0.4 * R["hr"])
+    c = R["ctx"]
+    lift = c["lift"]
+    curl = c["curl"] if c["curl"] is not None else max(0.0, lift) * 1.7
+    if c["lying"] or c["hang"] is not None:
+        curl = 0.0
+    # a falling body leaves the braid behind: it swings up from the nape and whips further up along its length
+    # (curl > 0); on landing it is already arcing back down (curl < 0). It never sticks straight out.
+    pts = settle(R, wave(p0, cloth_theta(R, 104, -8, 100, lo=92), 86 * s / 2, 10, 7, 1.3, 0.2 + sway, droop=curl * 100),
+                 0.4 * R["hr"])
     T = fk.tube(pts, [(0, 0.36 * R["hr"]), (0.55, 0.31 * R["hr"]), (1.0, 0.16 * R["hr"])], caps=(True, True))
     hair = fig.mats["hair"]
     fk.tube_draw(fig, T, hair, 2.4, k=0.38, ol=INNER)
@@ -874,7 +906,12 @@ def ilse_body(fig, R):
     # key light is upper-left (behind her): the belly side below the bust falls into shadow
     sh_back = [T(-0.1, 9), T(0.50, 9), T(0.56, 3.4), T(0.44, 1.6), T(0.28, 0.8), T(-0.1, 1.4)]
     sh_under = [T(0.50, 2), T(0.62, 4.0), T(0.7, 7.5), T(0.42, 8), T(0.40, 3)]
-    fk.shape_draw(fig, tor, coat, 3.0, shades=[fk.smooth(sh_back, 3, True), fk.smooth(sh_under, 3, True)], ol=INNER)
+    spun = abs(fk.spin()) > 30
+    if spun:        # tipped onto her back: the light now falls on her front, the side resting toward the ground is shaded
+        tor_sh = [fk.smooth([T(-0.1, -9), T(1.1, -9), T(1.1, -2.8), T(0.5, -1.4), T(-0.1, -2.8)], 3, True)]
+    else:
+        tor_sh = [fk.smooth(sh_back, 3, True), fk.smooth(sh_under, 3, True)]
+    fk.shape_draw(fig, tor, coat, 3.0, shades=tor_sh, ol=INNER)
     # shirt V and gold lapel trim
     vee = fk.smooth([T(0.99, -3.2), T(0.99, 3.0), T(0.78, 1.6), T(0.62, 0.3), T(0.80, -1.2)], 4, True, corners=(0, 1, 3))
     fk.shape_draw(fig, vee, shirt, 3.1, ol=1.0)
@@ -888,8 +925,8 @@ def ilse_body(fig, R):
     disc(fig, add(mc, (-0.7, -0.9)), 0.7, None, 3.5, ol=0, flat=(255, 255, 255))
     # ---- front leg then a cutaway coat skirt on top (front rides high, tails fall behind)
     ilse_leg(fig, R, "f", 3.15)
-    F = add(add(R["hip_f"], rs.vec(pose["fl"][0] * 0.5, R["thigh"] * 0.34)), (3.6 * s, 0))
-    tail = add(add(R["hip_b"], rs.vec(pose["bl"][0] * 0.7 - 5, R["thigh"] * 0.98)), (-4.0 * s, 0))
+    F = add(add(R["hip_f"], rs.vec(R["legs"]["f"][0] * 0.5, R["thigh"] * 0.34)), (3.6 * s, 0))
+    tail = add(add(R["hip_b"], rs.vec(R["legs"]["b"][0] * 0.7 - 5, R["thigh"] * 0.98)), (-4.0 * s, 0))
     q1 = add(lerp(F, tail, 0.34), (-0.6 * s, 2.0 * s))
     q2 = add(lerp(F, tail, 0.68), (0.4 * s, 2.0 * s))
     sk = [T(0.30, 4.7), T(0.20, 6.4), add(F, (0.8 * s, -1.5 * s)), F, q1, q2, tail, add(tail, (-1.0 * s, -6 * s)),
@@ -900,7 +937,13 @@ def ilse_body(fig, R):
              add(q2, (0.0, 3.0 * s)), add(tail, (0.0, 3.0 * s)), add(q2, (-0.6 * s, -2.4 * s)), add(q1, (-1.6 * s, -3.4 * s)), T(0.14, 2.2)]
     hi_sk = [T(0.29, -4.6), T(0.17, -6.4), lerp(T(0.06, -7.4), tail, 0.55), add(lerp(T(0.06, -7.4), tail, 0.55), (1.6 * s, -0.4 * s)),
              T(0.18, -4.6)]
-    fk.shape_draw(fig, skirt, coat, 3.3, shades=[fk.smooth(sh_sk, 3, True)], his=[fk.smooth(hi_sk, 3, True)], ol=INNER)
+    if spun:
+        back_w = T(0.06, -7.4)
+        sh_sk = [T(0.32, -2.4), add(q2, (-0.8 * s, -2.6 * s)), add(q2, (0.0, 3.0 * s)), add(tail, (0.0, 3.0 * s)),
+                 add(tail, (-4.0 * s, -6.0 * s)), add(back_w, (-3.0 * s, 0.0)), T(0.32, -8.0)]
+        fk.shape_draw(fig, skirt, coat, 3.3, shades=[fk.smooth(sh_sk, 3, True)], ol=INNER)
+    else:
+        fk.shape_draw(fig, skirt, coat, 3.3, shades=[fk.smooth(sh_sk, 3, True)], his=[fk.smooth(hi_sk, 3, True)], ol=INNER)
     hem_line = fk.smooth([F, q1, q2, tail], 5, False, corners=())
     fk.stroke(fig, hem_line, 1.25, 1.25, gold.base, 3.35)
     fk.stroke(fig, fk.smooth([T(0.30, 4.8), T(0.20, 6.5), add(F, (0.8 * s, -1.5 * s)), F], 5, False), 1.1, 1.1, gold.base, 3.35)
@@ -969,7 +1012,8 @@ def ilse_hair(fig, R):
         line = fk.hpoly(R, fd, 4, corners=(tipi,), closed=False)
         low = fd[tipi:]
         shp = fk.hpoly(R, low + [(f, d - 0.17) for f, d in reversed(low)], 3, corners=(0, len(low) - 1, len(low), 2 * len(low) - 1))
-        sd = [(x + 1.0, y + 2.2) for x, y in poly]
+        sx_, sy_ = fk.lv((1.0, 2.2))
+        sd = [(x + sx_, y + sy_) for x, y in poly]
         fk.fillp(fig, sd, hair.shadow, lay - 0.015, clip=capc)
         fk.outline(fig, line, lay, O, closed=False, col=fk.olcol(hair))
         fk.fillp(fig, poly, hair.base, lay)
@@ -1078,7 +1122,9 @@ def rook_cape(fig, R):
     cape = fig.mats["cape"]
     flow, sway = R["ctx"]["flow"], R["ctx"]["sway"]
     start = add(R["neck"], (-5.5 * s, 3.0 * s))
-    path = wave(start, cloth_theta(R, 104, 34, lo=96), 50 * s * (1 - 0.08 * flow), 7, 7, 0.9, 0.6 + sway, droop=-flow * 10)
+    short = 0.8 if R["ctx"]["hang"] is not None else 1.0     # a tumbling body bunches the cape up
+    path = wave(start, cloth_theta(R, 104, 34, lo=96), 50 * s * (1 - 0.08 * flow) * short, 7, 7, 0.9, 0.6 + sway,
+                droop=-flow * 10)
     path = settle(R, path, 9.5 * s)
     T = fk.tube(path, [(0, 5.0 * s), (0.35, 8.0 * s), (0.8, 10.0 * s), (1.0, 9.0 * s)], n=6, caps=(False, False))
     fk.tube_draw(fig, T, fk.far(cape, 0.25), 0.8, k=0.34, ol=INNER)
@@ -1196,7 +1242,16 @@ def rook_body(fig, R, glow, glow_hi):
     H0 = R["hip"]
     tab = [add(H0, (-ww * 0.5, -2)), add(H0, (ww * 1.0, -2)), add(H0, (ww * 1.18, 40 * s / 2 * 1.5)),
            add(H0, (-ww * 0.2, 44 * s / 2 * 1.5))]
-    quad(fig, tab, "cape", 3.35, add(H0, (0, 0)), add(H0, (0, 44 * s / 2 * 1.5)), ww * 0.9)
+    tab_ax = (0, 44 * s / 2 * 1.5)
+    tip = min(1.0, abs(R["ctx"]["spin"]) / 90.0)
+    if tip:
+        # tipped back or lying, the cloth no longer hangs toward his feet: it lies shorter across the lap and
+        # sags toward the ground
+        kl, ks = 1.0 - 0.4 * tip, 0.62 * tip
+        lie = lambda p_: add(H0, ((p_[0] - H0[0]) - ks * (p_[1] - H0[1]) * kl, (p_[1] - H0[1]) * kl))
+        tab = [tab[0], tab[1], lie(tab[2]), lie(tab[3])]
+        tab_ax = (-ks * tab_ax[1] * kl, tab_ax[1] * kl)
+    quad(fig, tab, "cape", 3.35, add(H0, (0, 0)), add(H0, tab_ax), ww * 0.9)
     cap(fig, tab[3], tab[2], 1.6, 1.6, None, 3.4, ol=0, flat=hl(trim))
     # breastplate: rounded barrel with a keel ridge toward the facing side (3/4 turn)
     bp = fk.smooth([T(0.34, -10.8), T(0.34, 11.9), T(0.60, 15.9), T(0.80, 16.6), T(0.93, 13.6), T(1.00, 8.0), T(1.00, -9.0),
@@ -1267,7 +1322,8 @@ def rook_helmet(fig, R, glow):
     bev = fk.hpoly(R, [(-1.2, 0.50), (-0.30, 0.44), (0.40, 0.50), (0.74, 0.40), (1.2, 0.42), (1.2, 1.4), (-1.2, 1.4)], 3,
                    corners=(3,))
     fk.fillp(fig, bev, trim.shadow, 4.62, clip=shell)
-    fk.fillp(fig, [(x - sh[0], y - sh[1]) for x, y in shell], trim.base, 4.621, clip=bev)
+    bx_, by_ = fk.lv((-sh[0], -sh[1]))
+    fk.fillp(fig, [(x + bx_, y + by_) for x, y in shell], trim.base, 4.621, clip=bev)
     fk.stroke(fig, fk.hpoly(R, [(-1.04, 0.50), (-0.30, 0.44), (0.40, 0.50), (0.74, 0.40), (1.00, 0.42)], 3, closed=False, corners=(3,)),
               r * 0.03, r * 0.03, fk.olcol(steel), 4.63)
     # keel ridge
@@ -1350,6 +1406,7 @@ def build_raw(fid, pose, p2=False, ctx=None):
     elif ctx["expr"] != "neutral":
         face = dict(face, shut=EXPRESSIONS[ctx["expr"]]["shut"])
     fig = rs.Figure(mats)
+    fk.set_spin(ctx["spin"])
     R = make_rig(DESIGNS[fid], pose, ctx)
     g, gh = glow_colours(fid, p2)
     DRAW[fid](fig, R, face, g, gh)

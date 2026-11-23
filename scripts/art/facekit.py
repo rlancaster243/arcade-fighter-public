@@ -17,6 +17,42 @@ INNER = 1.7                 # default contour width for kit shapes, texels
 OUTLINE = (50, 34, 92)      # deep indigo: tinted, never black
 INK = (52, 32, 78)
 LIGHT2 = (-0.66, -0.75)     # screen direction pointing toward the key light (upper-left)
+_SPIN = 0.0                 # degrees the figure being drawn will be rotated afterwards (see set_spin)
+
+
+def set_spin(deg):
+    """A tumbling or lying figure is drawn upright and rotated afterwards by `deg`. Everything that bakes the
+    key light into geometry (cel shadows, tube shading, highlights) turns it the other way first, so the
+    finished figure is still lit from the upper left."""
+    global _SPIN
+    _SPIN = float(deg)
+
+
+def spin():
+    return _SPIN
+
+
+def lv(v):
+    """A screen-space direction or offset expressed in the frame the figure is drawn in (before its spin)."""
+    if not _SPIN:
+        return v
+    t = math.radians(-_SPIN)
+    return (v[0] * math.cos(t) - v[1] * math.sin(t), v[0] * math.sin(t) + v[1] * math.cos(t))
+
+
+def lturn(pts, about):
+    """Turn a hand-placed highlight / shade polygon about `about` so it stays on the lit side after the spin."""
+    if not _SPIN:
+        return pts
+    t = math.radians(-_SPIN)
+    c, s_ = math.cos(t), math.sin(t)
+    return [(about[0] + (x - about[0]) * c - (y - about[1]) * s_, about[1] + (x - about[0]) * s_ + (y - about[1]) * c)
+            for x, y in pts]
+
+
+def centre(pts):
+    xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+    return ((min(xs) + max(xs)) / 2, (min(ys) + max(ys)) / 2)
 
 
 def add(a, b):
@@ -170,7 +206,8 @@ def tube(path, prof, n=7, scale=1.0, caps=(True, True)):
     poly += list(reversed(Rp))
     if caps[0]:
         poly += arc(0, math.pi, 2 * math.pi)
-    mean = sum(nx * LIGHT2[0] + ny * LIGHT2[1] for nx, ny in N) / len(N)
+    lx, ly = lv(LIGHT2)
+    mean = sum(nx * lx + ny * ly for nx, ny in N) / len(N)
     return dict(poly=poly, C=dense, N=N, W=W, T=Tn, L=Lp, R=Rp, shade_side=(-1 if mean > 0 else 1),
                 u=[c / tot for c in cum])
 
@@ -303,6 +340,9 @@ def head34(fig, R, face, skin, lay=4.0, ol=1.5):
     fd = face.get("outline", HEAD34)
     head = hpoly(R, fd, 5, corners=face.get("corners", ()))
     # form shadow: far cheek + under-jaw strip (light comes from the upper-left, behind the fighter)
+    if abs(_SPIN) > 30 and "shade" not in face:
+        # tipped back or lying face-up: the light falls on the face, only the underside of the jaw is shaded
+        face = dict(face, shade=[(-1.2, 0.06), (-0.56, 0.16), (-0.36, 0.36), (-0.06, 0.58), (0.24, 0.80), (0.52, 0.84), (0.7, 1.3), (-1.2, 1.3)])
     sh = hpoly(R, face.get("shade", [(1.2, -0.25), (0.93, -0.2), (0.84, 0.06), (0.86, 0.36), (0.74, 0.62), (0.52, 0.84),
                                      (0.24, 0.80), (-0.06, 0.58), (-0.36, 0.36), (-0.7, 0.4), (-0.4, 1.3), (1.2, 1.3)]), 4)
     shape_draw(fig, head, skin, lay, shades=[sh], ol=ol)
@@ -378,9 +418,10 @@ def cel_shape(fig, poly, m, layer, ol=INNER, shift=(1.3, 1.5), hi=None, clip=Non
     if ol:
         outline(fig, poly, layer, ol, col=olcol(m))
     fillp(fig, poly, m.shadow, layer, clip=clip)
+    shift = lv(shift)
     fillp(fig, [(x - shift[0], y - shift[1]) for x, y in poly], m.base, layer + 0.001, clip=poly)
     if hi is not None and m.hi:
-        fillp(fig, hi, m.hi, layer + 0.002, clip=poly)
+        fillp(fig, lturn(hi, centre(poly)), m.hi, layer + 0.002, clip=poly)
 
 
 # ------------------------------------------------------------------ shared feet

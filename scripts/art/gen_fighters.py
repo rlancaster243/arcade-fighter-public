@@ -66,6 +66,12 @@ def lerp_pose(a, b, t):
     return out
 
 
+def leg_units(fid):
+    """Hip-to-ankle length of a fighter's straight leg in the 1x units pose["hy"] is measured in."""
+    ch = designs.DESIGNS[fid]
+    return (ch.get("thigh", 21) + ch.get("shin", 20)) * ch.get("leg", 1.0) * ch["height"] / 94.0
+
+
 def pose_tables(fid):
     """Every pose of a fighter, keyed by table name: single poses, lists, and T_* move templates
     (startup, active, recovery)."""
@@ -89,26 +95,35 @@ def pose_tables(fid):
                            fl=(14 + 26 * math.sin(ph), 16 + dip + 22 * max(0, -math.cos(ph))),
                            bl=(-12 - 26 * math.sin(ph), 16 + dip + 22 * max(0, math.cos(ph))),
                            fa=bend(fa, -10 * math.sin(ph), 0), ba=bend(ba, 14 * math.sin(ph), 0)))
-    T["CROUCH"] = P(hy=24, lean=18, fl=(70, 120), bl=(30, 110), fa=(40, 80), ba=(30, 90))
+    # crouch / crouch block / landing: frames_for plants both feet where CROUCH_REF puts them and the hips drop
+    # by a share of the leg length, so the knees fold forward over feet that stay flat on the ground line
+    leg = leg_units(fid)
+    # (the back ankle sits higher in the reference: that foot ends up on its ball with the heel raised)
+    T["CROUCH_REF"] = P(lean=0, fl=(26, 6), bl=(16, 72))
+    T["CROUCH"] = P(hy=0.40 * leg, lean=18, fa=(40, 80), ba=(30, 90))
     T["JUMP"] = [P(hy=10, lean=14, fl=(40, 60), bl=(10, 50)),
                  P(hy=-4, lean=4, fl=(42, 64), bl=(-24, 52), fa=(72, 52), ba=(52, 60)),
-                 P(hy=-10, lean=10, fl=(80, 120), bl=(50, 110), fa=(50, 90), ba=(40, 90)),
+                 # apex tuck: front knee high with the shin hanging under it, back leg folded behind
+                 P(hy=-10, lean=10, fl=(98, 106), bl=(-6, 104), fa=(50, 90), ba=(40, 90)),
                  P(hy=-4, lean=2, fl=(32, 48), bl=(-8, 60), fa=(86, 40), ba=(64, 50))]
-    T["LAND"] = P(hy=12, lean=16, fl=(44, 70), bl=(10, 60))
+    T["LAND"] = P(hy=0.24 * leg, lean=16)
     T["BLOCK"] = P(hy=4, lean=-4, fa=(80, 120), ba=(70, 125), fl=(20, 22), bl=(-20, 16))
-    T["BLOCK_C"] = P(hy=24, lean=10, fl=(70, 120), bl=(30, 110), fa=(80, 125), ba=(70, 125))
+    T["BLOCK_C"] = P(hy=0.40 * leg, lean=10, fa=(80, 125), ba=(70, 125))
     T["HIT"] = [P(hy=2, lean=-22, head=-14, fa=(-10, 30), ba=(-20, 40), fl=(20, 20), bl=(-26, 10)),
                 P(hy=4, lean=-30, head=-20, fa=(-30, 20), ba=(-40, 30), fl=(30, 30), bl=(-20, 20))]
-    # knocked off the feet: posed near upright, then frames_for spins the whole figure backwards
-    T["FALL"] = P(hy=-6, lean=-10, head=-10, fa=(56, 50), ba=(34, 60), fl=(72, 88), bl=(38, 94))
-    # on the back (posed standing, then spun): front knee drawn up with the foot planted near the hips
-    T["LYING"] = P(lean=0, head=18, fa=(16, 24), ba=(-6, 14), fl=(64, 126), bl=(46, 94))
-    T["KO"] = P(lean=0, head=16, fa=(12, 12), ba=(-10, 10), fl=(50, 96), bl=(44, 90))
+    # knocked off the feet (posed near upright, then frames_for spins the whole figure backwards): the body
+    # goes first, head thrown back, and the arms and legs lag behind it
+    T["FALL"] = P(hy=-6, lean=-12, head=-14, fa=(84, 36), ba=(60, 40), fl=(60, 50), bl=(26, 66))
+    # on the back (posed standing, then spun; angles > 0 lift a limb off the ground): winded, head and one
+    # forearm lifted, front knee drawn up
+    T["LYING"] = P(lean=0, head=12, fa=(26, 44), ba=(-14, 24), fl=(64, 116), bl=(36, 72))
+    # out cold: head back on the ground, arms limp at the sides, legs slack with one knee slightly raised
+    T["KO"] = P(lean=0, head=-12, fa=(-14, 34), ba=(-18, 22), fl=(34, 60), bl=(12, 22))
     T["GETUP"] = P(hy=26, lean=30, fl=(80, 130), bl=(20, 120), fa=(10, 20), ba=(0, 30))
     T["WIN"] = [P(lean=0, fa=(136, 30), ba=(20, 60), fl=(16, 14), bl=(-14, 14)),
                 P(lean=-2, fa=(142, 44), ba=(25, 70), fl=(16, 14), bl=(-14, 14))]
     T["GRAB"] = P(lean=14, fa=(80, 40), ba=(70, 50), fl=(30, 20), bl=(-20, 10))
-    T["THROWN"] = P(hy=-14, lean=-8, head=-14, fa=(120, 40), ba=(140, 50), fl=(70, 80), bl=(40, 90))
+    T["THROWN"] = P(hy=-14, lean=-8, head=-16, fa=(120, 40), ba=(132, 58), fl=(62, 84), bl=(26, 60))
 
     T["T_JAB"] = (P(fa=(60, 110), lean=8), P(fa=(90, 0), lean=12, hx=2), P(fa=(70, 60), lean=8))
     T["T_CROSS"] = (P(ba=(40, 100), lean=-2, fa=(40, 90)),
@@ -155,15 +170,39 @@ FIGHTER_TWEAKS = {
               "WIN": lambda t, P: [dict(t[0], fa=(106, 70), fl=(20, 22), bl=(-18, 22)),
                                    dict(t[1], fa=(110, 62), fl=(20, 22), bl=(-18, 22))],
               "T_GRAB": lambda t, P: (t[0], t[1], dict(t[2], fa=(104, 44), ba=(92, 56))),
-              "JUMP": lambda t, P: [t[0], dict(t[1], fl=(50, 82), bl=(-14, 68)), t[2], dict(t[3], fl=(52, 88), bl=(10, 88))]},
+              "JUMP": lambda t, P: [t[0], dict(t[1], fl=(50, 82), bl=(-14, 68)), t[2], dict(t[3], fl=(52, 88), bl=(10, 88))],
+              # his guard sits below the chin: a gauntlet raised any higher hides his whole face
+              "BLOCK": lambda t, P: dict(t, **LOW_GUARD),
+              "BLOCK_C": lambda t, P: dict(t, **LOW_GUARD),
+              # he is nearly as long as the cell is wide, so he lies with his knees drawn further up
+              "LYING": lambda t, P: dict(t, fa=(20, 34), fl=(70, 124), bl=(44, 86)),
+              "KO": lambda t, P: dict(t, fl=(60, 104), bl=(42, 80)),
+              "FALL": lambda t, P: dict(t, fa=(72, 56), fl=(68, 80), bl=(34, 84)),
+              "THROWN": lambda t, P: dict(t, fl=(66, 96), bl=(34, 76)),
+              # heavy kick: the gauntlet comes up to the chest so it does not cover the kicking leg
+              "T_HK": lambda t, P: (t[0], dict(t[1], lean=-20, fl=(108, 0), fa=(60, 110), ba=(-24, 56)), t[2]),
+              # super wind-up: the back foot stays planted behind him instead of hanging in the air
+              "T_SUPER": lambda t, P: (dict(t[0], bl=(-30, 10)), t[1], t[2])},
+    # Rook's guard is lowered the same way so the visor slit stays visible.
+    # In full plate he is also too long for the cell with his legs out, so he falls and lies with them drawn up.
+    "rook": {"FALL": lambda t, P: dict(t, fa=(70, 52), fl=(70, 86), bl=(36, 88)),
+             "LYING": lambda t, P: dict(t, fl=(70, 124), bl=(44, 86)),
+             "BLOCK": lambda t, P: dict(t, **LOW_GUARD),
+             "BLOCK_C": lambda t, P: dict(t, **LOW_GUARD)},
     # Ilse holds her orb up at shoulder height rather than overhead, and wards with her palms held out in
     # front of her (the shared guard would put an open hand flat over her face).
     # and her super leans in less, so the cast orb and the flying coat tails both stay in the cell.
     "ilse": {"WIN": lambda t, P: [dict(t[0], fa=(86, 40)), dict(t[1], fa=(88, 46))],
              "BLOCK": lambda t, P: dict(t, fa=(68, 66), ba=(52, 78)),
              "BLOCK_C": lambda t, P: dict(t, fa=(68, 66), ba=(52, 78)),
-             "T_SUPER": lambda t, P: (t[0], dict(t[1], lean=10, fl=(44, 22), bl=(-40, 6)), t[2])},
+             "T_SUPER": lambda t, P: (t[0], dict(t[1], lean=10, fl=(44, 22), bl=(-40, 6)), t[2]),
+             # the orb rides over her front palm, so in the heavy kick and the slide kick that hand comes up
+             # to chest / head height instead of hanging beside the kicking leg
+             "T_HK": lambda t, P: (t[0], dict(t[1], fa=(62, 72)), t[2]),
+             "T_SWEEP": lambda t, P: (t[0], dict(t[1], fa=(88, 70)), t[2])},
 }
+
+LOW_GUARD = dict(fa=(66, 84), ba=(56, 92))
 
 # How far (1x units) a fighter's hips sink below the shared walk cycle, feet staying where the cycle puts them.
 WALK_SINK = {"bruno": 4}
@@ -225,22 +264,23 @@ def frame_specs(fid, fighter):
         frame(f"idle_{i}", p, plant=T["IDLE"][0], sway=i * math.pi / 2)
     for i, p in enumerate(T["WALK"]):
         frame(f"walk_{i}", dict(p, hy=WALK_SINK.get(fid, 0)), plant=p, flow=0.25, sway=i * math.pi / 3)
-    frame("crouch_0", T["CROUCH"])
-    for i, cloth in enumerate((dict(), dict(lift=-0.5), dict(flow=0.15), dict(lift=0.55))):
+    frame("crouch_0", T["CROUCH"], plant=T["CROUCH_REF"])
+    # rising: cloth and hair are left behind and below; apex: level; falling: they lift
+    for i, cloth in enumerate((dict(), dict(lift=-0.5, trail=134), dict(flow=0.15), dict(lift=0.55))):
         frame(f"jump_{i}", T["JUMP"][i], **cloth)
-    frame("land_0", T["LAND"], lift=0.35)
+    frame("land_0", T["LAND"], plant=T["CROUCH_REF"], lift=0.35, curl=-0.6)
     frame("block_0", T["BLOCK"], flow=-0.2)
-    frame("block_1", T["BLOCK_C"], flow=-0.2)
+    frame("block_1", T["BLOCK_C"], plant=T["CROUCH_REF"], flow=-0.2)
     for i, p in enumerate(T["HIT"]):
         frame(f"hit_{i}", p, flow=-0.5 - 0.2 * i, expr="hurt", focus=False)
-    frame("down_0", T["FALL"], spin=-48, flow=0.2, expr="hurt", focus=False)
+    frame("down_0", T["FALL"], spin=-48, hang=102, expr="hurt", focus=False)
     frame("down_1", T["LYING"], spin=-90, lying=True, expr="hurt", focus=False)
     frame("getup_0", T["GETUP"], focus=False)
     frame("ko_0", T["KO"], spin=-90, lying=True, expr="out", focus=False)
     for i, p in enumerate(T["WIN"]):
         frame(f"win_{i}", p, sway=i * math.pi)
     frame("throw_0", T["GRAB"], flow=0.3, focus=False)
-    frame("thrown_0", T["THROWN"], spin=-78, expr="hurt", focus=False)
+    frame("thrown_0", T["THROWN"], spin=-78, hang=94, expr="hurt", focus=False)
     # legacy name some move entries still reference
     frame("stance_1", T["IDLE"][2], plant=T["IDLE"][0], sway=math.pi)
     for move in fighter["moves"]:
