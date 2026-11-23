@@ -47,9 +47,11 @@ BASE = dict(hx=0, hy=0, lean=6, head=0,
 # Each fighter's ready stance: what every pose falls back to for the limbs it does not set.
 STANCES = {
     "kestrel": dict(lean=9, fa=(34, 96), ba=(44, 96), fl=(42, 54), bl=(-30, 4)),
-    "bruno": dict(lean=6, fa=(40, 84), ba=(12, 96), fl=(34, 14), bl=(-32, 8)),
+    # bruno, rook: `fa` is the lead hand on the far side (fist out ahead of the chest), `ba` the rear hand on the
+    # near side (elbow down by the ribs, fist up at the chest); see bruno_body / rook_body
+    "bruno": dict(lean=6, fa=(56, 76), ba=(4, 112), fl=(34, 14), bl=(-32, 8)),
     "ilse": dict(lean=4, fa=(52, 60), ba=(12, 88)),
-    "rook": dict(lean=4, fa=(52, 60), ba=(12, 88), fl=(28, 24), bl=(-28, 14)),
+    "rook": dict(lean=4, fa=(52, 60), ba=(8, 116), fl=(28, 24), bl=(-28, 14)),
 }
 
 
@@ -210,8 +212,8 @@ FIGHTER_TWEAKS = {
 LOW_GUARD = dict(fa=(66, 84), ba=(56, 92))
 # The two heavy fighters on their backs: near arm on the ground beside the body with the hand past the hip, far arm
 # behind it, knees raised in an inverted V with the feet flat. Winded, the head and shoulders come up on one forearm.
-FLAT_KO = dict(fa=(-8, 8), ba=(-4, 4), fl=(64, 126), bl=(52, 108))
-FLAT_LYING = dict(lean=14, head=2, fa=(-58, 56), ba=(-30, 30), fl=(62, 124), bl=(40, 90))
+FLAT_KO = dict(ba=(-8, 8), fa=(-4, 4), fl=(64, 126), bl=(52, 108))
+FLAT_LYING = dict(lean=14, head=2, ba=(-58, 56), fa=(-30, 30), fl=(62, 124), bl=(40, 90))
 # Extra frame context per fighter: {fighter: {frame name: ctx}}.
 FRAME_CTX = {"bruno": {"down_1": dict(flat=True), "ko_0": dict(flat=True)},
              "rook": {"down_1": dict(flat=True), "ko_0": dict(flat=True)}}

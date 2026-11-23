@@ -209,7 +209,7 @@ def make_rig(ch, pose, ctx):
     R["hip_f"] = add(hip, (ho * s, 0))
     R["hip_b"] = add(hip, (-ho * s, 0))
     if ctx["flat"]:
-        R["sh_f"], R["sh_b"] = tp(0.86, -7.0 * s), tp(0.87, -9.0 * s)
+        R["sh_f"], R["sh_b"] = tp(0.87, -9.0 * s), tp(0.86, -7.0 * s)      # rig side "b" is the near arm
         R["hip_f"], R["hip_b"] = add(hip, (-3.0 * s, 0)), add(hip, (-5.0 * s, 0))
     for side, sh, spec in (("f", R["sh_f"], pose["fa"]), ("b", R["sh_b"], pose["ba"])):
         elbow = add(sh, rs.vec(spec[0], upper))
@@ -537,11 +537,12 @@ def bruno_leg(fig, R, side, layer):
     fk.tube_draw(fig, C, patch, layer + 0.35, k=0.4, ol=1.2)
 
 
-def bruno_arm(fig, R, side, layer, glow, glow_hi, part="all"):
+def bruno_arm(fig, R, side, layer, glow, glow_hi, part="all", far=False):
     """Bare slab of an upper arm, gold armband, forge gauntlet with a furnace port, plated fist (or open palm).
-    `part` draws only the upper arm or only the forearm, so a far forearm can pass in front of the body."""
+    `part` draws only the upper arm or only the forearm, so a far forearm can pass in front of the body.
+    `far` tints the arm as the one on the far side of the body."""
     u = R["s"]
-    back = side == "b"
+    back = far
     sh, el, ha = R["sh_" + side], R["elbow_" + side], R["hand_" + side]
     skin, metal, gold = fig.mats["skin"], fig.mats["metal"], fig.mats["gold"]
     if back:
@@ -603,10 +604,13 @@ def bruno_body(fig, R, glow, glow_hi):
     # ---- back limbs
     bruno_leg(fig, R, "b", 1)
     px, py = R["perp"]
-    hb = R["hand_b"]
+    # The lead arm (rig side "f", its shoulder on the facing side of the chest) is the FAR arm of the 3/4 view:
+    # it leaves its shoulder behind the torso and its forearm comes out ahead of the chest. The rear arm (rig
+    # side "b") is the near one and is drawn over the torso from its own shoulder (see draw_bruno).
+    hb = R["hand_f"]
     fwd = ((hb[0] - R["hip"][0]) * px + (hb[1] - R["hip"][1]) * py) / u
     R["back_fore_front"] = fwd > 6.0
-    bruno_arm(fig, R, "b", 1, glow, glow_hi, "upper" if R["back_fore_front"] else "all")
+    bruno_arm(fig, R, "f", 1, glow, glow_hi, "upper" if R["back_fore_front"] else "all", far=True)
     bruno_leg(fig, R, "f", 2.2)
     # ---- torso: belly, barrel chest, yoke of the shoulders
     tbl = [(-0.06, 10.6, 10.6), (0.10, 11.8, 10.6), (0.28, 12.6, 10.6), (0.46, 13.4, 11.4), (0.62, 15.2, 13.0),
@@ -657,7 +661,7 @@ def bruno_body(fig, R, glow, glow_hi):
     Nk = fk.tube([T(0.98, 0.5), fk.head_pt(R, -0.05, 0.80)], [(0, 6.6 * u), (1, 5.6 * u)], caps=(False, False))
     fk.tube_draw(fig, Nk, fk.far(skin, 0.3), 3.7, k=0.5, ol=INNER)
     if R["back_fore_front"]:
-        bruno_arm(fig, R, "b", 5.4, glow, glow_hi, "fore")
+        bruno_arm(fig, R, "f", 5.4, glow, glow_hi, "fore", far=True)
 
 
 def bruno_hair(fig, R):
@@ -708,7 +712,7 @@ def draw_bruno(fig, R, face, glow, glow_hi):
     bruno_body(fig, R, glow, glow_hi)
     fk.head34(fig, R, face, fig.mats["skin"], 4.0, ol=INNER)
     bruno_hair(fig, R)
-    bruno_arm(fig, R, "f", 6, glow, glow_hi)
+    bruno_arm(fig, R, "b", 6, glow, glow_hi)
     # the furnace ports always smoulder; a glow pose stokes them
     s = R["s"]
     knuckles = add(R["hand_f"], sc(fk.unit(R["elbow_f"], R["hand_f"]), 6 * s))
@@ -1188,11 +1192,11 @@ def rook_leg(fig, R, side, layer):
     fk.cel_shape(fig, pol, steel, L0 + 0.32, ol=1.2, shift=(1.5, 1.7))
 
 
-def rook_arm(fig, R, side, layer):
+def rook_arm(fig, R, side, layer, far=False):
     """Plate arm: mail sleeve, rerebrace, round couter, vambrace with a flared cuff, blocky gauntlet fist
-    (or open palm)."""
+    (or open palm). `far` tints it as the arm on the far side of the body."""
     u = R["s"]
-    back = side == "b"
+    back = far
     sh, elbow, hand = R["sh_" + side], R["elbow_" + side], R["hand_" + side]
     steel, dark, trim = fig.mats["steel"], fig.mats["dark"], fig.mats["trim"]
     if back:
@@ -1240,8 +1244,11 @@ def rook_body(fig, R, glow, glow_hi):
     s, tp = R["s"], R["tp"]
     cw, ww = R["chest_w"], R["waist_w"]
     lr = R["limb_r"]
-    rook_arm(fig, R, "b", 1)
-    rook_pauldron(fig, add(R["sh_b"], (-1.0 * s, -0.5 * s)), lr * 1.05, 1.6, True)
+    # the lead arm (rig side "f", shoulder on the facing side of the chest) is the far arm of the 3/4 view: it
+    # starts behind the breastplate and comes out ahead of it; the rear arm (side "b") is the near one, drawn
+    # over the torso from its own shoulder in draw_rook
+    rook_arm(fig, R, "f", 1, far=True)
+    rook_pauldron(fig, add(R["sh_f"], (-1.0 * s, -0.5 * s)), lr * 1.05, 1.6, True)
     u = s
     T = lambda t, w: tp(t, w * u)
     steel, dark, trim = fig.mats["steel"], fig.mats["dark"], fig.mats["trim"]
@@ -1371,8 +1378,8 @@ def draw_rook(fig, R, face, glow, glow_hi):
     s = R["s"]
     rook_cape(fig, R)
     rook_body(fig, R, glow, glow_hi)
-    rook_arm(fig, R, "f", 6)
-    rook_pauldron(fig, add(R["sh_f"], (-0.5 * s, -1.5 * s)), R["limb_r"] * 0.98, 6.2)
+    rook_arm(fig, R, "b", 6)
+    rook_pauldron(fig, add(R["sh_b"], (-0.5 * s, -1.5 * s)), R["limb_r"] * 0.98, 6.2)
     rook_helmet(fig, R, (glow, glow_hi))
     where = R["pose"]["glow"]
     if where == "foot":
