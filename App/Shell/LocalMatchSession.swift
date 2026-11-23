@@ -13,6 +13,13 @@ final class LocalMatchSession: ObservableObject {
     private var lastTickTime: Date?
     private var accumulator: TimeInterval = 0
     private var paused = false
+    /// Per-slot gravity, for bringing fighters down after the match ends (`PostMatchSettle`).
+    private var gravities: [Int32] = []
+    private var settleTicksLeft: Int32 = 0
+    /// Events from the last few ticks, republished with every snapshot. The scene only sees the
+    /// snapshots SwiftUI delivers, which can skip one; its inbox de-duplicates by event tick.
+    private var recentEvents: [GameEvent] = []
+    private let eventWindowTicks: Int32 = 8
 
     private let tickDuration = 1.0 / 60.0
     private let maxCatchUpSteps = 5
@@ -43,6 +50,9 @@ final class LocalMatchSession: ObservableObject {
         snap.fighters[1].health = p2.health
         snapshot = snap
         self.setup = setup
+        gravities = [p1.gravity, p2.gravity]
+        settleTicksLeft = 0
+        recentEvents = []
         cpu = setup.mode == .arcade
             ? CPUAIController(difficulty: setup.difficulty, matchSeed: snap.rng.state)
             : nil
@@ -78,6 +88,8 @@ final class LocalMatchSession: ObservableObject {
         lastTickTime = nil
         accumulator = 0
         paused = false
+        settleTicksLeft = 0
+        recentEvents = []
         metadataTable = MoveMetadataTable(fighterDefs: [])
     }
 
@@ -98,14 +110,21 @@ final class LocalMatchSession: ObservableObject {
         lastTickTime = date
 
         var steps = 0
-        // Events from every step this frame. The scene only sees the last published snapshot per
-        // frame and each step clears `events`, so a 2-step catch-up frame used to drop the first
-        // step's hits/blocks (no spark, no shake). SFX already ran per step.
-        var frameEvents: [GameEvent] = []
         while accumulator >= tickDuration, steps < maxCatchUpSteps {
             steps += 1
             accumulator -= tickDuration
-            guard !snap.rules.matchOver else { break }
+            if snap.rules.matchOver { // settling: let anyone still in the air come down first
+                let aloft = PostMatchSettle.step(snapshot: &snap, gravities: gravities)
+                settleTicksLeft -= 1
+                snapshot = snap
+                publish(snap, to: model)
+                if !aloft || settleTicksLeft <= 0 {
+                    model.endMatch(snapshot: snap)
+                    stop()
+                    return
+                }
+                continue
+            }
 
             var frames = input.framesForTick()
             if let cpu {
@@ -116,18 +135,27 @@ final class LocalMatchSession: ObservableObject {
 
             simulation.step(inputs: frames, snapshot: &snap)
             snapshot = snap
-            frameEvents.append(contentsOf: snap.events)
-            var published = snap
-            published.events = frameEvents
-            model.matchSnapshot = published
+            recentEvents.append(contentsOf: snap.events)
+            recentEvents.removeAll { $0.tick < snap.tick - eventWindowTicks }
+            publish(snap, to: model)
             sfx.handle(events: snap.events, snapshot: snap, metadata: metadataTable)
 
             if snap.rules.matchOver {
+                if PostMatchSettle.anyAloft(snap) {
+                    settleTicksLeft = PostMatchSettle.maxTicks
+                    continue
+                }
                 model.endMatch(snapshot: snap)
                 stop()
                 return
             }
         }
+    }
+
+    private func publish(_ snap: GameSnapshot, to model: MenuShellModel) {
+        var published = snap
+        published.events = recentEvents
+        model.matchSnapshot = published
     }
 
     private func loadFighter(id: String, label: String, notices: inout [String]) -> FighterDef {

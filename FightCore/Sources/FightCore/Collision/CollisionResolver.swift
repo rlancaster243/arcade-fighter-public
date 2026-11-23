@@ -203,6 +203,9 @@ private extension CollisionResolver {
         guard snapshot.fighters.count >= 2 else { return }
         let a = worldPushbox(fighter: snapshot.fighters[0], slot: .p1, snapshot: snapshot)
         let b = worldPushbox(fighter: snapshot.fighters[1], slot: .p2, snapshot: snapshot)
+        // Bodies only push each other when they actually touch. Without the vertical test a
+        // fighter jumping over the opponent shoved them along the ground and could not cross.
+        guard a.overlaps(b) else { return }
         let overlap = BoxMath.horizontalOverlap(a, b)
         guard overlap > 0 else { return }
 

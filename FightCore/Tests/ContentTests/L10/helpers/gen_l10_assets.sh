@@ -21,17 +21,24 @@ mk_sheet_pair() {
 mkdir -p Content/Fighters/ilse/ilse.contentbundle Content/Fighters/rook/rook.contentbundle \
   Content/Stages/stage2/stage2.contentbundle Content/Audio
 
-mk_sheet_pair "Content/Fighters/ilse/ilse.contentbundle" "ilse" "0xE8E0D0" "0xC8B890"
-mk_sheet_pair "Content/Fighters/rook/rook.contentbundle" "rook" "0x707880" "0x505860"
+# Fighter sheets and stage layers are real art now (scripts/art/gen_fighters.py and
+# gen_stages.py). Placeholders are only written where no image exists, so re-running this
+# script for the audio never overwrites shipped art.
+[ -e Content/Fighters/ilse/ilse.contentbundle/ilse.png ] \
+  || mk_sheet_pair "Content/Fighters/ilse/ilse.contentbundle" "ilse" "0xE8E0D0" "0xC8B890"
+[ -e Content/Fighters/rook/rook.contentbundle/rook.png ] \
+  || mk_sheet_pair "Content/Fighters/rook/rook.contentbundle" "rook" "0x707880" "0x505860"
 
 for layer in sky bells floor; do
+  out="Content/Stages/stage2/stage2.contentbundle/cloister_${layer}.png"
+  [ -e "$out" ] && { echo "skip existing art: $out"; continue; }
   case "$layer" in
     sky) c=0x1a2030; s=384x216 ;;
     bells) c=0x3a4555; s=384x216 ;;
     floor) c=0x4a4038; s=384x96 ;;
   esac
   ffmpeg -y -loglevel error -f lavfi -i "color=c=${c}:s=${s}" \
-    -frames:v 1 -pix_fmt pal8 "Content/Stages/stage2/stage2.contentbundle/cloister_${layer}.png"
+    -frames:v 1 -pix_fmt pal8 "$out"
 done
 
 mkdir -p Content/Audio
