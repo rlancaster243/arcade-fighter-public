@@ -80,7 +80,7 @@ else here still holds for fighters: 224×224 cells, anchor (112, 220), 8 columns
 unchanged frame names and `sheet.json`, stdlib-only deterministic generator, bilinear filtering.
 Sheets are RGBA truecolour. Fighter PNGs total 8,399,008 bytes (7,699,802 before) and all Content
 PNGs 10,143,997, which is over the ~8 MB aim under Constraints; the Release app is 13,193,190 bytes
-against CI's 15,000,000 cap.
+against CI's 50,000,000 cap.
 
 ## Data contracts (fixed before parallel work)
 - `sheet.json`: `{"texelScale": 2, "frames": [ {name,x,y,w,h,anchorX,anchorY}, ... ]}`; rects and anchors

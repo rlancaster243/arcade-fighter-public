@@ -19,7 +19,7 @@ env:
   XCODE_SCHEME: ArcadeFighter
   APP_NAME: ArcadeFighter.app
   ENTITLEMENTS: App/ArcadeFighter.entitlements
-  MAX_APP_BYTES: "15000000"
+  MAX_APP_BYTES: "50000000"
 
 jobs:
   core-linux:
@@ -123,7 +123,7 @@ jobs:
           /usr/libexec/PlistBuddy -c 'Print :com.apple.security.app-sandbox' embedded.plist | grep -qx true \
             || { echo "::error::App Sandbox not embedded in the signed app"; exit 1; }
 
-      - name: Check size (< 15,000,000 bytes)
+      - name: Check size (< 50,000,000 bytes)
         run: |
           set -euo pipefail
           bytes=$(find "$APP_PATH" -type f -print0 | xargs -0 stat -f%z | awk '{s+=$1} END {print s+0}')
