@@ -37,7 +37,7 @@ final class GreyboxScene: SKScene {
         didSet { if stageID != oldValue { loadStageLayers() } }
     }
     private let stageNode = SKNode()
-    private var stageLayers: [(node: SKSpriteNode, parallaxQ8: Int32, width: Int32)] = []
+    private var stageLayers: [(node: SKSpriteNode, parallaxQ8: Int32)] = []
     /// Bundle each slot actually loaded (see `FighterAtlasRouting`); empty until a match starts.
     var contentIDs: [String] = []
 
@@ -120,7 +120,7 @@ final class GreyboxScene: SKScene {
                 node.anchorPoint = .zero
                 node.zPosition = CGFloat(spec.zOrder)
                 stageNode.addChild(node)
-                stageLayers.append((node, spec.parallaxQ8, Int32(logical.width)))
+                stageLayers.append((node, spec.parallaxQ8))
             }
         } catch {
             onAtlasLoadNotice?("Stage \(stageID) art failed: \(error.localizedDescription)")
@@ -267,13 +267,12 @@ final class GreyboxScene: SKScene {
             shakeTicks -= 1
         }
         arenaNode.position = offset
-        // Stage layers are one screen tall. The camera rests half-way along arena-wide art and
-        // each layer scrolls by its parallax factor from there. They do not take the shake: shifting them would uncover bare background along the screen edges.
+        // Stage layers are one screen tall and composed to line up at scroll 0 (stage2's bells
+        // sit inside the arches there), so they are drawn from their left edge. They do not take the shake: shifting them would uncover bare background along the screen edges.
         let distinct = Set(stageLayers.map(\.parallaxQ8))
         let farthest = distinct.count > 1 ? distinct.min() : nil
         for layer in stageLayers {
-            let stageScrollX = cam.scrollX + StageArt.centreScrollX(layerWidth: layer.width)
-            let x = StageArt.layerOffsetX(scrollX: stageScrollX, parallaxQ8: layer.parallaxQ8)
+            let x = StageArt.layerOffsetX(scrollX: cam.scrollX, parallaxQ8: layer.parallaxQ8)
             // The farthest layer stays put vertically, or a high jump would show a strip of
             // background above it. A lone layer is the floor and must follow the arena.
             let y = layer.parallaxQ8 == farthest ? 0 : -(cam.scrollY * layer.parallaxQ8) / 256

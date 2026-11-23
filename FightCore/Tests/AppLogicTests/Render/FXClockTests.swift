@@ -46,18 +46,6 @@ final class FXClockTests: XCTestCase {
         XCTAssertEqual(clock.now - start, 2)
     }
 
-    /// Stage art is arena-wide (two screens); with the playfield camera at rest the layers must be
-    /// drawn from the middle of the painting, not its left edge.
-    func testStageLayersAreFramedOnTheMiddleOfTheArt() {
-        let base = StageArt.centreScrollX(layerWidth: SceneConstants.width * 2)
-        XCTAssertEqual(base, SceneConstants.width / 2)
-        let floorX = StageArt.layerOffsetX(scrollX: base, parallaxQ8: 256)
-        XCTAssertEqual(floorX, -SceneConstants.width / 2) // art centre (x = 384) lands on screen centre
-        // Art one screen wide (legacy single background) must not be pushed half off-screen.
-        XCTAssertEqual(StageArt.centreScrollX(layerWidth: SceneConstants.width), 0)
-        XCTAssertEqual(StageArt.centreScrollX(layerWidth: 100), 0)
-    }
-
     /// Regression: Rook's jab (92 damage) counted as a heavy hit and strobed the flash.
     func testLightNormalsAreNeverHeavyHits() {
         let jab = GameEvent(kind: .hit, tick: 1, moveID: "rook_norm_lp", damage: 92)

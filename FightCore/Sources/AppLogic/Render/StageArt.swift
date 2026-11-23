@@ -76,12 +76,6 @@ public enum StageArt: Sendable {
     /// Upper bound for a layer's `parallaxQ8` (4x foreground speed), so offsets cannot overflow.
     public static let maxParallaxQ8 = 1024
 
-    /// Scroll that frames the middle of a layer `layerWidth` scene px wide. Arena-wide art (two
-    /// screens) starts half a screen in; art one screen wide or narrower is not shifted at all.
-    public static func centreScrollX(layerWidth: Int32) -> Int32 {
-        max((layerWidth - SceneConstants.width) / 2, 0)
-    }
-
     /// Horizontal layer offset for a camera scroll (scene px).
     public static func layerOffsetX(scrollX: Int32, parallaxQ8: Int32) -> Int32 {
         -(scrollX * parallaxQ8) / 256
