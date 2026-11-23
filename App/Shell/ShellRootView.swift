@@ -186,7 +186,6 @@ public struct ShellRootView: View {
     }
 
     private func matchLayer(snapshot: GameSnapshot) -> some View {
-        let display = model.state.preferences.display
         return GeometryReader { geo in
             MatchPreviewView(
                 snapshot: snapshot,

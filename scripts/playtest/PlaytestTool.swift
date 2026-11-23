@@ -4,7 +4,7 @@
 //   playtest permissions                 report Accessibility / Screen Recording status
 //   playtest request-permissions         trigger the macOS permission prompts
 //   playtest window-id <pid>             CGWindowID of the game window (for screencapture -l)
-//   playtest front-pid                   pids owning the frontmost window and keyboard focus
+//   playtest front-pid                   pid owning the frontmost window (stdout); focus detail on stderr
 //   playtest activate <pid>              bring the game to the front, verify it took
 //   playtest keys <pid> <step>...        send keyboard input (see STEP SYNTAX)
 //

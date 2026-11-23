@@ -32,8 +32,10 @@ public struct CollisionResolver: CollisionResolving {
 
             // One attack, one hit. A move without per-frame `hits` specs used to connect again on
             // every active frame (a 108-damage heavy dealt 324), so rounds ended in a few blows.
-            // Multi-hit moves list their hits explicitly and are not limited here.
-            if move.hits.isEmpty, attacker.attackContact { continue }
+            // Multi-hit moves list their hits explicitly and are not limited here. This reads
+            // `strikeSpent`, not `attackContact`: the fighter's projectile landing, or armor
+            // absorbing the blow, must not swallow the strike.
+            if move.hits.isEmpty, attacker.strikeSpent { continue }
 
             let activeIndex = activeFrameIndex(for: attacker, move: move)
             guard activeIndex >= 0 else { continue }
@@ -110,6 +112,7 @@ public struct CollisionResolver: CollisionResolving {
                     snapshot: snapshot
                 ) {
                     snapshot.fighters[aIdx].attackContact = true
+                    snapshot.fighters[aIdx].strikeSpent = true
                     applyHit(
                         HitResolution(
                             attacker: defenderSlot,
@@ -136,6 +139,7 @@ public struct CollisionResolver: CollisionResolving {
                     snapshot.fighters[aIdx].attackContact = true
                     continue
                 }
+                snapshot.fighters[aIdx].strikeSpent = true
                 pending.append(
                     HitResolution(
                         attacker: attackerSlot,

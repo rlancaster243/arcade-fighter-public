@@ -36,6 +36,7 @@ public enum StateHash {
             appendString(f.executingMoveID, to: &bytes)
             appendVarint(f.stateTick, to: &bytes)
             bytes.append(f.attackContact ? 1 : 0)
+            bytes.append(f.strikeSpent ? 1 : 0)
             appendVarint(f.armorRemaining, to: &bytes)
         }
         appendVarint(Int32(snapshot.projectiles.count), to: &bytes)

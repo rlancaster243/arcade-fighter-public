@@ -30,7 +30,6 @@ final class GreyboxScene: SKScene {
     /// FX-clock tick at which the current shake ends (timed like sparks and the flash).
     private var shakeEndTick: Int32 = 0
     private var shakeAmp: Int32 = 0
-    private var renderTick: Int32 = 0
     private var contentOffset = CGPoint.zero
     var onAtlasLoadNotice: ((String) -> Void)?
     /// Stage whose background layers draw behind the arena; empty draws none.
@@ -161,7 +160,6 @@ final class GreyboxScene: SKScene {
     }
 
     override func update(_ currentTime: TimeInterval) {
-        renderTick &+= 1
         fxClock.advance(snapshotTick: snapshot.tick, dt: lastUpdateTime.map { currentTime - $0 } ?? 0)
         lastUpdateTime = currentTime
         spawnCombatFXIfNeeded() // before syncFighters so a heavy-hit flash shows on the hit's own frame
