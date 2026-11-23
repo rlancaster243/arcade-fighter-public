@@ -33,8 +33,8 @@ public struct CollisionResolver: CollisionResolving {
             // One attack, one hit. A move without per-frame `hits` specs used to connect again on
             // every active frame (a 108-damage heavy dealt 324), so rounds ended in a few blows.
             // Multi-hit moves list their hits explicitly and are not limited here. This reads
-            // `strikeSpent`, not `attackContact`: the fighter's projectile landing, or armor
-            // absorbing the blow, must not swallow the strike.
+            // `strikeSpent`, not `attackContact`: the fighter's own projectile making contact
+            // must not swallow the strike. Armor absorbing the strike itself does spend it.
             if move.hits.isEmpty, attacker.strikeSpent { continue }
 
             let activeIndex = activeFrameIndex(for: attacker, move: move)
