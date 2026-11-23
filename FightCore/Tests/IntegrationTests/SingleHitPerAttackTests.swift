@@ -49,10 +49,10 @@ final class SingleHitPerAttackTests: XCTestCase {
         XCTAssertEqual(r.damage, r.expected)
     }
 
-    /// Armor absorbs one active frame; the strike still lands once on a later frame.
-    func testAStrikeIntoOneHitOfArmorStillLandsOnce() throws {
+    /// One hit of armor absorbs the whole blow: the strike must not land on a later active frame.
+    func testOneHitOfArmorAbsorbsTheWholeStrike() throws {
         let r = try damageAndHits(.heavyPunch, moveID: "norm_hp", attackerID: "kestrel", defenderArmor: 1)
-        XCTAssertEqual(r.hits, 1)
-        XCTAssertEqual(r.damage, r.expected)
+        XCTAssertEqual(r.hits, 0)
+        XCTAssertEqual(r.damage, 0)
     }
 }

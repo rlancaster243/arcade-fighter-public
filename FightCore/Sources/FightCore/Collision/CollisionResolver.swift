@@ -137,6 +137,7 @@ public struct CollisionResolver: CollisionResolving {
                 if !isThrow, !block, snapshot.fighters[dIdx].armorRemaining > 0 {
                     snapshot.fighters[dIdx].armorRemaining &-= 1
                     snapshot.fighters[aIdx].attackContact = true
+                    snapshot.fighters[aIdx].strikeSpent = true // armor absorbs the whole blow, not one frame of it
                     continue
                 }
                 snapshot.fighters[aIdx].strikeSpent = true
@@ -158,7 +159,11 @@ public struct CollisionResolver: CollisionResolving {
         var maxHitstop: Int32 = 0
         for hit in pending {
             // A whiffed hit (a throw box against a defender off the floor) must not freeze the game.
-            guard applyHit(hit, snapshot: &snapshot) else { continue }
+            guard applyHit(hit, snapshot: &snapshot) else {
+                // Nothing connected, so the attack is not used up: a later active frame may still land.
+                snapshot.fighters[Int(hit.attacker.rawValue)].strikeSpent = false
+                continue
+            }
             if hit.move.hitstop > maxHitstop {
                 maxHitstop = hit.move.hitstop
             }
