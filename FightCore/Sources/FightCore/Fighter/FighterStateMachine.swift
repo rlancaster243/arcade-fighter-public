@@ -153,11 +153,17 @@ enum FighterStateMachine {
         }
     }
 
+    /// State after a stun ends: still above the floor means falling, so the fighter lands through
+    /// `.landing` and cannot walk, jump or attack in mid-air as if standing.
+    static func recoveredKind(_ fighter: FighterState) -> FighterStateKind {
+        fighter.position.y.raw < FighterConstants.groundY ? .airborne : .idle
+    }
+
     static func advanceTimerStates(fighter: inout FighterState) {
         switch fighter.kind {
         case .hitstun, .blockstunStand, .blockstunCrouch, .knockdown, .beingThrown, .getup:
             guard fighter.timer > 0 else {
-                fighter.kind = .idle
+                fighter.kind = recoveredKind(fighter)
                 fighter.timer = 0
                 fighter.activeMoveID = ""
                 return
@@ -168,7 +174,7 @@ enum FighterStateMachine {
                     fighter.kind = .getup
                     fighter.timer = FighterConstants.defaultGetupTicks
                 } else {
-                    fighter.kind = .idle
+                    fighter.kind = recoveredKind(fighter)
                     fighter.activeMoveID = ""
                 }
             }

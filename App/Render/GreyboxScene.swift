@@ -166,7 +166,7 @@ final class GreyboxScene: SKScene {
         spawnCombatFXIfNeeded() // before syncFighters so a heavy-hit flash shows on the hit's own frame
         syncFighters()
         syncProjectiles()
-        hud.apply(snapshot: snapshot)
+        hud.apply(snapshot: snapshot, tick: fxClock.now)
         applyCameraAndShake()
         activeSparks = activeSparks.filter { spark in
             guard spark.apply(tick: fxClock.now) else {
@@ -191,7 +191,7 @@ final class GreyboxScene: SKScene {
             let container = fighterNodes[index]
             container.removeAllChildren()
             let atlasID: String? = slots.indices.contains(index) ? slots[index] : "greybox"
-            let candidates = SpriteSelection.frameCandidates(for: fighter, tick: snapshot.tick)
+            let candidates = SpriteSelection.frameCandidates(for: fighter, tick: fxClock.now)
             let sprite: SKNode
             if let atlasID, let atlas = atlases[atlasID],
                let node = candidates.lazy.compactMap({ atlas.spriteNode(named: $0) }).first {
@@ -261,9 +261,12 @@ final class GreyboxScene: SKScene {
             shakeTicks -= 1
         }
         arenaNode.position = offset
+        let farthest = stageLayers.map(\.parallaxQ8).min()
         for layer in stageLayers {
             let x = StageArt.layerOffsetX(scrollX: cam.scrollX, parallaxQ8: layer.parallaxQ8)
-            let y = -(cam.scrollY * layer.parallaxQ8) / 256
+            // Layers are exactly one screen tall, so the farthest one stays put vertically:
+            // shifting it down would show bare background along the top during a high jump.
+            let y = layer.parallaxQ8 == farthest ? 0 : -(cam.scrollY * layer.parallaxQ8) / 256
             layer.node.position = CGPoint(x: CGFloat(x) + (offset.x + CGFloat(cam.scrollX)),
                                           y: CGFloat(y) + (offset.y + CGFloat(cam.scrollY)))
         }

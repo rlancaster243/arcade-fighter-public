@@ -40,9 +40,9 @@ final class HUDNode: SKNode {
         nil
     }
 
-    func apply(snapshot: GameSnapshot) {
+    /// `tick` is the render-side effects clock, so the damage trail drains even after the sim stops.
+    func apply(snapshot: GameSnapshot, tick: Int32) {
         let model = HUDLayout.model(from: snapshot)
-        let tick = snapshot.tick
         let p1Shown = p1Trail.update(current: model.p1Health, tick: tick)
         let p2Shown = p2Trail.update(current: model.p2Health, tick: tick)
         let healthW = HUDLayout.p1HealthBarFrame().w

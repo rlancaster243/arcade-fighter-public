@@ -77,9 +77,9 @@ public enum CombatPresentation: Sendable {
                     kind: .hit, worldX: x, worldY: y,
                     heavy: event.damage >= heavyDamageThreshold, defenderIndex: defenderIndex
                 ))
-            case .block:
+            case .block, .chip: // a block that takes chip damage is still a block on screen
                 out.append(SparkRequest(kind: .block, worldX: x, worldY: y, defenderIndex: defenderIndex))
-            case .none, .chip, .throwHit, .knockdown, .roundStart, .roundEnd, .matchWin, .timeOver, .whiff:
+            case .none, .throwHit, .knockdown, .roundStart, .roundEnd, .matchWin, .timeOver, .whiff:
                 break
             }
         }

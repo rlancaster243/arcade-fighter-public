@@ -1,4 +1,5 @@
 import XCTest
+import FightCore
 @testable import AppLogic
 
 final class FXClockTests: XCTestCase {
@@ -32,5 +33,12 @@ final class FXClockTests: XCTestCase {
         let before = clock.now
         clock.advance(snapshotTick: 0, dt: 0.016)
         XCTAssertGreaterThan(clock.now, before)
+    }
+
+    /// Regression: a block that took chip damage showed no block spark.
+    func testChipBlockStillShowsABlockSpark() {
+        var snap = SimulationBootstrap.greyboxMatch()
+        snap.events = [GameEvent(kind: .chip, tick: 1, attacker: .p1, defender: .p2, damage: 5)]
+        XCTAssertEqual(CombatPresentation.sparks(from: snap).map(\.kind), [.block])
     }
 }

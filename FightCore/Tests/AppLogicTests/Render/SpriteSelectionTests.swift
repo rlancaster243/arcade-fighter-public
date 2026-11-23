@@ -4,6 +4,20 @@ import FightCore
 
 /// Frame names are the contract with scripts/art/gen_fighters.py.
 final class SpriteSelectionTests: XCTestCase {
+    /// Regression: stun frames read `stateTick`, which the sim never advances outside attacks, so
+    /// hitstun never wobbled and a knockdown from idle stayed on the falling frame.
+    func testStunFramesFollowTheStunTimer() {
+        var f = fighter(.hitstun)
+        let hits = Set((0..<14).map { t -> String in f.timer = Int32(t); return SpriteSelection.frameName(for: f) })
+        XCTAssertEqual(hits, ["hit_0", "hit_1"])
+
+        f = fighter(.knockdown)
+        f.timer = FighterConstants.defaultKnockdownTicks
+        XCTAssertEqual(SpriteSelection.frameName(for: f), "down_0")
+        f.timer = 1
+        XCTAssertEqual(SpriteSelection.frameName(for: f), "down_1")
+    }
+
     private func fighter(_ kind: FighterStateKind, move: String = "", stateTick: Int32 = 0) -> FighterState {
         var f = FighterState(position: Vec2(x: .zero, y: .zero), facingRight: true, health: 1000)
         f.kind = kind

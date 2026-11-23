@@ -9,6 +9,8 @@ public enum SpriteSelection: Sendable {
     static let walkRate: Int32 = 6
     static let hitRate: Int32 = 4
     static let winRate: Int32 = 20
+    /// Ticks of a knockdown shown as the falling frame before the lying frame.
+    static let downFallTicks: Int32 = 12
 
     public static func frameName(for fighter: FighterState, tick: Int32 = 0) -> String {
         frameCandidates(for: fighter, tick: tick)[0]
@@ -41,13 +43,14 @@ public enum SpriteSelection: Sendable {
         case .attackRecovery:
             c = moveFrame(fighter, 2)
         case .hitstun:
-            c = ["hit_\((max(fighter.stateTick, 0) / hitRate) % 2)", "hit_0"]
+            // The sim only advances `stateTick` during attacks; stun states count `timer` down.
+            c = ["hit_\((max(fighter.timer, 0) / hitRate) % 2)", "hit_0"]
         case .blockstunStand:
             c = ["block_0"]
         case .blockstunCrouch:
             c = ["block_1", "block_0"]
         case .knockdown:
-            c = [fighter.stateTick < 12 ? "down_0" : "down_1", "down_1"]
+            c = [fighter.timer > FighterConstants.defaultKnockdownTicks - downFallTicks ? "down_0" : "down_1", "down_1"]
         case .getup:
             c = ["getup_0", "crouch_0"]
         case .throwStartup:
