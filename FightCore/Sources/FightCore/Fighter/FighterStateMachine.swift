@@ -62,7 +62,11 @@ enum FighterStateMachine {
         let vx = fighter.velocity.x.raw
         var vy = fighter.velocity.y.raw
 
-        if !isGrounded(fighter.kind) {
+        // Gravity also applies to anyone above the floor in a "grounded" state: a fighter hit,
+        // blocked or thrown out of the air must still come down (see AirHitGravityTests).
+        // Attacks are exempt: their height comes from the move's own velocity samples.
+        let aloft = fighter.position.y.raw < FighterConstants.groundY && !isAttackState(fighter.kind)
+        if !isGrounded(fighter.kind) || aloft {
             vy += gravity
             fighter.velocity.y = Fixed(raw: vy)
         }

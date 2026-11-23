@@ -10,5 +10,5 @@ DerivedData/
 *.mode1v3
 *.mode2v3
 *.perspectivev3
-xcuserdata/__pycache__/
+xcuserdata/
 __pycache__/

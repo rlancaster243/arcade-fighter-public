@@ -20,8 +20,8 @@ public enum FighterLoader {
         let sheet: [SheetFrameJSON]
         do {
             // Bare array (1x sheets) or {"texelScale": N, "frames": [...]} (2x PS2-era sheets).
-            if let bare = try? decoder.decode([SheetFrameJSON].self, from: sheetData) {
-                sheet = bare
+            if SheetJSONShape.isBareArray(sheetData) {
+                sheet = try decoder.decode([SheetFrameJSON].self, from: sheetData)
             } else {
                 sheet = try decoder.decode(ScaledSheetJSON.self, from: sheetData).frames
             }

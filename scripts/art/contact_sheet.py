@@ -59,7 +59,8 @@ def draw_text(rows, x, y, text, colour, scale=2):
                     row = rows[y + (i // 3) * scale + sy]
                     for sx in range(scale):
                         o = (x + (i % 3) * scale + sx) * 3
-                        row[o:o + 3] = bytes(colour)
+                        if o + 3 <= len(row):  # clip long labels at the row edge
+                            row[o:o + 3] = bytes(colour)
         x += 4 * scale
 
 

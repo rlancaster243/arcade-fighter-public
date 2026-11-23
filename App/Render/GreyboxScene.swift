@@ -25,6 +25,8 @@ final class GreyboxScene: SKScene {
     private var fighterNodes: [SKNode] = []
     private var activeSparks: [SparkBurst] = []
     private var hitFlash = HitFlashTracker()
+    private var fxClock = FXClock()
+    private var lastUpdateTime: TimeInterval?
     private var shakeTicks: Int32 = 0
     private var shakeAmp: Int32 = 0
     private var renderTick: Int32 = 0
@@ -157,15 +159,17 @@ final class GreyboxScene: SKScene {
         loadedAtlasIDs = ids
     }
 
-    override func update(_: TimeInterval) {
+    override func update(_ currentTime: TimeInterval) {
         renderTick &+= 1
+        fxClock.advance(snapshotTick: snapshot.tick, dt: lastUpdateTime.map { currentTime - $0 } ?? 0)
+        lastUpdateTime = currentTime
         spawnCombatFXIfNeeded() // before syncFighters so a heavy-hit flash shows on the hit's own frame
         syncFighters()
         syncProjectiles()
         hud.apply(snapshot: snapshot)
         applyCameraAndShake()
         activeSparks = activeSparks.filter { spark in
-            guard spark.apply(tick: snapshot.tick) else {
+            guard spark.apply(tick: fxClock.now) else {
                 spark.removeFromParent() // finished bursts otherwise pile up in arenaNode
                 return false
             }
@@ -200,7 +204,7 @@ final class GreyboxScene: SKScene {
             let p = WorldToScene.point(simX: fighter.position.x.raw, simY: fighter.position.y.raw)
             container.position = CGPoint(x: CGFloat(p.x), y: CGFloat(p.y))
             sprite.xScale = fighter.facingRight ? 1 : -1
-            let flash = Float(hitFlash.blend(slot: index, tick: snapshot.tick))
+            let flash = Float(hitFlash.blend(slot: index, tick: fxClock.now))
             if flash > 0, let flashed = sprite as? SKSpriteNode { // heavy-hit flash: this fighter only
                 flashed.shader = HitFlashShader.shader(slot: index, blend: flash)
             }
@@ -239,8 +243,8 @@ final class GreyboxScene: SKScene {
             shakeTicks = 12
         }
         for spark in CombatPresentation.sparks(from: fxSnapshot) {
-            if spark.heavy { hitFlash.trigger(slot: spark.defenderIndex, tick: snapshot.tick) }
-            let burst = SparkBurst(request: spark, spawnTick: snapshot.tick)
+            if spark.heavy { hitFlash.trigger(slot: spark.defenderIndex, tick: fxClock.now) }
+            let burst = SparkBurst(request: spark, spawnTick: fxClock.now)
             burst.position = CGPoint(x: CGFloat(spark.worldX), y: CGFloat(spark.worldY))
             burst.zPosition = 50
             arenaNode.addChild(burst)

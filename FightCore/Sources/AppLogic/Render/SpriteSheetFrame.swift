@@ -1,4 +1,5 @@
 import Foundation
+import FightCore
 
 public struct SpriteSheetFrame: Sendable, Equatable, Hashable, Codable {
     public var name: String
@@ -89,8 +90,8 @@ public enum SpriteSheetLoader {
     /// Accepts either a bare frame array (texelScale 1) or `{"texelScale": N, "frames": [...]}`.
     public static func decode(_ data: Data) throws -> SpriteSheet {
         let decoder = JSONDecoder()
-        if let bare = try? decoder.decode([SpriteSheetFrame].self, from: data) {
-            return SpriteSheet(frames: bare, texelScale: 1)
+        if SheetJSONShape.isBareArray(data) {
+            return SpriteSheet(frames: try decoder.decode([SpriteSheetFrame].self, from: data), texelScale: 1)
         }
         let scaled = try decoder.decode(ScaledSheet.self, from: data)
         return SpriteSheet(frames: scaled.frames, texelScale: scaled.texelScale ?? 1)

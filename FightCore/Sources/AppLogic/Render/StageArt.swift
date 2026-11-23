@@ -54,8 +54,8 @@ public enum StageArt: Sendable {
                 return StageLayerSpec(
                     id: layer["id"] as? String ?? image,
                     imageURL: dir.appendingPathComponent(image),
-                    parallaxQ8: Int32(layer["parallaxQ8"] as? Int ?? 256),
-                    zOrder: Int32(layer["zOrder"] as? Int ?? 0),
+                    parallaxQ8: Int32(clamping: layer["parallaxQ8"] as? Int ?? 256),
+                    zOrder: Int32(clamping: layer["zOrder"] as? Int ?? 0),
                     texelScale: texelScale
                 )
             }.sorted { $0.zOrder < $1.zOrder }
