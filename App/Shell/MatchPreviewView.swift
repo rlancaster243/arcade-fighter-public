@@ -8,6 +8,7 @@ struct MatchPreviewView: View {
     let snapshot: GameSnapshot
     /// Bundle each slot actually loaded; drives which sprite sheet the scene draws.
     let contentIDs: [String]
+    let stageID: String
     let viewWidth: Int
     let viewHeight: Int
     let wantsFullscreen: Bool
@@ -18,7 +19,10 @@ struct MatchPreviewView: View {
     @State private var atlasSlotIDs: [String?] = []
 
     var body: some View {
-        let forcedScale = wantsFullscreen ? nil : windowIntegerScale
+        // The Settings scale sizes the window (WindowPresentation); the game then fills whatever
+        // space it gets at the largest integer scale. Forcing the setting here left a 2x picture
+        // in the middle of a fullscreen window entered via the green button.
+        let forcedScale: Int? = nil
         let viewport = DisplayLayout.viewport(
             viewWidth: viewWidth,
             viewHeight: viewHeight,
@@ -38,6 +42,7 @@ struct MatchPreviewView: View {
                 scene.scaleMode = .resizeFill
                 scene.onAtlasLoadNotice = onAtlasLoadNotice
                 scene.contentIDs = contentIDs
+                scene.stageID = stageID
                 atlasSlotIDs = slotIDs(fighterIDs: snapshot.fighterIDs, contentIDs: contentIDs)
                 scene.snapshot = snapshot
                 scene.revalidateAtlases()
@@ -46,6 +51,9 @@ struct MatchPreviewView: View {
                 scene.onAtlasLoadNotice = onAtlasLoadNotice
                 scene.snapshot = newValue
                 revalidateIfSlotsChanged(fighterIDs: newValue.fighterIDs, contentIDs: contentIDs)
+            }
+            .onChange(of: stageID) { _, newValue in
+                scene.stageID = newValue
             }
             .onChange(of: contentIDs) { _, newValue in
                 scene.contentIDs = newValue

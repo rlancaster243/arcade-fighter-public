@@ -184,23 +184,24 @@ struct MatchPausedView: View {
     @ObservedObject var input: InputCoordinator
 
     var body: some View {
-        ZStack(alignment: .topTrailing) {
-            VStack(spacing: 10) {
-                Text("PAUSED")
-                    .font(.title.bold())
-                    .foregroundStyle(.white)
-                Text("\(setup.p1.id) vs \(setup.p2.id)")
-                    .foregroundStyle(.white.opacity(0.9))
-                Text("P or Esc — resume")
-                    .font(.footnote)
-                    .foregroundStyle(.white.opacity(0.85))
-            }
-            .padding(.vertical, 28)
-            .padding(.horizontal, 36)
-            .background(.black.opacity(0.55), in: RoundedRectangle(cornerRadius: 10))
-            InputSettingsOverlay(input: input)
-                .padding(12)
+        // Centred card only: input settings are menu-only (see ShellRootView.allowsInputSettingsOverlay).
+        // A .topTrailing ZStack used to stack the card under the input panel.
+        VStack(spacing: 10) {
+            Text("PAUSED")
+                .font(.system(size: 34, weight: .heavy, design: .monospaced))
+                .foregroundStyle(Color(red: 1.0, green: 0.80, blue: 0.16))
+                .shadow(color: .black, radius: 0, x: 2, y: 2)
+            Text("\(setup.p1.id.uppercased())  VS  \(setup.p2.id.uppercased())")
+                .font(.system(size: 15, weight: .bold, design: .monospaced))
+                .foregroundStyle(.white)
+            Text("P or Esc — resume")
+                .font(.system(size: 12, design: .monospaced))
+                .foregroundStyle(.white.opacity(0.8))
         }
+        .padding(.vertical, 26)
+        .padding(.horizontal, 40)
+        .background(Color(red: 0.04, green: 0.03, blue: 0.10).opacity(0.85))
+        .overlay(Rectangle().stroke(Color(red: 1.0, green: 0.80, blue: 0.16), lineWidth: 2))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(Color.black.opacity(0.35))
         .allowsHitTesting(true)

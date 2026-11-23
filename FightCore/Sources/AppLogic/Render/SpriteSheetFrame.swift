@@ -1,4 +1,5 @@
 import Foundation
+import FightCore
 
 public struct SpriteSheetFrame: Sendable, Equatable, Hashable, Codable {
     public var name: String
@@ -52,11 +53,56 @@ extension SpriteSheetFrame {
     }
 }
 
+/// Logical (scene-space) size of a sprite node.
+public struct SpriteNodeSize: Sendable, Equatable {
+    public var width: Double
+    public var height: Double
+}
+
+extension SpriteSheetFrame {
+    /// Node size in logical scene points: sheet pixels divided by `texelScale`, so a 2x sheet
+    /// sizes its nodes the same as the equivalent 1x sheet. Anchors are unit fractions and
+    /// need no adjustment.
+    public func nodeSize(texelScale: Int32) -> SpriteNodeSize {
+        let scale = Double(max(texelScale, 1))
+        return SpriteNodeSize(width: Double(w) / scale, height: Double(h) / scale)
+    }
+}
+
+/// A decoded `sheet.json`: frame rects in sheet pixels plus the texel density of the sheet.
+public struct SpriteSheet: Sendable, Equatable {
+    public var frames: [SpriteSheetFrame]
+    /// Sheet pixels per logical scene pixel (1 for legacy sheets, 2 for the PS2-era art).
+    public var texelScale: Int32
+
+    public init(frames: [SpriteSheetFrame], texelScale: Int32 = 1) {
+        self.frames = frames
+        self.texelScale = max(texelScale, 1)
+    }
+}
+
 public enum SpriteSheetLoader {
+    private struct ScaledSheet: Decodable {
+        var texelScale: Int32?
+        var frames: [SpriteSheetFrame]
+    }
+
+    /// Accepts either a bare frame array (texelScale 1) or `{"texelScale": N, "frames": [...]}`.
+    public static func decode(_ data: Data) throws -> SpriteSheet {
+        let decoder = JSONDecoder()
+        if SheetJSONShape.isBareArray(data) {
+            return SpriteSheet(frames: try decoder.decode([SpriteSheetFrame].self, from: data), texelScale: 1)
+        }
+        let scaled = try decoder.decode(ScaledSheet.self, from: data)
+        return SpriteSheet(frames: scaled.frames, texelScale: scaled.texelScale ?? 1)
+    }
+
+    public static func loadSheet(fromSheetJSON url: URL) throws -> SpriteSheet {
+        try decode(Data(contentsOf: url))
+    }
+
     public static func loadFrames(fromSheetJSON url: URL) throws -> [SpriteSheetFrame] {
-        let data = try Data(contentsOf: url)
-        let decoded = try JSONDecoder().decode([SpriteSheetFrame].self, from: data)
-        return decoded
+        try loadSheet(fromSheetJSON: url).frames
     }
 
     public static func indexByName(_ frames: [SpriteSheetFrame]) -> [String: SpriteSheetFrame] {

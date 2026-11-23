@@ -2,7 +2,27 @@
   "schemaVersion": 1,
   "id": "stage1",
   "displayName": "Glacier Forge Quarry",
-  "background": "background.png",
+  "texelScale": 2,
+  "layers": [
+    {
+      "id": "sky",
+      "image": "glacier_sky.png",
+      "parallaxQ8": 26,
+      "zOrder": 0
+    },
+    {
+      "id": "glacier",
+      "image": "glacier_forge.png",
+      "parallaxQ8": 90,
+      "zOrder": 1
+    },
+    {
+      "id": "quarry",
+      "image": "glacier_quarry.png",
+      "parallaxQ8": 256,
+      "zOrder": 2
+    }
+  ],
   "floorY": 180,
   "leftBound": 20,
   "rightBound": 364,

@@ -4,7 +4,7 @@
 //   playtest permissions                 report Accessibility / Screen Recording status
 //   playtest request-permissions         trigger the macOS permission prompts
 //   playtest window-id <pid>             CGWindowID of the game window (for screencapture -l)
-//   playtest front-pid                   pid owning the frontmost normal window
+//   playtest front-pid                   pids owning the frontmost window and keyboard focus
 //   playtest activate <pid>              bring the game to the front, verify it took
 //   playtest keys <pid> <step>...        send keyboard input (see STEP SYNTAX)
 //
@@ -95,6 +95,19 @@ func frontWindowOwnerPID() -> pid_t? {
     return nil
 }
 
+/// App holding keyboard focus. Keys posted to the HID tap go here, whatever window is on top:
+/// a system alert (UserNotificationCenter) can take focus without covering the game window.
+/// Pump the run loop so NSWorkspace's cached value is current in this CLI process.
+func focusedAppPID() -> pid_t? {
+    RunLoop.current.run(until: Date())
+    return NSWorkspace.shared.frontmostApplication?.processIdentifier
+}
+
+/// True only when the game owns both the top window and keyboard focus.
+func gameHasFocus(_ pid: pid_t) -> Bool {
+    frontWindowOwnerPID() == pid && focusedAppPID() == pid
+}
+
 func gameWindowID(pid: pid_t) -> Int? {
     var best: (id: Int, area: Double)?
     for info in windows() {
@@ -110,10 +123,10 @@ func gameWindowID(pid: pid_t) -> Int? {
 }
 
 func activate(pid: pid_t) -> Bool {
-    if frontWindowOwnerPID() == pid { return true }
+    if gameHasFocus(pid) { return true }
     NSRunningApplication(processIdentifier: pid)?.activate(options: [.activateAllWindows, .activateIgnoringOtherApps])
     for _ in 0..<20 {
-        if frontWindowOwnerPID() == pid { return true }
+        if gameHasFocus(pid) { return true }
         sleepMS(50)
     }
     // macOS 14+ ignores activateIgnoringOtherApps from a CLI; ask System Events instead.
@@ -124,15 +137,16 @@ func activate(pid: pid_t) -> Bool {
     try? osa.run()
     osa.waitUntilExit()
     for _ in 0..<20 {
-        if frontWindowOwnerPID() == pid { return true }
+        if gameHasFocus(pid) { return true }
         sleepMS(50)
     }
     return false
 }
 
 func requireFront(_ pid: pid_t) {
-    guard frontWindowOwnerPID() == pid else {
-        fail("game (pid \(pid)) is not the frontmost window; aborting so keys don't go elsewhere. Run: playtest activate \(pid)")
+    guard gameHasFocus(pid) else {
+        let focused = focusedAppPID().flatMap { NSRunningApplication(processIdentifier: $0)?.localizedName } ?? "unknown"
+        fail("game (pid \(pid)) does not have keyboard focus (focused app: \(focused)); aborting so keys don't go elsewhere. Run: playtest activate \(pid)")
     }
 }
 
@@ -252,7 +266,7 @@ case "window-id":
     print(id)
 case "front-pid":
     guard let pid = frontWindowOwnerPID() else { fail("no frontmost window") }
-    print(pid)
+    print("window=\(pid) focused=\(focusedAppPID().map(String.init) ?? "none")")
 case "activate":
     let pid = pidArg(args, 2)
     guard activate(pid: pid) else { fail("could not bring pid \(pid) to the front; click the game window once and retry") }

@@ -62,7 +62,11 @@ enum FighterStateMachine {
         let vx = fighter.velocity.x.raw
         var vy = fighter.velocity.y.raw
 
-        if !isGrounded(fighter.kind) {
+        // Gravity also applies to anyone above the floor in a "grounded" state: a fighter hit,
+        // blocked or thrown out of the air must still come down (see AirHitGravityTests).
+        // Attacks are exempt: their height comes from the move's own velocity samples.
+        let aloft = fighter.position.y.raw < FighterConstants.groundY && !isAttackState(fighter.kind)
+        if !isGrounded(fighter.kind) || aloft {
             vy += gravity
             fighter.velocity.y = Fixed(raw: vy)
         }
@@ -114,7 +118,7 @@ enum FighterStateMachine {
     ) {
         fighter.stateTick &+= 1
         guard let phase = MovePhaseMath.attackPhase(for: fighter.stateTick, move: move) else {
-            fighter.kind = .idle
+            fighter.kind = recoveredKind(fighter)
             fighter.activeMoveID = ""
             fighter.executingMoveID = ""
             fighter.stateTick = 0
@@ -149,29 +153,37 @@ enum FighterStateMachine {
         }
     }
 
+    /// State after a stun ends: still above the floor means falling, so the fighter lands through
+    /// `.landing` and cannot walk, jump or attack in mid-air as if standing.
+    static func recoveredKind(_ fighter: FighterState) -> FighterStateKind {
+        fighter.position.y.raw < FighterConstants.groundY ? .airborne : .idle
+    }
+
     static func advanceTimerStates(fighter: inout FighterState) {
         switch fighter.kind {
         case .hitstun, .blockstunStand, .blockstunCrouch, .knockdown, .beingThrown, .getup:
             guard fighter.timer > 0 else {
-                fighter.kind = .idle
+                fighter.kind = recoveredKind(fighter)
                 fighter.timer = 0
                 fighter.activeMoveID = ""
                 return
             }
             fighter.timer &-= 1
             if fighter.timer == 0 {
-                if fighter.kind == .knockdown {
+                if fighter.kind == .knockdown, fighter.position.y.raw < FighterConstants.groundY {
+                    fighter.timer = 1 // still falling: stay down until the floor, then get up
+                } else if fighter.kind == .knockdown {
                     fighter.kind = .getup
                     fighter.timer = FighterConstants.defaultGetupTicks
                 } else {
-                    fighter.kind = .idle
+                    fighter.kind = recoveredKind(fighter)
                     fighter.activeMoveID = ""
                 }
             }
         case .throwing:
             fighter.timer &-= 1
             if fighter.timer <= 0 {
-                fighter.kind = .idle
+                fighter.kind = recoveredKind(fighter)
                 fighter.activeMoveID = ""
             }
         default:

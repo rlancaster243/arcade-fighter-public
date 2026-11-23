@@ -8,6 +8,8 @@ final class MenuShellModel: ObservableObject {
     @Published var matchSnapshot: GameSnapshot?
     /// Content bundle each slot actually loaded (differs from the pick after a load fallback).
     @Published var matchContentIDs: [String] = []
+    /// Stage the running match is on; drives the background layers.
+    @Published var matchStageID: String = "stage1"
     @Published var contentLoadNotices: [String] = []
 
     init(state: MenuShellState = .initial) {

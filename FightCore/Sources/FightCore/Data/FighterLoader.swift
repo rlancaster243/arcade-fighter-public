@@ -19,7 +19,12 @@ public enum FighterLoader {
         let sheetData = try Data(contentsOf: sheetURL)
         let sheet: [SheetFrameJSON]
         do {
-            sheet = try decoder.decode([SheetFrameJSON].self, from: sheetData)
+            // Bare array (1x sheets) or {"texelScale": N, "frames": [...]} (2x PS2-era sheets).
+            if SheetJSONShape.isBareArray(sheetData) {
+                sheet = try decoder.decode([SheetFrameJSON].self, from: sheetData)
+            } else {
+                sheet = try decoder.decode(ScaledSheetJSON.self, from: sheetData).frames
+            }
         } catch {
             throw FighterLoadError.decodeFailed("sheet: \(error)")
         }
@@ -103,7 +108,7 @@ public enum ContentPaths {
             )
     }
 
-    /// `Content/Audio` inside the app bundle when the greybox marker is present, otherwise the checkout.
+    /// `Content/Audio` inside the app bundle when it ships content, otherwise the checkout.
     public static func audioDirectory(
         fromFile file: String = #filePath,
         resourcesURL: URL? = nil
@@ -117,15 +122,18 @@ public enum ContentPaths {
             ?? repoRoot(fromFile: file).appendingPathComponent("Content", isDirectory: true)
     }
 
-    /// Resources/Content, only when the shipped greybox marker is actually there.
-    /// `resourcesURL` nil uses `Bundle.main`. An explicit `repoRoot` still walks the source tree.
+    /// Resources/Content when the bundle ships a `Content/Fighters` directory (the app does; a test
+    /// runner's bundle does not). `resourcesURL` nil uses `Bundle.main`. An explicit `repoRoot`
+    /// still walks the source tree. The marker is structural on purpose: it used to be greybox's
+    /// fighter.json, so one broken fighter sent every path to the sandbox-unreadable checkout.
     private static func bundledContentRoot(resourcesURL: URL? = nil) -> URL? {
         guard let resources = resourcesURL ?? Bundle.main.resourceURL else { return nil }
         let content = resources.appendingPathComponent("Content", isDirectory: true)
-        let marker = content.appendingPathComponent(
-            "Fighters/greybox/greybox.contentbundle/fighter.json"
-        )
-        guard FileManager.default.fileExists(atPath: marker.path) else { return nil }
+        var isDir: ObjCBool = false
+        let fighters = content.appendingPathComponent("Fighters", isDirectory: true)
+        guard FileManager.default.fileExists(atPath: fighters.path, isDirectory: &isDir), isDir.boolValue else {
+            return nil
+        }
         return content
     }
 

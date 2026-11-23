@@ -191,6 +191,7 @@ public struct ShellRootView: View {
             MatchPreviewView(
                 snapshot: snapshot,
                 contentIDs: model.matchContentIDs,
+                stageID: model.matchStageID,
                 viewWidth: Int(geo.size.width.rounded(.down)),
                 viewHeight: Int(geo.size.height.rounded(.down)),
                 wantsFullscreen: display.wantsFullscreen,

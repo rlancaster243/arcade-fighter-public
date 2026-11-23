@@ -92,6 +92,11 @@ public enum HUDLayout: Sendable {
         )
     }
 
+    /// Top edge of the "R1 0-0" label: directly under the timer box so the two never overlap.
+    public static func roundLabelTopY() -> Int32 {
+        timerFrame().y - 2
+    }
+
     public static func timerFrame() -> IntRect {
         let w: Int32 = 48
         return IntRect(

@@ -68,6 +68,25 @@ final class ContentPathsBundleTests: XCTestCase {
         )
     }
 
+    /// Regression: the marker used to be greybox's fighter.json, so a broken greybox sent every
+    /// fighter, stage and audio path to the (sandbox-unreadable) source tree and no match could start.
+    func testBundleStillPreferredWhenGreyboxIsMissing() throws {
+        let kestrel = resources
+            .appendingPathComponent("Content/Fighters/kestrel/kestrel.contentbundle", isDirectory: true)
+        try FileManager.default.createDirectory(at: kestrel, withIntermediateDirectories: true)
+
+        let fighter = ContentPaths.fighterDirectory("bruno", resourcesURL: resources)
+        let stage = ContentPaths.stageDirectory("stage1", resourcesURL: resources)
+        XCTAssertEqual(
+            normalized(fighter),
+            normalized(resources.appendingPathComponent("Content/Fighters/bruno/bruno.contentbundle", isDirectory: true))
+        )
+        XCTAssertEqual(
+            normalized(stage),
+            normalized(resources.appendingPathComponent("Content/Stages/stage1/stage1.contentbundle", isDirectory: true))
+        )
+    }
+
     func testFighterAndStageDirectoriesFallBackToSourceTreeWhenMarkerIsAbsent() throws {
         let fighter = ContentPaths.fighterDirectory("kestrel", fromFile: #filePath, resourcesURL: resources)
         let stage = ContentPaths.stageDirectory("stage1", fromFile: #filePath, resourcesURL: resources)

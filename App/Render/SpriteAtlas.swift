@@ -9,10 +9,13 @@ final class SpriteAtlas {
     /// Sheet size in pixels, the space `sheet.json` rects are written in.
     private let sheetPixelWidth: Double
     private let sheetPixelHeight: Double
+    /// Sheet pixels per logical scene pixel; nodes are sized at `w / texelScale`.
+    let texelScale: Int32
 
     init(sheetPNG: URL, sheetJSON: URL) throws {
-        let loaded = try SpriteSheetLoader.loadFrames(fromSheetJSON: sheetJSON)
-        frames = SpriteSheetLoader.indexByName(loaded)
+        let loaded = try SpriteSheetLoader.loadSheet(fromSheetJSON: sheetJSON)
+        frames = SpriteSheetLoader.indexByName(loaded.frames)
+        texelScale = loaded.texelScale
         // Decode to a CGImage rather than NSImage: NSImage sizes in points from the PNG's DPI
         // metadata, so a 144-dpi sheet would report half its pixel size and every frame rect
         // would land in the wrong place.
@@ -28,7 +31,9 @@ final class SpriteAtlas {
         sheetPixelWidth = Double(image.width)
         sheetPixelHeight = Double(image.height)
         texture = SKTexture(cgImage: image)
-        texture.filteringMode = .nearest
+        // Bilinear + mipmaps: 2x art drawn at 1x window scale minifies cleanly instead of shimmering.
+        texture.filteringMode = .linear
+        texture.usesMipmaps = true
     }
 
     func spriteNode(named name: String) -> SKSpriteNode? {
@@ -46,10 +51,12 @@ final class SpriteAtlas {
             height: geometry.textureHeight
         )
         let sub = SKTexture(rect: rect, in: texture)
-        sub.filteringMode = .nearest
+        sub.filteringMode = .linear
+        sub.usesMipmaps = true
+        let logical = frame.nodeSize(texelScale: texelScale)
         let node = SKSpriteNode(
             texture: sub,
-            size: CGSize(width: CGFloat(frame.w), height: CGFloat(frame.h))
+            size: CGSize(width: CGFloat(logical.width), height: CGFloat(logical.height))
         )
         node.anchorPoint = CGPoint(x: geometry.anchorX, y: geometry.anchorY)
         return node

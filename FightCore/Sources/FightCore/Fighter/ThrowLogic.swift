@@ -9,6 +9,8 @@ enum ThrowLogic {
         guard horizontalDistance(attacker, defender) <= FighterConstants.throwRangeRaw else { return false }
         guard !FighterStateMachine.isHitstunLike(defender.kind) else { return false }
         guard defender.kind != .beingThrown else { return false }
+        // Throws are ground grabs: a defender off the floor is out of reach at any height.
+        guard defender.position.y.raw >= FighterConstants.groundY else { return false }
         return true
     }
 
@@ -28,7 +30,7 @@ enum ThrowLogic {
     }
 
     static func techThrow(defender: inout FighterState, attacker: inout FighterState) {
-        defender.kind = .idle
+        defender.kind = FighterStateMachine.recoveredKind(defender)
         defender.timer = 0
         defender.activeMoveID = ""
         attacker.kind = .attackRecovery

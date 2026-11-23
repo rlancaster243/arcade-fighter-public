@@ -294,7 +294,9 @@ public enum MenuReducer {
                 state.screen = .mainMenu
                 state.cursor = MenuShellState.MainMenuItem.settings.rawValue
             } else {
-                adjustSetting(&state, row: row, command: command)
+                // Enter on a value row steps it forward, like →. It used to count as ←
+                // (delta -1), so Enter shrank the window scale and volume.
+                adjustSetting(&state, row: row, command: .right)
             }
         case .cancel:
             state.screen = .mainMenu
@@ -302,7 +304,6 @@ public enum MenuReducer {
         default:
             break
         }
-        state.screen = .settings(pane)
     }
 
     private static func adjustSetting(
