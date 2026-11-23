@@ -177,6 +177,12 @@ final class GreyboxScene: SKScene {
         }
     }
 
+    /// Tick for looping pose animation. It follows the sim so fighters hold still under the pause
+    /// card; after the match ends the sim stops for good, so the win pose runs on the FX clock.
+    private var poseTick: Int32 {
+        snapshot.rules.matchOver ? fxClock.now : snapshot.tick
+    }
+
     private func syncFighters() {
         while fighterNodes.count < snapshot.fighters.count {
             let placeholder = SKNode()
@@ -191,7 +197,7 @@ final class GreyboxScene: SKScene {
             let container = fighterNodes[index]
             container.removeAllChildren()
             let atlasID: String? = slots.indices.contains(index) ? slots[index] : "greybox"
-            let candidates = SpriteSelection.frameCandidates(for: fighter, tick: fxClock.now)
+            let candidates = SpriteSelection.frameCandidates(for: fighter, tick: poseTick)
             let sprite: SKNode
             if let atlasID, let atlas = atlases[atlasID],
                let node = candidates.lazy.compactMap({ atlas.spriteNode(named: $0) }).first {
@@ -261,14 +267,17 @@ final class GreyboxScene: SKScene {
             shakeTicks -= 1
         }
         arenaNode.position = offset
-        let farthest = stageLayers.map(\.parallaxQ8).min()
+        // Stage layers are one screen tall and frame the middle of the arena-wide art. They do
+        // not take the shake: shifting them would uncover bare background along the screen edges.
+        let distinct = Set(stageLayers.map(\.parallaxQ8))
+        let farthest = distinct.count > 1 ? distinct.min() : nil
+        let stageScrollX = cam.scrollX + FightCamera.stageCentreScrollX
         for layer in stageLayers {
-            let x = StageArt.layerOffsetX(scrollX: cam.scrollX, parallaxQ8: layer.parallaxQ8)
-            // Layers are exactly one screen tall, so the farthest one stays put vertically:
-            // shifting it down would show bare background along the top during a high jump.
+            let x = StageArt.layerOffsetX(scrollX: stageScrollX, parallaxQ8: layer.parallaxQ8)
+            // The farthest layer stays put vertically, or a high jump would show a strip of
+            // background above it. A lone layer is the floor and must follow the arena.
             let y = layer.parallaxQ8 == farthest ? 0 : -(cam.scrollY * layer.parallaxQ8) / 256
-            layer.node.position = CGPoint(x: CGFloat(x) + (offset.x + CGFloat(cam.scrollX)),
-                                          y: CGFloat(y) + (offset.y + CGFloat(cam.scrollY)))
+            layer.node.position = CGPoint(x: CGFloat(x), y: CGFloat(y))
         }
         hud.position = .zero
     }

@@ -5,6 +5,11 @@ public struct FXClock: Sendable, Equatable {
     public private(set) var now: Int32 = 0
     private var lastSnapshotTick: Int32?
     private var carry: Double = 0
+    /// Ticks credited from wall time since the snapshot last advanced; taken back off the next
+    /// sim delta so a rendered frame with no sim step is not counted twice.
+    private var wallCredit: Int32 = 0
+    /// A stall longer than this is a real stop (pause, match over), not frame jitter.
+    private static let maxRefund: Int32 = 2
 
     public init() {}
 
@@ -14,15 +19,19 @@ public struct FXClock: Sendable, Equatable {
         defer { lastSnapshotTick = snapshotTick }
         guard let last = lastSnapshotTick else { return now }
         if snapshotTick > last {
-            now &+= min(snapshotTick - last, 60)
+            let refund = wallCredit <= Self.maxRefund ? wallCredit : 0
+            now &+= max(min(snapshotTick - last, 60) - refund, 0)
             carry = 0
+            wallCredit = 0
         } else if snapshotTick < last { // new match: sim tick rewound
             now &+= 1
             carry = 0
+            wallCredit = 0
         } else {
             carry += min(max(dt, 0), 0.1) * 60
             let whole = Int32(carry)
             now &+= whole
+            wallCredit &+= whole
             carry -= Double(whole)
         }
         return now

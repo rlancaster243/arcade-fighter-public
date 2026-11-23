@@ -5,7 +5,7 @@
 set -euo pipefail
 root="$(git -C "$(dirname "$0")" rev-parse --show-toplevel)"
 catalog="$root/FightCore/Tests/FightCoreTests/Contracts/expected-hashes.json"
-tmp="$(mktemp -t expected-hashes)"
+tmp="$(mktemp "${TMPDIR:-/tmp}/expected-hashes.XXXXXX")"
 trap 'rm -f "$tmp"' EXIT
 
 cd "$root/FightCore"

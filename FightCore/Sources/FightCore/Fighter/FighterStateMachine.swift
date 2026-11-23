@@ -118,7 +118,7 @@ enum FighterStateMachine {
     ) {
         fighter.stateTick &+= 1
         guard let phase = MovePhaseMath.attackPhase(for: fighter.stateTick, move: move) else {
-            fighter.kind = .idle
+            fighter.kind = recoveredKind(fighter)
             fighter.activeMoveID = ""
             fighter.executingMoveID = ""
             fighter.stateTick = 0
@@ -181,7 +181,7 @@ enum FighterStateMachine {
         case .throwing:
             fighter.timer &-= 1
             if fighter.timer <= 0 {
-                fighter.kind = .idle
+                fighter.kind = recoveredKind(fighter)
                 fighter.activeMoveID = ""
             }
         default:

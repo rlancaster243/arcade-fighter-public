@@ -35,6 +35,25 @@ final class FXClockTests: XCTestCase {
         XCTAssertGreaterThan(clock.now, before)
     }
 
+    /// Regression: a rendered frame with no sim step was credited from wall time and then again
+    /// from the next sim delta, so the clock ran ahead of the sim.
+    func testAStalledFrameIsNotCountedTwice() {
+        var clock = FXClock()
+        clock.advance(snapshotTick: 100, dt: 0)
+        let start = clock.now
+        clock.advance(snapshotTick: 100, dt: 0.0168) // no sim step this frame
+        clock.advance(snapshotTick: 102, dt: 0.0166) // two catch-up steps
+        XCTAssertEqual(clock.now - start, 2)
+    }
+
+    /// Stage art is arena-wide (two screens); with the playfield camera at rest the layers must be
+    /// drawn from the middle of the painting, not its left edge.
+    func testStageLayersAreFramedOnTheMiddleOfTheArt() {
+        XCTAssertEqual(FightCamera.stageCentreScrollX, SceneConstants.width / 2)
+        let floorX = StageArt.layerOffsetX(scrollX: FightCamera.stageCentreScrollX, parallaxQ8: 256)
+        XCTAssertEqual(floorX, -SceneConstants.width / 2) // art centre (x = 384) lands on screen centre
+    }
+
     /// Regression: a block that took chip damage showed no block spark.
     func testChipBlockStillShowsABlockSpark() {
         var snap = SimulationBootstrap.greyboxMatch()
