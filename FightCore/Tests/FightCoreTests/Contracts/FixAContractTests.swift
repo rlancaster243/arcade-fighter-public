@@ -159,6 +159,17 @@ final class FixAContractTests: XCTestCase {
         XCTAssertLessThan(airborneHit.fighters[1].health, 1000)
     }
 
+    /// A real projectile hit must leave its owner's strike unspent, or the follow-up attack
+    /// would pass straight through.
+    func testProjectileHitDoesNotSpendTheOwnersStrike() throws {
+        let def = try FighterTestFixtures.greyboxDef()
+        var resolver = CollisionResolver(context: CollisionMatchContext(fighterDefs: [def, def]))
+        var snap = projectileSnapshot(def: def, hitsAirborne: false, defenderKind: .idle)
+        resolver.resolveHits(snapshot: &snap)
+        XCTAssertLessThan(snap.fighters[1].health, 1000)
+        XCTAssertFalse(snap.fighters[0].strikeSpent)
+    }
+
     func testCounterIsDataNotMoveID() throws {
         let countered = try counterSnapshot(stanceID: "stance", withCounter: true)
         var resolver = CollisionResolver(context: countered.context)

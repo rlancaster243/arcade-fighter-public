@@ -60,8 +60,8 @@ On block, advantage is `blockstun - (active frames after the connecting hit + re
 | Sister Ilse | Vesper Step | 214 | LK | 5/1/22 | 0 | 8 | mid | vel x 9216..9216 |
 | Sister Ilse | Vesper Step | 214 | HK | 5/1/22 | 0 | 8 | mid | vel x -9216..-9216 |
 | Sister Ilse | Rosary Storm | 236236 | P | 6/6/18 | 0 | 10 | mid | projectile speed 1280 life 80 dmg 45 max 4 spawn 4 air True |
-| Rook | Rocket Jab | 236 | LP | 5/3/12 | 32 | 8 | mid | vel x 461..461 |
-| Rook | Rocket Jab | 236 | HP | 7/4/16 | 45 | 10 | mid | armorHits 1; vel x 645..645 |
+| Rook | Rocket Jab | 236 | LP | 5/3/12 | 96 | 8 | mid | vel x 461..461 |
+| Rook | Rocket Jab | 236 | HP | 7/4/16 | 180 | 10 | mid | armorHits 1; vel x 645..645 |
 | Rook | Guard Protocol | 214 | P | 4/8/14 | 0 | 8 | mid | counter 0..<12 -> rook_norm_hp |
 | Rook | Overclock Barrage | 236236 | K | 4/10/18 | 48 | 10 | mid | hits 5; vel x 768..768 |
 
@@ -81,3 +81,5 @@ Normals on Kestrel and Bruno step forward. Ilse's HP and HK step back and push o
 | greybox | `Content/Fighters/greybox/greybox.contentbundle/fighter.json` |
 
 Schema reference: `docs/fighter-schema.md`.
+
+Rocket Jab damage was 32 (LP) and 45 (HP) while every active frame connected, which made it 96 and 180 in play. Attacks now connect once, so the listed damage is the full amount: 96 (chip 42) and 180 (chip 80).
