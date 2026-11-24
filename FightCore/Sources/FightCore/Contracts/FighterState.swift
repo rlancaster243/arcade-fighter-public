@@ -36,6 +36,11 @@ public struct FighterState: Sendable, Equatable, Hashable, Codable {
     public var stateTick: Int32
     /// True after the current attack has hit, been blocked, been thrown, or been absorbed by armor.
     public var attackContact: Bool
+    /// True once the current attack's own hitbox has landed (hit or blocked), been countered or
+    /// been absorbed by armor. A move without per-frame `hits` specs strikes once, so later
+    /// active frames are skipped. Unlike `attackContact` this is not set by the fighter's
+    /// projectile, so a projectile connecting cannot swallow the strike.
+    public var strikeSpent: Bool
     /// Armor hits left on the current attack. Set from `MoveDef.armorHits` when the attack starts.
     public var armorRemaining: Int32
 
@@ -51,6 +56,7 @@ public struct FighterState: Sendable, Equatable, Hashable, Codable {
         executingMoveID: String = "",
         stateTick: Int32 = 0,
         attackContact: Bool = false,
+        strikeSpent: Bool = false,
         armorRemaining: Int32 = 0
     ) {
         self.kind = kind
@@ -64,6 +70,7 @@ public struct FighterState: Sendable, Equatable, Hashable, Codable {
         self.executingMoveID = executingMoveID
         self.stateTick = stateTick
         self.attackContact = attackContact
+        self.strikeSpent = strikeSpent
         self.armorRemaining = armorRemaining
     }
 }
