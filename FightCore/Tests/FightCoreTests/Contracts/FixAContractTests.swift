@@ -15,6 +15,13 @@ final class FixAContractTests: XCTestCase {
         XCTAssertNotEqual(baseline.stateHash(), other.stateHash())
     }
 
+    func testStateHashIncludesStrikeSpent() {
+        let baseline = SimulationBootstrap.greyboxMatch()
+        var other = baseline
+        other.fighters[0].strikeSpent = true
+        XCTAssertNotEqual(baseline.stateHash(), other.stateHash())
+    }
+
     func testGreyboxWalkSpeedsAreQ8AndMoveThreePixels() throws {
         let def = try FighterTestFixtures.greyboxDef()
         XCTAssertEqual(def.walkForward, 3 * Fixed.scale)

@@ -83,3 +83,5 @@ Normals on Kestrel and Bruno step forward. Ilse's HP and HK step back and push o
 Schema reference: `docs/fighter-schema.md`.
 
 Rocket Jab damage was 32 (LP) and 45 (HP) while every active frame connected, which made it 96 and 180 in play. Attacks now connect once, so the listed damage is the full amount: 96 (chip 42) and 180 (chip 80).
+
+Every other move keeps its listed damage, which is now the full amount per attack. Crag Hook (90 and 120) and the normals therefore deal less in play than they did while every active frame connected; this is deliberate, and a wider balance pass is still open.

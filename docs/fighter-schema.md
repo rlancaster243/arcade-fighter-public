@@ -49,7 +49,7 @@ Integer rectangle from bottom-centre anchor, facing right: `x`, `y`, `w`, `h`.
 | `invulnerableFrames` | array of integer | `stateTick` values that are invulnerable. Omitted means none |
 | `whiffsVsAirborne` | boolean | Command grab: no connect against `airborne`. Only when `guard` is `throw`. Omitted means false |
 | `counter` | object | Counter window. Omitted means no counter. See counter |
-| `hits` | array | Multi-hit specs. Omitted means every active frame uses the move's damage. See hit |
+| `hits` | array | Multi-hit specs. Omitted means the move connects once per attack for its listed damage; a multi-hit move must list each hit. See hit |
 
 ### projectile
 
