@@ -243,6 +243,8 @@ public struct FighterStepper: FighterStepping, Sendable {
             let aIdx = Int(attackerSlot.rawValue)
             var attacker = snapshot.fighters[aIdx]
             guard attacker.kind == .attackActive else { continue }
+            // One grab attempt per throw: a teched throw must not grab again on its next active frame.
+            guard !attacker.strikeSpent else { continue }
             guard let defID = aIdx < snapshot.fighterIDs.count ? snapshot.fighterIDs[aIdx] : nil,
                   let def = definitions[defID] ?? definitions.values.first,
                   let move = def.moves.first(where: { $0.id == attacker.activeMoveID }),
@@ -263,6 +265,7 @@ public struct FighterStepper: FighterStepping, Sendable {
                 }
                 ThrowLogic.techThrow(defender: &defender, attacker: &attacker)
                 attacker.attackContact = true
+                attacker.strikeSpent = true
                 snapshot.fighters[aIdx] = attacker
                 snapshot.fighters[defenderIdx] = defender
                 continue
@@ -273,6 +276,7 @@ public struct FighterStepper: FighterStepping, Sendable {
             }
             ThrowLogic.beginThrowStates(attacker: &attacker, defender: &defender, move: move)
             attacker.attackContact = true
+            attacker.strikeSpent = true
             snapshot.fighters[aIdx] = attacker
             snapshot.fighters[defenderIdx] = defender
             snapshot.events.append(

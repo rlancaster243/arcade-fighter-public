@@ -91,6 +91,32 @@ final class TCoreAdvancedMechanicsTests: XCTestCase {
         XCTAssertNotEqual(snap.fighters[0].kind, .throwing)
     }
 
+    /// A throw with several active frames used to grab on the frame after it was teched.
+    func testATechedThrowDoesNotGrabAgainOnALaterActiveFrame() throws {
+        var def = try FighterTestFixtures.greyboxDef()
+        let index = try XCTUnwrap(def.moves.firstIndex { $0.id == "throw_lp_lk" })
+        def.moves[index].active = 4
+        let throwMove = def.moves[index]
+        var stepper = FighterTestFixtures.stepper(with: def)
+        var snap = FighterTestFixtures.baseSnapshot(def: def)
+
+        snap.fighters[0].activeMoveID = "throw_lp_lk"
+        stepper.stepFighters(snapshot: &snap)
+        for _ in 0..<max(0, throwMove.startup - 1) {
+            stepper.stepFighters(snapshot: &snap)
+        }
+        snap.fighters[1].activeMoveID = "throw_lp_lk"
+        stepper.stepFighters(snapshot: &snap) // the tech
+        snap.fighters[1].activeMoveID = ""
+        snap.fighters[1].kind = .idle
+
+        for _ in 0..<6 {
+            stepper.stepFighters(snapshot: &snap)
+            XCTAssertNotEqual(snap.fighters[1].kind, .beingThrown)
+        }
+        XCTAssertFalse(snap.events.contains { $0.kind == .throwHit })
+    }
+
     private func greyboxWithInvulnSpecial() throws -> FighterDef {
         var def = try FighterTestFixtures.greyboxDef()
         var move = FighterTestFixtures.move("sp_qcb", in: def)

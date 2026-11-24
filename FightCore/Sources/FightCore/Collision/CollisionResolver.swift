@@ -30,6 +30,13 @@ public struct CollisionResolver: CollisionResolving {
             guard let atkDef = context.def(for: attackerSlot, snapshot: snapshot) else { continue }
             guard let move = atkDef.moves.first(where: { $0.id == attacker.activeMoveID }) else { continue }
 
+            // One attack, one hit. A move without per-frame `hits` specs used to connect again on
+            // every active frame (a 108-damage heavy dealt 324), so rounds ended in a few blows.
+            // Multi-hit moves list their hits explicitly and are not limited here. This reads
+            // `strikeSpent`, not `attackContact`: the fighter's own projectile making contact
+            // must not swallow the strike. Armor absorbing the strike itself does spend it.
+            if move.hits.isEmpty, attacker.strikeSpent { continue }
+
             let activeIndex = activeFrameIndex(for: attacker, move: move)
             guard activeIndex >= 0 else { continue }
 
@@ -105,6 +112,7 @@ public struct CollisionResolver: CollisionResolving {
                     snapshot: snapshot
                 ) {
                     snapshot.fighters[aIdx].attackContact = true
+                    snapshot.fighters[aIdx].strikeSpent = true
                     applyHit(
                         HitResolution(
                             attacker: defenderSlot,
@@ -129,8 +137,10 @@ public struct CollisionResolver: CollisionResolving {
                 if !isThrow, !block, snapshot.fighters[dIdx].armorRemaining > 0 {
                     snapshot.fighters[dIdx].armorRemaining &-= 1
                     snapshot.fighters[aIdx].attackContact = true
+                    snapshot.fighters[aIdx].strikeSpent = true // armor absorbs the whole blow, not one frame of it
                     continue
                 }
+                snapshot.fighters[aIdx].strikeSpent = true
                 pending.append(
                     HitResolution(
                         attacker: attackerSlot,
@@ -149,7 +159,11 @@ public struct CollisionResolver: CollisionResolving {
         var maxHitstop: Int32 = 0
         for hit in pending {
             // A whiffed hit (a throw box against a defender off the floor) must not freeze the game.
-            guard applyHit(hit, snapshot: &snapshot) else { continue }
+            guard applyHit(hit, snapshot: &snapshot) else {
+                // Nothing connected, so the attack is not used up: a later active frame may still land.
+                snapshot.fighters[Int(hit.attacker.rawValue)].strikeSpent = false
+                continue
+            }
             if hit.move.hitstop > maxHitstop {
                 maxHitstop = hit.move.hitstop
             }

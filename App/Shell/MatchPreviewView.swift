@@ -11,8 +11,6 @@ struct MatchPreviewView: View {
     let stageID: String
     let viewWidth: Int
     let viewHeight: Int
-    let wantsFullscreen: Bool
-    let windowIntegerScale: Int
     var onAtlasLoadNotice: ((String) -> Void)?
 
     @State private var scene = GreyboxScene(size: CGSize(width: 384, height: 216))
@@ -22,11 +20,10 @@ struct MatchPreviewView: View {
         // The Settings scale sizes the window (WindowPresentation); the game then fills whatever
         // space it gets at the largest integer scale. Forcing the setting here left a 2x picture
         // in the middle of a fullscreen window entered via the green button.
-        let forcedScale: Int? = nil
         let viewport = DisplayLayout.viewport(
             viewWidth: viewWidth,
             viewHeight: viewHeight,
-            forcedScale: forcedScale
+            forcedScale: nil
         )
         let contentW = CGFloat(viewport.contentWidth)
         let contentH = CGFloat(viewport.contentHeight)

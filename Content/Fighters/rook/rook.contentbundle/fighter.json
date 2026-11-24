@@ -816,8 +816,8 @@
         ],
         "throw": []
       },
-      "damage": 32,
-      "chip": 14,
+      "damage": 96,
+      "chip": 42,
       "hitstun": 14,
       "blockstun": 8,
       "pushbackHit": 4,
@@ -1001,8 +1001,8 @@
         ],
         "throw": []
       },
-      "damage": 45,
-      "chip": 20,
+      "damage": 180,
+      "chip": 80,
       "hitstun": 16,
       "blockstun": 10,
       "pushbackHit": 4,

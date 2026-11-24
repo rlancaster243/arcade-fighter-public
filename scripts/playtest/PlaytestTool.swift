@@ -4,7 +4,7 @@
 //   playtest permissions                 report Accessibility / Screen Recording status
 //   playtest request-permissions         trigger the macOS permission prompts
 //   playtest window-id <pid>             CGWindowID of the game window (for screencapture -l)
-//   playtest front-pid                   pids owning the frontmost window and keyboard focus
+//   playtest front-pid                   pid owning the frontmost window (stdout); focus detail on stderr
 //   playtest activate <pid>              bring the game to the front, verify it took
 //   playtest keys <pid> <step>...        send keyboard input (see STEP SYNTAX)
 //
@@ -266,7 +266,8 @@ case "window-id":
     print(id)
 case "front-pid":
     guard let pid = frontWindowOwnerPID() else { fail("no frontmost window") }
-    print("window=\(pid) focused=\(focusedAppPID().map(String.init) ?? "none")")
+    print(pid) // stdout stays a bare pid for scripts; the focus detail goes to stderr
+    FileHandle.standardError.write(Data("window=\(pid) focused=\(focusedAppPID().map(String.init) ?? "none")\n".utf8))
 case "activate":
     let pid = pidArg(args, 2)
     guard activate(pid: pid) else { fail("could not bring pid \(pid) to the front; click the game window once and retry") }

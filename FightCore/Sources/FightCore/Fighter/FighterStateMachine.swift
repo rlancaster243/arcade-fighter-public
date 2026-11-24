@@ -97,6 +97,7 @@ enum FighterStateMachine {
         runtime.armorHitsRemaining = MovePhaseMath.armorHits(for: move)
         runtime.queuedMoveID = ""
         fighter.attackContact = false
+        fighter.strikeSpent = false
         fighter.armorRemaining = move.armorHits
     }
 
@@ -124,6 +125,7 @@ enum FighterStateMachine {
             fighter.stateTick = 0
             fighter.timer = 0
             fighter.attackContact = false
+            fighter.strikeSpent = false
             fighter.armorRemaining = 0
             runtime.executingMoveID = ""
             runtime.armorHitsRemaining = 0

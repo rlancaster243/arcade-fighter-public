@@ -154,7 +154,9 @@ final class SparkBurst: SKNode {
 enum ShakeState {
     static func offset(tick: Int32, amplitude: Int32) -> CGPoint {
         if amplitude <= 0 { return .zero }
-        let phase = tick % 4
+        // Two ticks per direction: the FX clock can advance by 2 per rendered frame (30 fps),
+        // and a one-tick step would then only ever show two of the four directions.
+        let phase = (tick / 2) % 4
         switch phase {
         case 0: return CGPoint(x: CGFloat(amplitude), y: 0)
         case 1: return CGPoint(x: CGFloat(-amplitude), y: 0)

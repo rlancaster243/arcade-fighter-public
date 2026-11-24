@@ -15,6 +15,13 @@ final class FixAContractTests: XCTestCase {
         XCTAssertNotEqual(baseline.stateHash(), other.stateHash())
     }
 
+    func testStateHashIncludesStrikeSpent() {
+        let baseline = SimulationBootstrap.greyboxMatch()
+        var other = baseline
+        other.fighters[0].strikeSpent = true
+        XCTAssertNotEqual(baseline.stateHash(), other.stateHash())
+    }
+
     func testGreyboxWalkSpeedsAreQ8AndMoveThreePixels() throws {
         let def = try FighterTestFixtures.greyboxDef()
         XCTAssertEqual(def.walkForward, 3 * Fixed.scale)
@@ -157,6 +164,17 @@ final class FixAContractTests: XCTestCase {
         var airborneHit = projectileSnapshot(def: def, hitsAirborne: true, defenderKind: .airborne)
         resolver.resolveHits(snapshot: &airborneHit)
         XCTAssertLessThan(airborneHit.fighters[1].health, 1000)
+    }
+
+    /// A real projectile hit must leave its owner's strike unspent, or the follow-up attack
+    /// would pass straight through.
+    func testProjectileHitDoesNotSpendTheOwnersStrike() throws {
+        let def = try FighterTestFixtures.greyboxDef()
+        var resolver = CollisionResolver(context: CollisionMatchContext(fighterDefs: [def, def]))
+        var snap = projectileSnapshot(def: def, hitsAirborne: false, defenderKind: .idle)
+        resolver.resolveHits(snapshot: &snap)
+        XCTAssertLessThan(snap.fighters[1].health, 1000)
+        XCTAssertFalse(snap.fighters[0].strikeSpent)
     }
 
     func testCounterIsDataNotMoveID() throws {

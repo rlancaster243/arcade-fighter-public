@@ -186,7 +186,6 @@ public struct ShellRootView: View {
     }
 
     private func matchLayer(snapshot: GameSnapshot) -> some View {
-        let display = model.state.preferences.display
         return GeometryReader { geo in
             MatchPreviewView(
                 snapshot: snapshot,
@@ -194,8 +193,6 @@ public struct ShellRootView: View {
                 stageID: model.matchStageID,
                 viewWidth: Int(geo.size.width.rounded(.down)),
                 viewHeight: Int(geo.size.height.rounded(.down)),
-                wantsFullscreen: display.wantsFullscreen,
-                windowIntegerScale: display.windowIntegerScale,
                 onAtlasLoadNotice: { line in
                     Task { @MainActor in
                         model.appendContentLoadNotices([line])
