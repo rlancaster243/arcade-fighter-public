@@ -102,7 +102,7 @@ swift run FightSim --p1-fighter kestrel --p2-fighter bruno --seed-start 1 --seed
 | `Fixtures/Replays/` | Recorded inputs for replay tests |
 | `scripts/art`, `scripts/audio` | Generators for the sprite sheets and stage art; the script that prepares the CC0 sound clips |
 | `scripts/playtest` | macOS scripts to build, launch, drive, and screenshot the app |
-| `docs/` | Fighter data schema, balance notes, and build notes |
+| `docs/` | Fighter data schema and balance notes |
 
 ## Credits
 
