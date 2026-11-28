@@ -2,7 +2,9 @@
 
 An original 2D one-on-one arcade fighting game for macOS, written in Swift with SpriteKit and SwiftUI. All fighters, stages and moves are original. The simulation is deterministic and runs at a fixed 60 ticks per second, and the core builds and tests on Linux as well as macOS.
 
-> **Screenshot / GIF: TODO.** There is no gameplay capture in the repo yet.
+![Kestrel Vane faces Rook at the start of round 2 on a snowy stage under an aurora sky](docs/media/screenshot-neutral.jpg)
+
+![Kestrel Vane lands a punch on Rook and a white hit flash bursts at the point of impact](docs/media/screenshot-hit.jpg)
 
 ## Features
 
